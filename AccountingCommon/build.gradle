@@ -17,6 +17,9 @@ dependencies {
 
     compile "net.dankito.utils:java-utils:$javaUtilsVersion"
 
+    compile "org.eclipse.persistence:javax.persistence:$javaxPersistenceVersion"
+
+
     testCompile "junit:junit:$junitVersion"
     testCompile "org.assertj:assertj-core:$assertJVersion"
 }

@@ -4,6 +4,9 @@ ext {
     
     javaUtilsVersion = '1.0.4'
 
+    javaxPersistenceVersion = '2.1.1'
+    
+
     junitVersion = '4.12'
     assertJVersion = '3.12.1'
     
