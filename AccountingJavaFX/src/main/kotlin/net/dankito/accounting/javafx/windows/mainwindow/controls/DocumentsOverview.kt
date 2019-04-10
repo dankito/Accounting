@@ -2,6 +2,7 @@ package net.dankito.accounting.javafx.windows.mainwindow.controls
 
 import javafx.collections.FXCollections
 import net.dankito.accounting.data.model.Document
+import net.dankito.accounting.javafx.windows.mainwindow.OverviewPresenter
 import net.dankito.utils.javafx.ui.controls.AddButton
 import net.dankito.utils.javafx.ui.extensions.concurrencyColumn
 import net.dankito.utils.javafx.ui.extensions.dateColumn
@@ -11,7 +12,7 @@ import java.util.*
 import kotlin.concurrent.schedule
 
 
-abstract class DocumentsOverview(titleResourceKey: String) : View() {
+abstract class DocumentsOverview(titleResourceKey: String, protected val presenter: OverviewPresenter) : View() {
 
     companion object {
         protected const val ControlBarHeight = 35.0
@@ -25,12 +26,18 @@ abstract class DocumentsOverview(titleResourceKey: String) : View() {
 
     protected abstract fun retrieveDocuments(): List<Document>
 
+    protected abstract fun showCreateNewDocumentWindow()
+
 
     protected val documents = FXCollections.observableArrayList<Document>()
 
 
     init {
-        retrieveDocumentsDelayed() // so that subclasses have time to initialize
+        presenter.addDocumentsUpdatedListenerInAMemoryLeakWay { // TODO: find a better event bus
+            loadDocumentsInBackgroundAndUpdateOnUiThread()
+        }
+
+        loadDocumentsInBackgroundAndUpdateOnUiThreadDelayed() // so that subclasses have time to initialize
     }
 
 
@@ -49,6 +56,8 @@ abstract class DocumentsOverview(titleResourceKey: String) : View() {
 
             add(AddButton().apply {
                 minWidth = ControlBarHeight
+
+                action { showCreateNewDocumentWindow() }
 
                 anchorpaneConstraints {
                     topAnchor = AddDocumentButtonTopBottomMargin
@@ -72,17 +81,25 @@ abstract class DocumentsOverview(titleResourceKey: String) : View() {
 
             concurrencyColumn(messages["main.window.documents.table.total.amount.column.header"], Document::totalAmount)
 
+
+            onDoubleClick {
+                selectedItem?.let { clickedItem -> presenter.showEditDocumentWindow(clickedItem) }
+            }
         }
 
     }
 
 
-    private fun retrieveDocumentsDelayed() {
+    private fun loadDocumentsInBackgroundAndUpdateOnUiThreadDelayed() {
         Timer().schedule(1000) {
-            val retrievedDocuments = retrieveDocuments()
-
-            runLater { documents.setAll(retrievedDocuments) }
+            loadDocumentsInBackgroundAndUpdateOnUiThread()
         }
+    }
+
+    private fun loadDocumentsInBackgroundAndUpdateOnUiThread() {
+        val retrievedDocuments = retrieveDocuments().sortedBy { it.paymentDate }
+
+        runLater { documents.setAll(retrievedDocuments) }
     }
 
 }

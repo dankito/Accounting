@@ -4,12 +4,16 @@ import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.javafx.windows.mainwindow.OverviewPresenter
 
 
-class ExpendituresOverview(private val presenter: OverviewPresenter)
-    : DocumentsOverview("main.window.tab.overview.expenditures.label") {
+class ExpendituresOverview(presenter: OverviewPresenter)
+    : DocumentsOverview("main.window.tab.overview.expenditures.label", presenter) {
 
 
     override fun retrieveDocuments(): List<Document> {
         return presenter.getExpenditures()
+    }
+
+    override fun showCreateNewDocumentWindow() {
+        presenter.showCreateExpenditureWindow()
     }
 
 }

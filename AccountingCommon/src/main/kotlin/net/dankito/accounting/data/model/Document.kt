@@ -14,6 +14,11 @@ open class Document() : BaseEntity() {
 
     companion object {
 
+        val UnsetAmount = Double.NaN
+
+        val UnsetVatRate = Float.NaN
+
+
         const val DocumentTypeColumnName = "type"
 
         const val NetAmountColumnName = "net_amount"
@@ -53,10 +58,13 @@ open class Document() : BaseEntity() {
     }
 
 
-    constructor(type: DocumentType, totalAmount: Double, valueAddedTaxRate: Float,
-                paymentState: PaymentState = PaymentState.Paid) : this() {
-
+    constructor(type: DocumentType) : this() {
         this.type = type
+    }
+
+    constructor(type: DocumentType, totalAmount: Double, valueAddedTaxRate: Float,
+                paymentState: PaymentState = PaymentState.Paid) : this(type) {
+
         this.valueAddedTaxRate = valueAddedTaxRate
         this.totalAmount = totalAmount
         this.paymentState = paymentState
@@ -90,16 +98,16 @@ open class Document() : BaseEntity() {
     var isSelfCreatedInvoice: Boolean = false
 
     @Column(name = NetAmountColumnName)
-    var netAmount: Double = 0.0
+    var netAmount: Double = UnsetAmount
 
     @Column(name = ValueAddedTaxRateColumnName)
-    var valueAddedTaxRate: Float = 0f
+    var valueAddedTaxRate: Float = UnsetVatRate
 
     @Column(name = ValueAddedTaxColumnName)
-    var valueAddedTax: Double = 0.0
+    var valueAddedTax: Double = UnsetAmount
 
     @Column(name = TotalAmountColumnName)
-    var totalAmount: Double = 0.0
+    var totalAmount: Double = UnsetAmount
 
     @Column(name = DocumentNumberColumnName)
     var documentNumber: String? = null
@@ -125,6 +133,24 @@ open class Document() : BaseEntity() {
 
     @Column(name = FilePathColumnName)
     var filePath: File? = null
+
+
+
+    val isNetAmountSet: Boolean
+        @Transient
+        get() = netAmount.isNaN() == false // != UnsetAmount
+
+    val isTotalAmountSet: Boolean
+        @Transient
+        get() = totalAmount.isNaN() == false
+
+    val isValueAddedTaxSet: Boolean
+        @Transient
+        get() = valueAddedTax.isNaN() == false
+
+    val isValueAddedTaxRateSet: Boolean
+        @Transient
+        get() = valueAddedTaxRate.isNaN() == false // != UnsetVatRate does not work
 
 
     override fun toString(): String {

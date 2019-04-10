@@ -2,6 +2,7 @@ package net.dankito.accounting.javafx.windows.mainwindow
 
 import javafx.scene.control.TabPane
 import net.dankito.accounting.data.dao.JsonDocumentDao
+import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.javafx.windows.mainwindow.controls.MainMenuBar
 import net.dankito.accounting.javafx.windows.mainwindow.controls.OverviewTab
 import net.dankito.accounting.service.document.DocumentService
@@ -16,10 +17,12 @@ class MainWindow : Fragment(String.format(FX.messages["application.title"], Pack
 
     private val dataFolder = File("data")
 
+    private val router = Router(this)
+
 
     private val documentsService = DocumentService(JsonDocumentDao(dataFolder))
 
-    private val overviewPresenter = OverviewPresenter(documentsService)
+    private val overviewPresenter = OverviewPresenter(documentsService, router)
 
 
     private val threadPool = ThreadPool()
