@@ -1,2 +1,4 @@
 include ':AccountingCommon'
 
+include ':AccountingJavaFX'
+
