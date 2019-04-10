@@ -13,7 +13,7 @@ def mavenArtifact = 'accounting-common'
 
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7$kotlinVersion"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
 
     compile "net.dankito.utils:java-utils:$javaUtilsVersion"
 
