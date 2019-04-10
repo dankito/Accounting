@@ -99,7 +99,10 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
     private fun loadDocumentsInBackgroundAndUpdateOnUiThread() {
         val retrievedDocuments = retrieveDocuments().sortedBy { it.paymentDate }
 
-        runLater { documents.setAll(retrievedDocuments) }
+        val documentsInCurrentAccountingPeriod =
+            presenter.getDocumentsInCurrentAndPreviousAccountingPeriod(retrievedDocuments)
+
+        runLater { documents.setAll(documentsInCurrentAccountingPeriod) }
     }
 
 }
