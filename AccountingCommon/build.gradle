@@ -1,0 +1,22 @@
+apply plugin: 'kotlin'
+
+
+sourceCompatibility = 1.7
+
+compileKotlin.kotlinOptions.jvmTarget = "1.6"
+
+compileTestKotlin.kotlinOptions.jvmTarget = "1.6"
+
+
+def mavenArtifact = 'accounting-common'
+
+
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7$kotlinVersion"
+
+    compile "net.dankito.utils:java-utils:$javaUtilsVersion"
+
+    testCompile "junit:junit:$junitVersion"
+    testCompile "org.assertj:assertj-core:$assertJVersion"
+}
