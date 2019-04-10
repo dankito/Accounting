@@ -46,8 +46,8 @@ open class Document() : BaseEntity() {
                           documentNumber: String?, documentDescription: String?,
                           issueDate: Date = Date(), dueDate: Date? = null, filePath: File? = null): Document {
 
-            return Document(DocumentType.Revenue, true, netAmount, valueAddedTaxRate, valueAddedTax,
-                totalAmount, documentNumber, documentDescription, PaymentState.Outstanding, issueDate, dueDate, filePath)
+            return Document(DocumentType.Revenue, true, netAmount, valueAddedTaxRate, valueAddedTax, totalAmount,
+                documentNumber, documentDescription, PaymentState.Outstanding, issueDate, dueDate, null, filePath)
         }
 
     }
@@ -64,7 +64,7 @@ open class Document() : BaseEntity() {
 
     constructor(type: DocumentType, isSelfCreatedInvoice: Boolean, netAmount: Double, valueAddedTaxRate: Float,
                 valueAddedTax: Double, totalAmount: Double, documentNumber: String?, documentDescription: String?,
-                paymentState: PaymentState, issueDate: Date?, dueDate: Date?, filePath: File?
+                paymentState: PaymentState, issueDate: Date?, dueDate: Date?, paymentDate: Date?, filePath: File?
     ) : this(type, totalAmount, valueAddedTaxRate) {
 
         this.isSelfCreatedInvoice = isSelfCreatedInvoice
@@ -75,6 +75,7 @@ open class Document() : BaseEntity() {
         this.paymentState = paymentState
         this.issueDate = issueDate
         this.dueDate = dueDate
+        this.paymentDate = paymentDate
         this.filePath = filePath
     }
 
