@@ -7,9 +7,11 @@ import net.dankito.utils.javafx.ui.extensions.concurrencyColumn
 import net.dankito.utils.javafx.ui.extensions.dateColumn
 import net.dankito.utils.javafx.ui.extensions.initiallyUseRemainingSpace
 import tornadofx.*
+import java.util.*
+import kotlin.concurrent.schedule
 
 
-open class DocumentsOverview(titleResourceKey: String) : View() {
+abstract class DocumentsOverview(titleResourceKey: String) : View() {
 
     companion object {
         protected const val ControlBarHeight = 35.0
@@ -21,7 +23,15 @@ open class DocumentsOverview(titleResourceKey: String) : View() {
     }
 
 
+    protected abstract fun retrieveDocuments(): List<Document>
+
+
     protected val documents = FXCollections.observableArrayList<Document>()
+
+
+    init {
+        retrieveDocumentsDelayed() // so that subclasses have time to initialize
+    }
 
 
     override val root = vbox {
@@ -64,6 +74,15 @@ open class DocumentsOverview(titleResourceKey: String) : View() {
 
         }
 
+    }
+
+
+    private fun retrieveDocumentsDelayed() {
+        Timer().schedule(1000) {
+            val retrievedDocuments = retrieveDocuments()
+
+            runLater { documents.setAll(retrievedDocuments) }
+        }
     }
 
 }

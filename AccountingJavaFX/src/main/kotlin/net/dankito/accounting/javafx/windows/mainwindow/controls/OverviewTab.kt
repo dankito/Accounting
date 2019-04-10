@@ -1,10 +1,11 @@
 package net.dankito.accounting.javafx.windows.mainwindow.controls
 
 import javafx.scene.layout.Priority
+import net.dankito.accounting.javafx.windows.mainwindow.OverviewPresenter
 import tornadofx.*
 
 
-class OverviewTab : View() {
+class OverviewTab(presenter: OverviewPresenter) : View() {
 
     companion object {
         private const val DocumentsOverviewSpace = 12.0
@@ -18,9 +19,9 @@ class OverviewTab : View() {
                 hGrow = Priority.ALWAYS
             }
 
-            add(DocumentsOverview("main.window.tab.overview.revenues.label"))
+            add(RevenuesOverview(presenter))
 
-            add(DocumentsOverview("main.window.tab.overview.expenditures.label").apply {
+            add(ExpendituresOverview(presenter).apply {
                 root.vboxConstraints {
                     marginTop = DocumentsOverviewSpace
                 }
