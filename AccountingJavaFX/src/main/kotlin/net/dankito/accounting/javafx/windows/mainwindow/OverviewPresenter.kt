@@ -6,11 +6,16 @@ import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.document.DocumentService
 import net.dankito.utils.datetime.DateConvertUtils
+import java.text.NumberFormat
 import java.time.LocalDate
 import java.util.*
 
 
 class OverviewPresenter(private val documentService: DocumentService, private val router: Router) {
+
+    companion object {
+        val CurrencyFormat = NumberFormat.getCurrencyInstance()
+    }
 
 
     var accountingPeriod: AccountingPeriod = AccountingPeriod.Monthly
@@ -77,6 +82,10 @@ class OverviewPresenter(private val documentService: DocumentService, private va
     }
 
 
+    fun getCurrencyString(amount: Double): String {
+        return CurrencyFormat.format(amount)
+    }
+
     fun getDefaultVatRateForUser(): Float {
         return 19f // TODO: make country / Locale specific
     }
@@ -87,15 +96,87 @@ class OverviewPresenter(private val documentService: DocumentService, private va
 
 
     fun getDocumentsInCurrentAndPreviousAccountingPeriod(documents: List<Document>): List<Document> {
-        val previousAccountingPeriodStart = getPreviousAccountingPeriodStartDate()
+        val periodStart = getPreviousAccountingPeriodStartDate()
+        val periodEnd = getCurrentAccountingPeriodEndDate()
 
-        return documents.filter { it.paymentDate?.let { date -> date >= previousAccountingPeriodStart } ?: false }
+        return getDocumentsInPeriod(documents, periodStart, periodEnd)
     }
+
+    fun getDocumentsInCurrentAccountingPeriod(documents: List<Document>): List<Document> {
+        val periodStart = getCurrentAccountingPeriodStartDate()
+        val periodEnd = getCurrentAccountingPeriodEndDate()
+
+        return getDocumentsInPeriod(documents, periodStart, periodEnd)
+    }
+
+    fun getDocumentsInPreviousAccountingPeriod(documents: List<Document>): List<Document> {
+        val periodStart = getPreviousAccountingPeriodStartDate()
+        val periodEnd = getPreviousAccountingPeriodEndDate()
+
+        return getDocumentsInPeriod(documents, periodStart, periodEnd)
+    }
+
+    private fun getDocumentsInPeriod(documents: List<Document>, periodStart: Date, periodEnd: Date): List<Document> {
+        return documents.filter {
+            it.paymentDate?.let { date -> date in periodStart..periodEnd }
+            ?: false
+        }
+    }
+
+
+    fun calculateCurrentAccountingPeriodReceivedVat(): Double {
+        val currentPeriodRevenues = getDocumentsInCurrentAccountingPeriod(getRevenues())
+
+        return sumVat(currentPeriodRevenues)
+    }
+
+    fun calculateCurrentAccountingPeriodSpentVat(): Double {
+        val currentPeriodExpenditures = getDocumentsInCurrentAccountingPeriod(getExpenditures())
+
+        return sumVat(currentPeriodExpenditures)
+    }
+
+    fun calculateCurrentAccountingPeriodVatBalance(): Double {
+        return calculateCurrentAccountingPeriodReceivedVat() - calculateCurrentAccountingPeriodSpentVat()
+    }
+
+    fun calculatePreviousAccountingPeriodReceivedVat(): Double {
+        val previousPeriodRevenues = getDocumentsInPreviousAccountingPeriod(getRevenues())
+
+        return sumVat(previousPeriodRevenues)
+    }
+
+    fun calculatePreviousAccountingPeriodSpentVat(): Double {
+        val previousPeriodExpenditures = getDocumentsInPreviousAccountingPeriod(getExpenditures())
+
+        return sumVat(previousPeriodExpenditures)
+    }
+
+    fun calculatePreviousAccountingPeriodVatBalance(): Double {
+        return calculatePreviousAccountingPeriodReceivedVat() - calculatePreviousAccountingPeriodSpentVat()
+    }
+
+    fun sumVat(previousPeriodExpenditures: List<Document>) =
+        previousPeriodExpenditures.sumByDouble { it.valueAddedTax }
+
 
     fun getCurrentAccountingPeriodStartDate(): Date {
         val periodStart = getCurrentAccountingPeriodStartLocalDate()
 
         return DateConvertUtils.asUtilDate(periodStart)!!
+    }
+
+    fun getCurrentAccountingPeriodEndDate(): Date {
+        val periodStart = getCurrentAccountingPeriodStartLocalDate()
+
+        val periodEnd = if (accountingPeriod == AccountingPeriod.Monthly) {
+            periodStart.plusMonths(1)
+        } else {
+            periodStart.plusMonths(3)
+        }
+            .minusDays(1)
+
+        return DateConvertUtils.asUtilDate(periodEnd)!!
     }
 
     fun getPreviousAccountingPeriodStartDate(): Date {
@@ -135,8 +216,8 @@ class OverviewPresenter(private val documentService: DocumentService, private va
         if (accountingPeriod == AccountingPeriod.Quarterly) {
             periodStart = when {
                 periodStart.monthValue > 9 -> periodStart.withMonth(10)
-                periodStart.monthValue > 9 -> periodStart.withMonth(7)
-                periodStart.monthValue > 9 -> periodStart.withMonth(4)
+                periodStart.monthValue > 6 -> periodStart.withMonth(7)
+                periodStart.monthValue > 3 -> periodStart.withMonth(4)
                 else -> periodStart.withMonth(1)
             }
         }

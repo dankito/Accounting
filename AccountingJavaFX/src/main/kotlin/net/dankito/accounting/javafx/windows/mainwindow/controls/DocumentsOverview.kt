@@ -77,7 +77,7 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
             concurrencyColumn(messages["main.window.documents.table.net.amount.column.header"], Document::netAmount)
 
-            concurrencyColumn(messages["main.window.documents.table.value.added.tax.column.header"], Document::valueAddedTax)
+            concurrencyColumn(messages["value.added.tax"], Document::valueAddedTax)
 
             concurrencyColumn(messages["main.window.documents.table.total.amount.column.header"], Document::totalAmount)
 
