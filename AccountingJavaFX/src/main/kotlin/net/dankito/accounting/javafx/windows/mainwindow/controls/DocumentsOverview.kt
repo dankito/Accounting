@@ -4,7 +4,7 @@ import javafx.collections.FXCollections
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.javafx.windows.mainwindow.OverviewPresenter
 import net.dankito.utils.javafx.ui.controls.AddButton
-import net.dankito.utils.javafx.ui.extensions.concurrencyColumn
+import net.dankito.utils.javafx.ui.extensions.currencyColumn
 import net.dankito.utils.javafx.ui.extensions.dateColumn
 import net.dankito.utils.javafx.ui.extensions.initiallyUseRemainingSpace
 import tornadofx.*
@@ -75,11 +75,11 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
             dateColumn(messages["main.window.documents.table.payment.date.column.header"], Document::paymentDate)
 
-            concurrencyColumn(messages["main.window.documents.table.net.amount.column.header"], Document::netAmount)
+            currencyColumn(messages["main.window.documents.table.net.amount.column.header"], Document::netAmount, OverviewPresenter.CurrencyFormat)
 
-            concurrencyColumn(messages["value.added.tax"], Document::valueAddedTax)
+            currencyColumn(messages["value.added.tax"], Document::valueAddedTax, OverviewPresenter.CurrencyFormat)
 
-            concurrencyColumn(messages["main.window.documents.table.total.amount.column.header"], Document::totalAmount)
+            currencyColumn(messages["main.window.documents.table.total.amount.column.header"], Document::totalAmount, OverviewPresenter.CurrencyFormat)
 
 
             onDoubleClick {

@@ -13,11 +13,14 @@ import tornadofx.*
 class SummaryPane(private val presenter: OverviewPresenter) : View() {
 
     companion object {
-        private const val SummaryAmountLabelWidth = 80.0
+        private const val SummaryAmountLabelWidth = 90.0
     }
 
 
     private val previousPeriodLabel = SimpleStringProperty()
+
+    private val currentPeriodLabel = SimpleStringProperty()
+
 
     private val previousPeriodReceivedVat = SimpleStringProperty()
 
@@ -26,8 +29,6 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
     private val previousPeriodVatBalance = SimpleStringProperty()
 
 
-    private val currentPeriodLabel = SimpleStringProperty()
-
     private val currentPeriodReceivedVat = SimpleStringProperty()
 
     private val currentPeriodSpentVat = SimpleStringProperty()
@@ -35,17 +36,31 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
     private val currentPeriodVatBalance = SimpleStringProperty()
 
 
+    private val previousPeriodRevenues = SimpleStringProperty()
+
+    private val previousPeriodExpenditures = SimpleStringProperty()
+
+    private val previousPeriodBalance = SimpleStringProperty()
+
+
+    private val currentPeriodRevenues = SimpleStringProperty()
+
+    private val currentPeriodExpenditures = SimpleStringProperty()
+
+    private val currentPeriodBalance = SimpleStringProperty()
+
+
     init {
-        updateVatValues()
+        updateValues()
 
         presenter.addDocumentsUpdatedListenerInAMemoryLeakWay {
-            runLater { updateVatValues() }
+            runLater { updateValues() }
         }
     }
 
 
     override val root = vbox {
-        minWidth = 200.0
+        minWidth = 240.0
 
         paddingAll = 2.0
         paddingLeft = 4.0
@@ -72,29 +87,69 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
 
             vboxConstraints {
                 marginTop = 4.0
-                marginBottom = 6.0
             }
         }
 
 
-        vbox {
+        currentAndPreviousPeriodSummary("turnover",
+            previousPeriodLabel,
+            previousPeriodRevenues, "revenues",
+            previousPeriodExpenditures, "expenditures",
+            previousPeriodBalance, "balance",
+            currentPeriodLabel,
+            currentPeriodRevenues, "revenues",
+            currentPeriodExpenditures, "expenditures",
+            currentPeriodBalance, "balance"
+        )
+
+
+        currentAndPreviousPeriodSummary("value.added.tax",
+            previousPeriodLabel,
+            previousPeriodReceivedVat, "main.window.tab.overview.summary.pane.received.vat",
+            previousPeriodSpentVat, "main.window.tab.overview.summary.pane.spent.vat",
+            previousPeriodVatBalance, "balance",
+            currentPeriodLabel,
+            currentPeriodReceivedVat, "main.window.tab.overview.summary.pane.received.vat",
+            currentPeriodSpentVat, "main.window.tab.overview.summary.pane.spent.vat",
+            currentPeriodVatBalance, "balance"
+        )
+    }
+
+    private fun EventTarget.currentAndPreviousPeriodSummary(categoryResourceKey: String,
+                previousPeriodLabel: SimpleStringProperty,
+                previousReceivedAmountString: SimpleStringProperty, previousReceivedLabelResourceKey: String,
+                previousSpentAmountString: SimpleStringProperty, previousSpentLabelResourceKey: String,
+                previousBalanceAmountString: SimpleStringProperty, previousBalanceLabelResourceKey: String,
+                currentPeriodLabel: SimpleStringProperty,
+                currentReceivedAmountString: SimpleStringProperty, currentReceivedLabelResourceKey: String,
+                currentSpentAmountString: SimpleStringProperty, currentSpentLabelResourceKey: String,
+                currentBalanceAmountString: SimpleStringProperty, currentBalanceLabelResourceKey: String): Pane {
+
+        return vbox {
             this.border = Border(BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, CornerRadii(4.0), BorderWidths(2.0)))
 
             paddingAll = 4.0
 
-            label(messages["value.added.tax"])
+            label(messages[categoryResourceKey])
 
-            periodSummary(previousPeriodLabel,
-                previousPeriodReceivedVat, "main.window.tab.overview.summary.pane.received.vat",
-                previousPeriodSpentVat, "main.window.tab.overview.summary.pane.spent.vat",
-                previousPeriodVatBalance, "main.window.tab.overview.summary.pane.vat.balance"
+            periodSummary(
+                previousPeriodLabel,
+                previousReceivedAmountString, previousReceivedLabelResourceKey,
+                previousSpentAmountString, previousSpentLabelResourceKey,
+                previousBalanceAmountString, previousBalanceLabelResourceKey
             )
 
-            periodSummary(currentPeriodLabel,
-                currentPeriodReceivedVat, "main.window.tab.overview.summary.pane.received.vat",
-                currentPeriodSpentVat, "main.window.tab.overview.summary.pane.spent.vat",
-                currentPeriodVatBalance, "main.window.tab.overview.summary.pane.vat.balance"
+            periodSummary(
+                currentPeriodLabel,
+                currentReceivedAmountString, currentReceivedLabelResourceKey,
+                currentSpentAmountString, currentSpentLabelResourceKey,
+                currentBalanceAmountString, currentBalanceLabelResourceKey
             )
+
+
+            vboxConstraints {
+                marginTop = 6.0
+            }
 
         }
     }
@@ -150,19 +205,40 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
     }
 
 
-
-
-    private fun updateVatValues() {
+    private fun updateValues() {
         previousPeriodLabel.value = if (presenter.accountingPeriod == AccountingPeriod.Quarterly)
-                                    messages["main.window.tab.overview.summary.pane.previous.quarter"]
-                                    else messages["main.window.tab.overview.summary.pane.previous.month"]
-        previousPeriodReceivedVat.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodReceivedVat())
-        previousPeriodSpentVat.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodSpentVat())
-        previousPeriodVatBalance.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodVatBalance())
+            messages["main.window.tab.overview.summary.pane.previous.quarter"]
+        else messages["main.window.tab.overview.summary.pane.previous.month"]
 
         currentPeriodLabel.value = if (presenter.accountingPeriod == AccountingPeriod.Quarterly)
             messages["main.window.tab.overview.summary.pane.current.quarter"]
         else messages["main.window.tab.overview.summary.pane.current.month"]
+
+        updateTurnoverValues()
+
+        updateVatValues()
+    }
+
+    private fun updateTurnoverValues() {
+        previousPeriodRevenues.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodRevenues())
+
+        previousPeriodExpenditures.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodExpenditures())
+
+        previousPeriodBalance.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodBalance())
+
+
+        currentPeriodRevenues.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodRevenues())
+
+        currentPeriodExpenditures.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodExpenditures())
+
+        currentPeriodBalance.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodBalance())
+    }
+
+    private fun updateVatValues() {
+        previousPeriodReceivedVat.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodReceivedVat())
+        previousPeriodSpentVat.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodSpentVat())
+        previousPeriodVatBalance.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodVatBalance())
+
         currentPeriodReceivedVat.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodReceivedVat())
         currentPeriodSpentVat.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodSpentVat())
         currentPeriodVatBalance.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodVatBalance())

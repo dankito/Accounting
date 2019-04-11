@@ -5,7 +5,7 @@ import net.dankito.accounting.javafx.windows.mainwindow.OverviewPresenter
 
 
 class ExpendituresOverview(presenter: OverviewPresenter)
-    : DocumentsOverview("main.window.tab.overview.expenditures.label", presenter) {
+    : DocumentsOverview("expenditures", presenter) {
 
 
     override fun retrieveDocuments(): List<Document> {

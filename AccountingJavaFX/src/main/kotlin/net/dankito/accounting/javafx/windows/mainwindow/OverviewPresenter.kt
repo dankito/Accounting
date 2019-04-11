@@ -124,6 +124,42 @@ class OverviewPresenter(private val documentService: DocumentService, private va
     }
 
 
+    fun calculateCurrentAccountingPeriodRevenues(): Double {
+        val currentPeriodRevenues = getDocumentsInCurrentAccountingPeriod(getRevenues())
+
+        return sumTotalAmount(currentPeriodRevenues)
+    }
+
+    fun calculateCurrentAccountingPeriodExpenditures(): Double {
+        val currentPeriodExpenditures = getDocumentsInCurrentAccountingPeriod(getExpenditures())
+
+        return sumTotalAmount(currentPeriodExpenditures)
+    }
+
+    fun calculateCurrentAccountingPeriodBalance(): Double {
+        return calculateCurrentAccountingPeriodRevenues() - calculateCurrentAccountingPeriodExpenditures()
+    }
+
+    fun calculatePreviousAccountingPeriodRevenues(): Double {
+        val previousPeriodRevenues = getDocumentsInPreviousAccountingPeriod(getRevenues())
+
+        return sumTotalAmount(previousPeriodRevenues)
+    }
+
+    fun calculatePreviousAccountingPeriodExpenditures(): Double {
+        val previousPeriodExpenditures = getDocumentsInPreviousAccountingPeriod(getExpenditures())
+
+        return sumTotalAmount(previousPeriodExpenditures)
+    }
+
+    fun calculatePreviousAccountingPeriodBalance(): Double {
+        return calculatePreviousAccountingPeriodRevenues() - calculatePreviousAccountingPeriodExpenditures()
+    }
+
+    fun sumTotalAmount(previousPeriodExpenditures: List<Document>) =
+        previousPeriodExpenditures.sumByDouble { it.totalAmount }
+
+
     fun calculateCurrentAccountingPeriodReceivedVat(): Double {
         val currentPeriodRevenues = getDocumentsInCurrentAccountingPeriod(getRevenues())
 
