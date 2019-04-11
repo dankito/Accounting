@@ -4,6 +4,7 @@ import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.javafx.service.Router
+import net.dankito.accounting.service.ValueAddedTaxCalculator
 import net.dankito.accounting.service.document.IDocumentService
 import net.dankito.utils.datetime.DateConvertUtils
 import java.text.NumberFormat
@@ -11,7 +12,11 @@ import java.time.LocalDate
 import java.util.*
 
 
-open class OverviewPresenter(private val documentService: IDocumentService, private val router: Router) {
+open class OverviewPresenter(private val documentService: IDocumentService,
+                             private val router: Router,
+                             private val vatCalculator: ValueAddedTaxCalculator = ValueAddedTaxCalculator()
+) {
+
 
     companion object {
         val CurrencyFormat = NumberFormat.getCurrencyInstance()
@@ -60,12 +65,12 @@ open class OverviewPresenter(private val documentService: IDocumentService, priv
         }
     }
 
-    private fun calculateVatFromNetAmount(document: Document): Double {
-        return document.valueAddedTaxRate * (1 + (document.totalAmount / 100f)) // TODO
+    fun calculateVatFromNetAmount(document: Document): Double {
+        return vatCalculator.calculateVatFromNetAmount(document.netAmount, document.valueAddedTaxRate)
     }
 
-    private fun calculateVatFromTotalAmount(document: Document): Double {
-        return document.valueAddedTaxRate * (document.totalAmount / 100f) // TODO
+    fun calculateVatFromTotalAmount(document: Document): Double {
+        return vatCalculator.calculateVatFromTotalAmount(document.totalAmount, document.valueAddedTaxRate)
     }
 
 
