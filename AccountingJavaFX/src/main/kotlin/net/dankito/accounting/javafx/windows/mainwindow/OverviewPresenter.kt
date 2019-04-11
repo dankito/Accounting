@@ -4,14 +4,14 @@ import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.javafx.service.Router
-import net.dankito.accounting.service.document.DocumentService
+import net.dankito.accounting.service.document.IDocumentService
 import net.dankito.utils.datetime.DateConvertUtils
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.util.*
 
 
-class OverviewPresenter(private val documentService: DocumentService, private val router: Router) {
+open class OverviewPresenter(private val documentService: IDocumentService, private val router: Router) {
 
     companion object {
         val CurrencyFormat = NumberFormat.getCurrencyInstance()
@@ -234,6 +234,7 @@ class OverviewPresenter(private val documentService: DocumentService, private va
         return DateConvertUtils.asUtilDate(periodEnd)!!
     }
 
+    // TODO: when adding support for Android find a solution without Java 8's LocalDate
     private fun getPreviousAccountingPeriodStartLocalDate(): LocalDate {
         val currentAccountingPeriodStartDate = getCurrentAccountingPeriodStartLocalDate()
 
@@ -245,7 +246,7 @@ class OverviewPresenter(private val documentService: DocumentService, private va
     }
 
     private fun getCurrentAccountingPeriodStartLocalDate(): LocalDate {
-        val today = LocalDate.now()
+        val today = getToday()
 
         var periodStart = today.withDayOfMonth(1)
 
@@ -260,6 +261,9 @@ class OverviewPresenter(private val documentService: DocumentService, private va
 
         return periodStart
     }
+
+    // to be overrideable in unit tests
+    protected open fun getToday(): LocalDate = LocalDate.now()
 
 
     fun showCreateRevenueWindow() {
