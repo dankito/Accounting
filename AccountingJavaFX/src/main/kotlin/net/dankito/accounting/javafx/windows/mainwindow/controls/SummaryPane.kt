@@ -36,14 +36,14 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
     private val currentPeriodVatBalance = SimpleStringProperty()
 
 
-    private val previousPeriodRevenues = SimpleStringProperty()
+    private val previousPeriodNetRevenues = SimpleStringProperty()
 
     private val previousPeriodExpenditures = SimpleStringProperty()
 
     private val previousPeriodBalance = SimpleStringProperty()
 
 
-    private val currentPeriodRevenues = SimpleStringProperty()
+    private val currentPeriodNetRevenues = SimpleStringProperty()
 
     private val currentPeriodExpenditures = SimpleStringProperty()
 
@@ -93,11 +93,11 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
 
         currentAndPreviousPeriodSummary("turnover",
             previousPeriodLabel,
-            previousPeriodRevenues, "revenues",
+            previousPeriodNetRevenues, "main.window.tab.overview.summary.pane.net.revenues",
             previousPeriodExpenditures, "expenditures",
             previousPeriodBalance, "balance",
             currentPeriodLabel,
-            currentPeriodRevenues, "revenues",
+            currentPeriodNetRevenues, "main.window.tab.overview.summary.pane.net.revenues",
             currentPeriodExpenditures, "expenditures",
             currentPeriodBalance, "balance"
         )
@@ -220,14 +220,14 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
     }
 
     private fun updateTurnoverValues() {
-        previousPeriodRevenues.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodRevenues())
+        previousPeriodNetRevenues.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodNetRevenues())
 
         previousPeriodExpenditures.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodExpenditures())
 
         previousPeriodBalance.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodBalance())
 
 
-        currentPeriodRevenues.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodRevenues())
+        currentPeriodNetRevenues.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodNetRevenues())
 
         currentPeriodExpenditures.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodExpenditures())
 

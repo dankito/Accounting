@@ -135,6 +135,12 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         return sumTotalAmount(currentPeriodRevenues)
     }
 
+    fun calculateCurrentAccountingPeriodNetRevenues(): Double {
+        val currentPeriodRevenues = getDocumentsInCurrentAccountingPeriod(getRevenues())
+
+        return sumNetAmount(currentPeriodRevenues)
+    }
+
     fun calculateCurrentAccountingPeriodExpenditures(): Double {
         val currentPeriodExpenditures = getDocumentsInCurrentAccountingPeriod(getExpenditures())
 
@@ -142,13 +148,19 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     }
 
     fun calculateCurrentAccountingPeriodBalance(): Double {
-        return calculateCurrentAccountingPeriodRevenues() - calculateCurrentAccountingPeriodExpenditures()
+        return calculateCurrentAccountingPeriodNetRevenues() - calculateCurrentAccountingPeriodExpenditures()
     }
 
     fun calculatePreviousAccountingPeriodRevenues(): Double {
         val previousPeriodRevenues = getDocumentsInPreviousAccountingPeriod(getRevenues())
 
         return sumTotalAmount(previousPeriodRevenues)
+    }
+
+    fun calculatePreviousAccountingPeriodNetRevenues(): Double {
+        val previousPeriodRevenues = getDocumentsInPreviousAccountingPeriod(getRevenues())
+
+        return sumNetAmount(previousPeriodRevenues)
     }
 
     fun calculatePreviousAccountingPeriodExpenditures(): Double {
@@ -158,11 +170,14 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     }
 
     fun calculatePreviousAccountingPeriodBalance(): Double {
-        return calculatePreviousAccountingPeriodRevenues() - calculatePreviousAccountingPeriodExpenditures()
+        return calculatePreviousAccountingPeriodNetRevenues() - calculatePreviousAccountingPeriodExpenditures()
     }
 
     fun sumTotalAmount(previousPeriodExpenditures: List<Document>) =
         previousPeriodExpenditures.sumByDouble { it.totalAmount }
+
+    fun sumNetAmount(previousPeriodExpenditures: List<Document>) =
+        previousPeriodExpenditures.sumByDouble { it.netAmount }
 
 
     fun calculateCurrentAccountingPeriodReceivedVat(): Double {
