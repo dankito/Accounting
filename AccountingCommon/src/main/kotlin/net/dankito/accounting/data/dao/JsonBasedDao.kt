@@ -36,7 +36,7 @@ abstract class JsonBasedDao<T>(private val entityClass: Class<T>, dataFolder: Fi
 
 
     protected open fun retrieveAllEntities(): MutableSet<T> {
-        return serializer.deserializeSet(jsonFile, entityClass).toMutableSet()
+        return serializer.deserializeSetOr(jsonFile, entityClass).toMutableSet()
     }
 
     protected open fun saveAllEntities() {
