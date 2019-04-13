@@ -10,7 +10,8 @@ import net.dankito.utils.javafx.ui.dialogs.Window
 import tornadofx.*
 
 
-class EditPersonWindow(private val person: Person) : Window() {
+class EditPersonWindow(private val person: Person, private val didUserSavePersonCallback: ((Boolean) -> Unit)? = null)
+    : Window() {
 
     companion object {
 
@@ -128,11 +129,17 @@ class EditPersonWindow(private val person: Person) : Window() {
 
         // TODO: save
 
-        close()
+        closeWindow(true)
     }
 
     private fun askUserToSaveChangesAndClose() {
         // TODO: check for unsaved changes and ask user if he/she likes to save them
+
+        closeWindow(false)
+    }
+
+    private fun closeWindow(didSavePerson: Boolean) {
+        didUserSavePersonCallback?.invoke(didSavePerson)
 
         close()
     }
