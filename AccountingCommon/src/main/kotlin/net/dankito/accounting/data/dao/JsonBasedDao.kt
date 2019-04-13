@@ -25,9 +25,7 @@ abstract class JsonBasedDao<T : BaseEntity>(private val entityClass: Class<T>, d
     }
 
     override fun saveOrUpdate(entity: T) {
-        if (entity.id == null) { // not persisted yet
-            entity.id = UUID.randomUUID().toString()
-        }
+        setIdIfNotPersistedYet(entity)
 
         entities.add(entity)
 
@@ -47,6 +45,13 @@ abstract class JsonBasedDao<T : BaseEntity>(private val entityClass: Class<T>, d
 
     protected open fun saveAllEntities() {
         serializer.serializeObject(entities, jsonFile)
+    }
+
+
+    protected open fun setIdIfNotPersistedYet(entity: BaseEntity) {
+        if (entity.isPersisted() == false) {
+            entity.id = UUID.randomUUID().toString()
+        }
     }
 
 }
