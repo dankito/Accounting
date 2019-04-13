@@ -6,4 +6,8 @@ class Address(var street: String,
               var zipCode: String,
               var city: String,
               var country: String
-)
+) : BaseEntity() {
+
+    protected constructor() : this("", "", "", "", "") // for Jackson, ...
+
+}
