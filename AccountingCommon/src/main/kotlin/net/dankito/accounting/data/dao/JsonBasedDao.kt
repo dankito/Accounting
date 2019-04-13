@@ -6,7 +6,7 @@ import java.io.File
 import java.util.*
 
 
-abstract class JsonBasedDao<T>(private val entityClass: Class<T>, dataFolder: File, jsonFileName: String) : IBaseDao<T> {
+abstract class JsonBasedDao<T : BaseEntity>(private val entityClass: Class<T>, dataFolder: File, jsonFileName: String) : IBaseDao<T> {
 
     protected val jsonFile = File(dataFolder, jsonFileName)
 
@@ -25,7 +25,7 @@ abstract class JsonBasedDao<T>(private val entityClass: Class<T>, dataFolder: Fi
     }
 
     override fun saveOrUpdate(entity: T) {
-        if (entity is BaseEntity && entity.id == null) { // not persisted yet
+        if (entity.id == null) { // not persisted yet
             entity.id = UUID.randomUUID().toString()
         }
 

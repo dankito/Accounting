@@ -1,7 +1,9 @@
 package net.dankito.accounting.data.dao
 
+import net.dankito.accounting.data.model.BaseEntity
 
-interface IBaseDao<T> {
+
+interface IBaseDao<T : BaseEntity> {
 
     fun getAll(): List<T>
 
