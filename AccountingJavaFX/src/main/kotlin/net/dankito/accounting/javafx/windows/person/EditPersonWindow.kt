@@ -6,12 +6,13 @@ import javafx.geometry.Pos
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import net.dankito.accounting.data.model.Person
+import net.dankito.accounting.service.person.IPersonService
 import net.dankito.utils.javafx.ui.dialogs.Window
 import tornadofx.*
 
 
-class EditPersonWindow(private val person: Person, private val didUserSavePersonCallback: ((Boolean) -> Unit)? = null)
-    : Window() {
+class EditPersonWindow(private val person: Person, private val personService: IPersonService,
+                       private val didUserSavePersonCallback: ((Boolean) -> Unit)? = null) : Window() {
 
     companion object {
 
@@ -127,7 +128,7 @@ class EditPersonWindow(private val person: Person, private val didUserSavePerson
         person.primaryAddress.city = city.value
         person.primaryAddress.country = country.value
 
-        // TODO: save
+        personService.saveOrUpdate(person)
 
         closeWindow(true)
     }
