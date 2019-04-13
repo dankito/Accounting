@@ -6,6 +6,9 @@ class Person(var firstName: String,
              var primaryAddress: Address
 ) {
 
+    constructor() : this("", "", Address("", "", "", "", ""))
+
+
     /**
      * Returns "[firstName] [lastName]".
      */
