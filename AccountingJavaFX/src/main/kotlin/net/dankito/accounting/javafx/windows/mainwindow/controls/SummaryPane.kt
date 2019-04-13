@@ -7,6 +7,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.TextAlignment
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.javafx.windows.mainwindow.OverviewPresenter
+import net.dankito.utils.javafx.ui.extensions.setBorder
 import tornadofx.*
 
 
@@ -126,7 +127,7 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
                 currentBalanceAmountString: SimpleStringProperty, currentBalanceLabelResourceKey: String): Pane {
 
         return vbox {
-            this.border = Border(BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, CornerRadii(4.0), BorderWidths(2.0)))
+            this.setBorder()
 
             paddingAll = 4.0
 
