@@ -5,7 +5,7 @@ interface IBaseDao<T> {
 
     fun getAll(): List<T>
 
-    fun saveOrUpdate(T: T)
+    fun saveOrUpdate(entity: T)
 
     fun delete(entity: T)
 
