@@ -4,12 +4,15 @@ ext {
 
     kotlinVersion = '1.3.21'
 
-    javaUtilsVersion = '2.0.0-SNAPSHOT'
+
+    javaUtilsVersion = '1.0.5-SNAPSHOT'
 
     javaxPersistenceVersion = '2.1.1'
 
 
     javaFxUtilsVersion = '1.0.1-SNAPSHOT'
+
+    logbackVersion = '1.2.3'
 
 
     junitVersion = '4.12'

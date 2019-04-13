@@ -1,7 +1,6 @@
 package net.dankito.accounting.data.dao
 
 import net.dankito.accounting.data.model.Document
-import net.dankito.utils.io.FileUtils
 import net.dankito.utils.serialization.JacksonJsonSerializer
 import java.io.File
 
@@ -13,8 +12,6 @@ class JsonDocumentDao(dataFolder: File) : IDocumentDao {
 
     private val serializer = JacksonJsonSerializer()
 
-    private val fileUtils = FileUtils()
-
     private val documents: MutableSet<Document> = retrieveDocuments()
 
 
@@ -24,28 +21,23 @@ class JsonDocumentDao(dataFolder: File) : IDocumentDao {
 
 
     private fun retrieveDocuments(): MutableSet<Document> {
-        // TODO: use new convenience methods as soon as JavaUtils 2.0.0 is out
-        if (documentsJsonFile.exists()) {
-            fileUtils.readFromTextFile(documentsJsonFile)?.let { documentsJson ->
-                return serializer.deserializeObject(documentsJson, MutableSet::class.java, Document::class.java)
-                        as MutableSet<Document>
-            }
-        }
-
-        return mutableSetOf()
+        return serializer.deserializeSet(documentsJsonFile, Document::class.java).toMutableSet()
     }
 
-
-    override fun saveOrUpdate(document: Document) {
-        documents.add(document)
-
-        // TODO: use new convenience methods as soon as JavaUtils 2.0.0 is out
-        val documentsJson = serializer.serializeObject(documents)
-        fileUtils.writeToTextFile(documentsJson, documentsJsonFile)
-    }
 
     override fun getAll(): List<Document> {
         return documents.toList()
+    }
+
+    override fun saveOrUpdate(entity: Document) {
+        documents.add(entity)
+
+        saveDocuments()
+    }
+
+
+    private fun saveDocuments() {
+        serializer.serializeObject(documents, documentsJsonFile)
     }
 
 }

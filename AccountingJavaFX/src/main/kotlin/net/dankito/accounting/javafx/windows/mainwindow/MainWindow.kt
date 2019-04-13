@@ -12,7 +12,7 @@ import tornadofx.*
 import java.io.File
 
 
-class MainWindow : Fragment(String.format(FX.messages["application.title"], PackageInfo.getAppVersionFrom())) {
+class MainWindow : Fragment(String.format(FX.messages["application.title"], PackageInfo.getAppVersionFromManifest())) {
 
 
     private val dataFolder = File("data")
