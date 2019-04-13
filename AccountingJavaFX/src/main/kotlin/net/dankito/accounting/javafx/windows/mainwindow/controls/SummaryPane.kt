@@ -6,7 +6,7 @@ import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.TextAlignment
 import net.dankito.accounting.data.model.AccountingPeriod
-import net.dankito.accounting.javafx.windows.mainwindow.OverviewPresenter
+import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.utils.javafx.ui.extensions.setBorder
 import tornadofx.*
 

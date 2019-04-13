@@ -1,4 +1,4 @@
-package net.dankito.accounting.javafx.windows.mainwindow
+package net.dankito.accounting.javafx.presenter
 
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.javafx.service.Router

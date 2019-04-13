@@ -8,7 +8,7 @@ import javafx.event.EventTarget
 import javafx.scene.control.Label
 import javafx.scene.layout.Priority
 import net.dankito.accounting.data.model.Document
-import net.dankito.accounting.javafx.windows.mainwindow.OverviewPresenter
+import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.utils.datetime.DateConvertUtils
 import net.dankito.utils.javafx.ui.dialogs.Window
 import tornadofx.*

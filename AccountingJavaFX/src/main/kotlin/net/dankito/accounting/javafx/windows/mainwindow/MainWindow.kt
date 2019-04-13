@@ -2,6 +2,7 @@ package net.dankito.accounting.javafx.windows.mainwindow
 
 import javafx.scene.control.TabPane
 import net.dankito.accounting.data.dao.JsonDocumentDao
+import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.javafx.windows.mainwindow.controls.MainMenuBar
 import net.dankito.accounting.javafx.windows.mainwindow.controls.OverviewTab

@@ -1,7 +1,7 @@
 package net.dankito.accounting.javafx.windows.mainwindow.controls
 
 import javafx.scene.layout.Priority
-import net.dankito.accounting.javafx.windows.mainwindow.OverviewPresenter
+import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import tornadofx.*
 
 
