@@ -35,6 +35,12 @@ class JsonDocumentDao(dataFolder: File) : IDocumentDao {
         saveDocuments()
     }
 
+    override fun delete(entity: Document) {
+        documents.remove(entity)
+
+        saveDocuments()
+    }
+
 
     private fun saveDocuments() {
         serializer.serializeObject(documents, documentsJsonFile)
