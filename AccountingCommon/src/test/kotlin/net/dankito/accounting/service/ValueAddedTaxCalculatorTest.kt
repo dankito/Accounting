@@ -262,4 +262,24 @@ class ValueAddedTaxCalculatorTest {
         assertThat(result).isEqualTo(2073.28)
     }
 
+    @Test
+    fun calculateNetAmountFromTotalAmount_13147_12() {
+
+        // when
+        val result = underTest.calculateNetAmountFromTotalAmount(13147.12, GermanDefaultVatRate)
+
+        // then
+        assertThat(result).isEqualTo(11048.0, within(0.01))
+    }
+
+    @Test
+    fun calculateNetAmountFromTotalAmount_13147_12_and_12974_57() {
+
+        // when
+        val result = underTest.calculateNetAmountFromTotalAmount(13147.12 + 12974.57, GermanDefaultVatRate)
+
+        // then
+        assertThat(result).isEqualTo(21951.0, within(0.01))
+    }
+
 }
