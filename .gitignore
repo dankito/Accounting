@@ -16,7 +16,9 @@ out/
 
 /data/
 /lib/
-/log/
+**/lib
+/logs/
+**/logs
 **/*.log
 
 keys.gradle
