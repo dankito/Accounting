@@ -1,5 +1,6 @@
 package net.dankito.accounting.javafx.windows.mainwindow.controls
 
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.EventTarget
 import javafx.scene.layout.Pane
@@ -12,6 +13,7 @@ import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.tax.elster.ElsterTaxDeclarationWindow
 import net.dankito.accounting.service.person.PersonService
 import net.dankito.utils.ThreadPool
+import net.dankito.utils.javafx.ui.controls.currencyLabel
 import net.dankito.utils.javafx.ui.extensions.setBorder
 import tornadofx.*
 import java.io.File
@@ -33,32 +35,32 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
     private val currentPeriodLabel = SimpleStringProperty()
 
 
-    private val previousPeriodReceivedVat = SimpleStringProperty()
+    private val previousPeriodReceivedVat = SimpleDoubleProperty()
 
-    private val previousPeriodSpentVat = SimpleStringProperty()
+    private val previousPeriodSpentVat = SimpleDoubleProperty()
 
-    private val previousPeriodVatBalance = SimpleStringProperty()
-
-
-    private val currentPeriodReceivedVat = SimpleStringProperty()
-
-    private val currentPeriodSpentVat = SimpleStringProperty()
-
-    private val currentPeriodVatBalance = SimpleStringProperty()
+    private val previousPeriodVatBalance = SimpleDoubleProperty()
 
 
-    private val previousPeriodNetRevenues = SimpleStringProperty()
+    private val currentPeriodReceivedVat = SimpleDoubleProperty()
 
-    private val previousPeriodExpenditures = SimpleStringProperty()
+    private val currentPeriodSpentVat = SimpleDoubleProperty()
 
-    private val previousPeriodBalance = SimpleStringProperty()
+    private val currentPeriodVatBalance = SimpleDoubleProperty()
 
 
-    private val currentPeriodNetRevenues = SimpleStringProperty()
+    private val previousPeriodNetRevenues = SimpleDoubleProperty()
 
-    private val currentPeriodExpenditures = SimpleStringProperty()
+    private val previousPeriodExpenditures = SimpleDoubleProperty()
 
-    private val currentPeriodBalance = SimpleStringProperty()
+    private val previousPeriodBalance = SimpleDoubleProperty()
+
+
+    private val currentPeriodNetRevenues = SimpleDoubleProperty()
+
+    private val currentPeriodExpenditures = SimpleDoubleProperty()
+
+    private val currentPeriodBalance = SimpleDoubleProperty()
 
 
     init {
@@ -189,13 +191,13 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
 
     private fun EventTarget.currentAndPreviousPeriodSummary(categoryResourceKey: String,
                 previousPeriodLabel: SimpleStringProperty,
-                previousReceivedAmountString: SimpleStringProperty, previousReceivedLabelResourceKey: String,
-                previousSpentAmountString: SimpleStringProperty, previousSpentLabelResourceKey: String,
-                previousBalanceAmountString: SimpleStringProperty, previousBalanceLabelResourceKey: String,
+                previousReceivedAmount: SimpleDoubleProperty, previousReceivedLabelResourceKey: String,
+                previousSpentAmount: SimpleDoubleProperty, previousSpentLabelResourceKey: String,
+                previousBalanceAmount: SimpleDoubleProperty, previousBalanceLabelResourceKey: String,
                 currentPeriodLabel: SimpleStringProperty,
-                currentReceivedAmountString: SimpleStringProperty, currentReceivedLabelResourceKey: String,
-                currentSpentAmountString: SimpleStringProperty, currentSpentLabelResourceKey: String,
-                currentBalanceAmountString: SimpleStringProperty, currentBalanceLabelResourceKey: String): Pane {
+                currentReceivedAmount: SimpleDoubleProperty, currentReceivedLabelResourceKey: String,
+                currentSpentAmount: SimpleDoubleProperty, currentSpentLabelResourceKey: String,
+                currentBalanceAmount: SimpleDoubleProperty, currentBalanceLabelResourceKey: String): Pane {
 
         return vbox {
             this.setBorder()
@@ -206,16 +208,16 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
 
             periodSummary(
                 previousPeriodLabel,
-                previousReceivedAmountString, previousReceivedLabelResourceKey,
-                previousSpentAmountString, previousSpentLabelResourceKey,
-                previousBalanceAmountString, previousBalanceLabelResourceKey
+                previousReceivedAmount, previousReceivedLabelResourceKey,
+                previousSpentAmount, previousSpentLabelResourceKey,
+                previousBalanceAmount, previousBalanceLabelResourceKey
             )
 
             periodSummary(
                 currentPeriodLabel,
-                currentReceivedAmountString, currentReceivedLabelResourceKey,
-                currentSpentAmountString, currentSpentLabelResourceKey,
-                currentBalanceAmountString, currentBalanceLabelResourceKey
+                currentReceivedAmount, currentReceivedLabelResourceKey,
+                currentSpentAmount, currentSpentLabelResourceKey,
+                currentBalanceAmount, currentBalanceLabelResourceKey
             )
 
 
@@ -227,9 +229,9 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
     }
 
     private fun EventTarget.periodSummary(periodLabel: SimpleStringProperty,
-                                          receivedAmountString: SimpleStringProperty, receivedLabelResourceKey: String,
-                                          spentAmountString: SimpleStringProperty, spentLabelResourceKey: String,
-                                          balanceAmountString: SimpleStringProperty, balanceLabelResourceKey: String): Pane {
+                                          receivedAmount: SimpleDoubleProperty, receivedLabelResourceKey: String,
+                                          spentAmount: SimpleDoubleProperty, spentLabelResourceKey: String,
+                                          balanceAmount: SimpleDoubleProperty, balanceLabelResourceKey: String): Pane {
 
         return vbox {
             label(periodLabel) {
@@ -240,15 +242,15 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
                 }
             }
 
-            amountWithLabel(receivedAmountString, receivedLabelResourceKey)
+            amountWithLabel(receivedAmount, receivedLabelResourceKey)
 
-            amountWithLabel(spentAmountString, spentLabelResourceKey)
+            amountWithLabel(spentAmount, spentLabelResourceKey)
 
-            amountWithLabel(balanceAmountString, balanceLabelResourceKey)
+            amountWithLabel(balanceAmount, balanceLabelResourceKey)
         }
     }
 
-    private fun EventTarget.amountWithLabel(amountString: SimpleStringProperty, labelResourceKey: String = ""): Pane {
+    private fun EventTarget.amountWithLabel(amount: SimpleDoubleProperty, labelResourceKey: String = ""): Pane {
         return anchorpane {
 
             vboxConstraints {
@@ -263,7 +265,7 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
                 }
             }
 
-            label(amountString) {
+            currencyLabel(amount) {
                 textAlignment = TextAlignment.RIGHT
 
                 anchorpaneConstraints {
@@ -292,28 +294,28 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
     }
 
     private fun updateTurnoverValues() {
-        previousPeriodNetRevenues.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodNetRevenues())
+        previousPeriodNetRevenues.value = presenter.calculatePreviousAccountingPeriodNetRevenues()
 
-        previousPeriodExpenditures.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodExpenditures())
+        previousPeriodExpenditures.value = presenter.calculatePreviousAccountingPeriodExpenditures()
 
-        previousPeriodBalance.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodBalance())
+        previousPeriodBalance.value = presenter.calculatePreviousAccountingPeriodBalance()
 
 
-        currentPeriodNetRevenues.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodNetRevenues())
+        currentPeriodNetRevenues.value = presenter.calculateCurrentAccountingPeriodNetRevenues()
 
-        currentPeriodExpenditures.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodExpenditures())
+        currentPeriodExpenditures.value = presenter.calculateCurrentAccountingPeriodExpenditures()
 
-        currentPeriodBalance.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodBalance())
+        currentPeriodBalance.value = presenter.calculateCurrentAccountingPeriodBalance()
     }
 
     private fun updateVatValues() {
-        previousPeriodReceivedVat.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodReceivedVat())
-        previousPeriodSpentVat.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodSpentVat())
-        previousPeriodVatBalance.value = presenter.getCurrencyString(presenter.calculatePreviousAccountingPeriodVatBalance())
+        previousPeriodReceivedVat.value = presenter.calculatePreviousAccountingPeriodReceivedVat()
+        previousPeriodSpentVat.value = presenter.calculatePreviousAccountingPeriodSpentVat()
+        previousPeriodVatBalance.value = presenter.calculatePreviousAccountingPeriodVatBalance()
 
-        currentPeriodReceivedVat.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodReceivedVat())
-        currentPeriodSpentVat.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodSpentVat())
-        currentPeriodVatBalance.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodVatBalance())
+        currentPeriodReceivedVat.value = presenter.calculateCurrentAccountingPeriodReceivedVat()
+        currentPeriodSpentVat.value = presenter.calculateCurrentAccountingPeriodSpentVat()
+        currentPeriodVatBalance.value = presenter.calculateCurrentAccountingPeriodVatBalance()
     }
 
 
