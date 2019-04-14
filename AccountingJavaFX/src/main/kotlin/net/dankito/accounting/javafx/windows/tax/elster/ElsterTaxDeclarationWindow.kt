@@ -106,10 +106,13 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
         initFields()
     }
 
-    override fun onUndock() {
-        presenter.close()
 
-        super.onUndock()
+    override fun beforeShow(dialogStage: Stage) {
+        super.beforeShow(dialogStage)
+
+        dialogStage.setOnCloseRequest {
+            presenter.close()
+        }
     }
 
 
