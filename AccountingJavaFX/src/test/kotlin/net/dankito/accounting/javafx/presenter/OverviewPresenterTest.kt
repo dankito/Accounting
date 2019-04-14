@@ -3,7 +3,7 @@ package net.dankito.accounting.javafx.presenter
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.document.IDocumentService
-import net.dankito.utils.datetime.DateConvertUtils
+import net.dankito.utils.datetime.asUtilDate
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -40,7 +40,7 @@ class OverviewPresenterTest {
         val result = underTest.getCurrentAccountingPeriodStartDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 6, 1)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 6, 1).asUtilDate())
     }
 
     @Test
@@ -54,7 +54,7 @@ class OverviewPresenterTest {
         val result = underTest.getCurrentAccountingPeriodStartDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 4, 1)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 4, 1).asUtilDate())
     }
 
     @Test
@@ -68,7 +68,7 @@ class OverviewPresenterTest {
         val result = underTest.getCurrentAccountingPeriodStartDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2020, 2, 1)))
+        assertThat(result).isEqualTo(LocalDate.of(2020, 2, 1).asUtilDate())
     }
 
     @Test
@@ -82,7 +82,7 @@ class OverviewPresenterTest {
         val result = underTest.getCurrentAccountingPeriodStartDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 4, 1)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 4, 1).asUtilDate())
     }
 
     @Test
@@ -96,7 +96,7 @@ class OverviewPresenterTest {
         val result = underTest.getCurrentAccountingPeriodStartDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 4, 1)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 4, 1).asUtilDate())
     }
 
 
@@ -111,7 +111,7 @@ class OverviewPresenterTest {
         val result = underTest.getCurrentAccountingPeriodEndDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 6, 30)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 6, 30).asUtilDate())
     }
 
     @Test
@@ -125,7 +125,7 @@ class OverviewPresenterTest {
         val result = underTest.getCurrentAccountingPeriodEndDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 4, 30)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 4, 30).asUtilDate())
     }
 
     @Test
@@ -139,7 +139,7 @@ class OverviewPresenterTest {
         val result = underTest.getCurrentAccountingPeriodEndDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2020, 2, 29)))
+        assertThat(result).isEqualTo(LocalDate.of(2020, 2, 29).asUtilDate())
     }
 
     @Test
@@ -153,7 +153,7 @@ class OverviewPresenterTest {
         val result = underTest.getCurrentAccountingPeriodEndDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 6, 30)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 6, 30).asUtilDate())
     }
 
     @Test
@@ -167,7 +167,7 @@ class OverviewPresenterTest {
         val result = underTest.getCurrentAccountingPeriodEndDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 6, 30)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 6, 30).asUtilDate())
     }
 
 
@@ -182,7 +182,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodStartDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 5, 1)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 5, 1).asUtilDate())
     }
 
     @Test
@@ -196,7 +196,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodStartDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 3, 1)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 3, 1).asUtilDate())
     }
 
     @Test
@@ -210,7 +210,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodStartDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2018, 12, 1)))
+        assertThat(result).isEqualTo(LocalDate.of(2018, 12, 1).asUtilDate())
     }
 
     @Test
@@ -224,7 +224,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodStartDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2018, 12, 1)))
+        assertThat(result).isEqualTo(LocalDate.of(2018, 12, 1).asUtilDate())
     }
 
     @Test
@@ -238,7 +238,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodStartDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2020, 1, 1)))
+        assertThat(result).isEqualTo(LocalDate.of(2020, 1, 1).asUtilDate())
     }
 
 
@@ -253,7 +253,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodStartDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 1, 1)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 1, 1).asUtilDate())
     }
 
     @Test
@@ -267,7 +267,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodStartDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 1, 1)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 1, 1).asUtilDate())
     }
 
     @Test
@@ -281,7 +281,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodStartDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2018, 10, 1)))
+        assertThat(result).isEqualTo(LocalDate.of(2018, 10, 1).asUtilDate())
     }
 
     @Test
@@ -295,7 +295,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodStartDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2018, 10, 1)))
+        assertThat(result).isEqualTo(LocalDate.of(2018, 10, 1).asUtilDate())
     }
 
 
@@ -310,7 +310,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodEndDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 3, 31)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 3, 31).asUtilDate())
     }
 
     @Test
@@ -324,7 +324,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodEndDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2018, 12, 31)))
+        assertThat(result).isEqualTo(LocalDate.of(2018, 12, 31).asUtilDate())
     }
 
     @Test
@@ -338,7 +338,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodEndDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2018, 12, 31)))
+        assertThat(result).isEqualTo(LocalDate.of(2018, 12, 31).asUtilDate())
     }
 
     @Test
@@ -352,7 +352,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodEndDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2020, 2, 29)))
+        assertThat(result).isEqualTo(LocalDate.of(2020, 2, 29).asUtilDate())
     }
 
 
@@ -367,7 +367,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodEndDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 3, 31)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 3, 31).asUtilDate())
     }
 
     @Test
@@ -381,7 +381,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodEndDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2019, 3, 31)))
+        assertThat(result).isEqualTo(LocalDate.of(2019, 3, 31).asUtilDate())
     }
 
     @Test
@@ -395,7 +395,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodEndDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2018, 12, 31)))
+        assertThat(result).isEqualTo(LocalDate.of(2018, 12, 31).asUtilDate())
     }
 
     @Test
@@ -409,7 +409,7 @@ class OverviewPresenterTest {
         val result = underTest.getPreviousAccountingPeriodEndDate()
 
         // then
-        assertThat(result).isEqualTo(DateConvertUtils.asUtilDate(LocalDate.of(2018, 12, 31)))
+        assertThat(result).isEqualTo(LocalDate.of(2018, 12, 31).asUtilDate())
     }
 
 }

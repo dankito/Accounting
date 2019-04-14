@@ -6,7 +6,7 @@ import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.ValueAddedTaxCalculator
 import net.dankito.accounting.service.document.IDocumentService
-import net.dankito.utils.datetime.DateConvertUtils
+import net.dankito.utils.datetime.asUtilDate
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.util.*
@@ -219,7 +219,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     fun getCurrentAccountingPeriodStartDate(): Date {
         val periodStart = getCurrentAccountingPeriodStartLocalDate()
 
-        return DateConvertUtils.asUtilDate(periodStart)!!
+        return periodStart.asUtilDate()
     }
 
     fun getCurrentAccountingPeriodEndDate(): Date {
@@ -238,7 +238,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     fun getPreviousAccountingPeriodStartDate(): Date {
         val periodStart = getPreviousAccountingPeriodStartLocalDate()
 
-        return DateConvertUtils.asUtilDate(periodStart)!!
+        return periodStart.asUtilDate()
     }
 
     fun getPreviousAccountingPeriodEndDate(): Date {
@@ -251,7 +251,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         }
             .minusDays(1)
 
-        return DateConvertUtils.asUtilDate(periodEnd)!!
+        return periodEnd.asUtilDate()
     }
 
     // TODO: when adding support for Android find a solution without Java 8's LocalDate

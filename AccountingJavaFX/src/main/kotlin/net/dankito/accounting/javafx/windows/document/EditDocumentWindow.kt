@@ -9,11 +9,11 @@ import javafx.scene.control.Label
 import javafx.scene.layout.Priority
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
-import net.dankito.utils.datetime.DateConvertUtils
+import net.dankito.utils.datetime.asLocalDate
+import net.dankito.utils.datetime.asUtilDate
 import net.dankito.utils.javafx.ui.dialogs.Window
 import tornadofx.*
 import java.time.LocalDate
-import java.util.*
 
 
 class EditDocumentWindow(private val document: Document, private val presenter: OverviewPresenter) : Window() {
@@ -43,7 +43,7 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
 
     private val totalAmount = SimpleDoubleProperty(if (document.isTotalAmountSet) document.totalAmount else 0.0)
 
-    private val paymentDate = SimpleObjectProperty<LocalDate>(DateConvertUtils.asLocalDate(document.paymentDate ?: Date()))
+    private val paymentDate = SimpleObjectProperty<LocalDate>(document.paymentDate.asLocalDate() ?: LocalDate.now())
 
 
     override val root = vbox {
@@ -182,7 +182,7 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
         document.documentDescription = documentDescription.value
         document.valueAddedTaxRate = vatRate.value
         document.totalAmount = totalAmount.value
-        document.paymentDate = DateConvertUtils.asUtilDate(paymentDate.value)
+        document.paymentDate = paymentDate.value.asUtilDate()
 
         presenter.saveOrUpdate(document)
 
