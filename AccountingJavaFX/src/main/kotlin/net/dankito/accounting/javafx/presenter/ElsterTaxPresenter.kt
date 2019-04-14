@@ -104,11 +104,11 @@ class ElsterTaxPresenter(private val personService: IPersonService, private val 
     }
 
 
-    fun createUmsatzsteuerVoranmeldungXmlFile(data: UmsatzsteuerVoranmeldung): String {
-        return client.createUmsatzsteuerVoranmeldungXmlFile(data)
+    fun createUmsatzsteuerVoranmeldungXmlFile(data: UmsatzsteuerVoranmeldung): ElsterFileCreationTransactionResult {
+        return client.createAndValidateUmsatzsteuerVoranmeldungXmlFile(data)
     }
 
-    fun makeUmsatzsteuerVoranmeldung(data: UmsatzsteuerVoranmeldung): Boolean {
+    fun makeUmsatzsteuerVoranmeldung(data: UmsatzsteuerVoranmeldung): ElsterTransactionResult {
         return client.makeUmsatzsteuerVoranmeldung(data)
     }
 

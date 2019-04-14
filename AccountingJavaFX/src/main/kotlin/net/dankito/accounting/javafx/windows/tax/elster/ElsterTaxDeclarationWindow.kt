@@ -4,10 +4,13 @@ import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.event.EventTarget
 import javafx.geometry.Pos
-import javafx.scene.layout.HBox
-import javafx.scene.layout.Pane
-import javafx.scene.layout.VBox
+import javafx.scene.control.Alert
+import javafx.scene.control.ButtonType
+import javafx.scene.control.Label
+import javafx.scene.layout.*
 import javafx.stage.FileChooser
+import javafx.stage.Screen
+import javafx.stage.Stage
 import net.dankito.accounting.data.model.Person
 import net.dankito.accounting.javafx.presenter.ElsterTaxPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
@@ -19,6 +22,7 @@ import net.dankito.utils.javafx.ui.controls.currencyLabel
 import net.dankito.utils.javafx.ui.controls.doubleTextfield
 import net.dankito.utils.javafx.ui.controls.intTextfield
 import net.dankito.utils.javafx.ui.dialogs.Window
+import net.dankito.utils.javafx.util.FXUtils
 import tornadofx.*
 import java.io.File
 
@@ -309,6 +313,10 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
                 enableWhen(areRequiredFieldsForElsterUploadProvided)
 
                 action { makeUmsatzsteuerVoranmeldung() }
+
+                hboxConstraints {
+                    marginLeft = 12.0
+                }
             }
 
             vboxConstraints {
@@ -517,7 +525,33 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
 
 
     private fun makeUmsatzsteuerVoranmeldung() {
-        presenter.makeUmsatzsteuerVoranmeldung(createUmsatzsteuerVoranmeldungData())
+        val result = presenter.makeUmsatzsteuerVoranmeldung(createUmsatzsteuerVoranmeldungData())
+
+        if (result.successful) {
+            var message = messages["elster.tax.declaration.window.upload.to.elster.success.alert.message"]
+
+            if (result.userInfo.isNotEmpty()) {
+                message += System.lineSeparator() + System.lineSeparator() + messages["elster.tax.declaration.window.upload.to.elster.success.elster.info.alert.message"]
+                result.userInfo.forEach { message += System.lineSeparator() + System.lineSeparator() + it }
+            }
+
+            createDialog(Alert.AlertType.INFORMATION, message,
+                messages["elster.tax.declaration.window.upload.to.elster.success.alert.title"],
+                currentStage, ButtonType.OK).show()
+        }
+        else {
+            var message = messages["elster.tax.declaration.window.upload.to.elster.error.alert.message"]
+
+            if (result.errors.isNotEmpty()) {
+                message += System.lineSeparator() + System.lineSeparator() + messages["elster.tax.declaration.window.upload.to.elster.error.errors.alert.message"]
+                result.errors.forEach { message += System.lineSeparator() + System.lineSeparator() + it.message +
+                String.format(messages["elster.tax.declaration.window.upload.to.elster.error.error.code.alert.message"], it.errorCode)}
+            }
+
+            createDialog(Alert.AlertType.ERROR, message,
+                messages["elster.tax.declaration.window.upload.to.elster.error.alert.title"],
+                currentStage, ButtonType.OK).show()
+        }
     }
 
     private fun createUmsatzsteuerVoranmeldungXmlFile() {
@@ -532,9 +566,24 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
         }
 
         fileChooser.showSaveDialog(currentStage)?.let { xmlOutputFile ->
-            val xmlString = presenter.createUmsatzsteuerVoranmeldungXmlFile(createUmsatzsteuerVoranmeldungData())
+            val result = presenter.createUmsatzsteuerVoranmeldungXmlFile(createUmsatzsteuerVoranmeldungData())
 
-            FileUtils().writeToTextFile(xmlString, xmlOutputFile)
+            if (result.successful) {
+                FileUtils().writeToTextFile(result.xmlString, xmlOutputFile)
+
+                createDialog(Alert.AlertType.INFORMATION,
+                    String.format(messages["elster.tax.declaration.window.elster.xml.file.success.alert.message"], xmlOutputFile),
+                    messages["elster.tax.declaration.window.elster.xml.file.success.alert.title"],
+                    currentStage, ButtonType.OK).show()
+            }
+            else {
+                var message = messages["elster.tax.declaration.window.elster.xml.file.error.alert.message"]
+                result.errors.forEach { message += System.lineSeparator() + System.lineSeparator() + it.message }
+
+                createDialog(Alert.AlertType.INFORMATION, message,
+                    messages["elster.tax.declaration.window.elster.xml.file.error.alert.title"],
+                    currentStage, ButtonType.OK).show()
+            }
         }
     }
 
@@ -551,6 +600,53 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
         val address = person.primaryAddress
 
         return Steuerpflichtiger(person.firstName, person.lastName, address.street, address.streetNumber,
-            address.zipCode, address.city, address.country, "", "") // TODO: set telephone and e-mail
+            address.zipCode, address.city, address.country, null, null) // TODO: set telephone and e-mail
     }
+
+
+
+    // TODO: use DialogService as soon as JavaFxUtils 2.0.0 is out
+    private fun createDialog(alertType: Alert.AlertType, message: CharSequence, alertTitle: CharSequence?, owner: Stage?, vararg buttons: ButtonType): Alert {
+        val alert = Alert(alertType)
+
+        (alertTitle as? String)?.let { alert.title = it }
+
+        owner?.let { alert.initOwner(it) }
+
+        (message as? String)?.let { setAlertContent(alert, it) }
+        alert.headerText = null
+
+        alert.buttonTypes.setAll(*buttons)
+
+        return alert
+    }
+
+    private fun setAlertContent(alert: Alert, content: String) {
+        var maxWidth = Screen.getPrimary().visualBounds.width
+
+        if(alert.owner != null) {
+            FXUtils.getScreenWindowLeftUpperCornerIsIn(alert.owner)?.let { ownersScreen ->
+                maxWidth = ownersScreen.visualBounds.width
+            }
+        }
+
+        maxWidth *= 0.6 // set max width to 60 % of Screen width
+
+        val contentLabel = Label(content)
+        contentLabel.isWrapText = true
+        contentLabel.prefHeight = Region.USE_COMPUTED_SIZE
+        contentLabel.maxHeight = FXUtils.SizeMaxValue
+        contentLabel.maxWidth = maxWidth
+
+        val contentPane = VBox(contentLabel)
+        contentPane.prefHeight = Region.USE_COMPUTED_SIZE
+        contentPane.maxHeight = FXUtils.SizeMaxValue
+        VBox.setVgrow(contentLabel, Priority.ALWAYS)
+
+        alert.dialogPane.prefHeight = Region.USE_COMPUTED_SIZE
+        alert.dialogPane.maxHeight = FXUtils.SizeMaxValue
+        alert.dialogPane.maxWidth = maxWidth
+        alert.dialogPane.content = contentPane
+    }
+
 }
