@@ -127,6 +127,6 @@ open class ValueAddedTaxCalculator {
 
     protected open fun toBigDecimal(float: Float) = toBigDecimal(float.toDouble())
 
-    protected open fun toBigDecimal(double: Double) = BigDecimal(double)
+    protected open fun toBigDecimal(double: Double) = BigDecimal.valueOf(double)
 
 }
