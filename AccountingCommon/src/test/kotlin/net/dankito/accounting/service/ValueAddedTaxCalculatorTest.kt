@@ -3,7 +3,6 @@ package net.dankito.accounting.service
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.Test
-import java.math.RoundingMode
 
 class ValueAddedTaxCalculatorTest {
 
@@ -143,11 +142,8 @@ class ValueAddedTaxCalculatorTest {
     @Test
     fun calculateVatFromNetAmount_10903_20_to_2071_57() {
 
-        // given: for ELSTER we have to round net amount down
-        val downRounded = underTest.round(10903.20, 0, RoundingMode.DOWN)
-
         // when
-        val result = underTest.calculateVatFromNetAmount(downRounded, GermanDefaultVatRate)
+        val result = underTest.calculateVatFromNetAmount(10903.20, GermanDefaultVatRate, true)
 
         // then
         assertThat(result).isEqualTo(2071.57, within(0.01))
@@ -156,11 +152,8 @@ class ValueAddedTaxCalculatorTest {
     @Test
     fun calculateVatFromNetAmountRounded_10903_20_to_2071_57() {
 
-        // given: for ELSTER we have to round net amount down
-        val downRounded = underTest.round(10903.20, 0, RoundingMode.DOWN)
-
         // when
-        val result = underTest.calculateVatFromNetAmountRounded(downRounded, GermanDefaultVatRate)
+        val result = underTest.calculateVatFromNetAmountRounded(10903.20, GermanDefaultVatRate, true)
 
         // then
         assertThat(result).isEqualTo(2071.57)
@@ -189,11 +182,8 @@ class ValueAddedTaxCalculatorTest {
     @Test
     fun calculateVatFromNetAmount_10912_80_to_2073_28() {
 
-        // given: for ELSTER we have to round net amount down
-        val downRounded = underTest.round(10912.80, 0, RoundingMode.DOWN)
-
         // when
-        val result = underTest.calculateVatFromNetAmount(downRounded, GermanDefaultVatRate)
+        val result = underTest.calculateVatFromNetAmount(10912.80, GermanDefaultVatRate, true)
 
         // then
         assertThat(result).isEqualTo(2073.28, within(0.01))
@@ -202,11 +192,8 @@ class ValueAddedTaxCalculatorTest {
     @Test
     fun calculateVatFromNetAmountRounded_10912_80_to_2073_28() {
 
-        // given: for ELSTER we have to round net amount down
-        val downRounded = underTest.round(10912.80, 0, RoundingMode.DOWN)
-
         // when
-        val result = underTest.calculateVatFromNetAmountRounded(downRounded, GermanDefaultVatRate)
+        val result = underTest.calculateVatFromNetAmountRounded(10912.80, GermanDefaultVatRate, true)
 
         // then
         assertThat(result).isEqualTo(2073.28)

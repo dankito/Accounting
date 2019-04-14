@@ -65,8 +65,13 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         }
     }
 
-    fun calculateVatFromNetAmount(document: Document): Double {
-        return vatCalculator.calculateVatFromNetAmount(document.netAmount, document.valueAddedTaxRate)
+    /**
+     * [roundDownNetAmount] is needed for revenues in Germany where you first have to round down the net amount and
+     * calculate VAT from this value.
+     */
+    @JvmOverloads
+    fun calculateVatFromNetAmount(document: Document, roundDownNetAmount: Boolean = false): Double {
+        return vatCalculator.calculateVatFromNetAmount(document.netAmount, document.valueAddedTaxRate, roundDownNetAmount)
     }
 
     fun calculateVatFromTotalAmount(document: Document): Double {

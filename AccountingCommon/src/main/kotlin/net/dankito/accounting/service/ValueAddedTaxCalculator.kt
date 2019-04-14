@@ -38,20 +38,42 @@ open class ValueAddedTaxCalculator {
     }
 
 
-    open fun calculateVatFromNetAmount(netAmount: Double, vatRate: Float): Double {
-        return calculateVatFromNetAmount(toBigDecimal(netAmount), vatRate).toDouble()
+    /**
+     * [roundDownNetAmount] is needed for revenues in Germany where you first have to round down the net amount and
+     * calculate VAT from this value.
+     */
+    @JvmOverloads
+    open fun calculateVatFromNetAmount(netAmount: Double, vatRate: Float, roundDownNetAmount: Boolean = false): Double {
+        return calculateVatFromNetAmount(toBigDecimal(netAmount), vatRate, roundDownNetAmount).toDouble()
     }
 
-    open fun calculateVatFromNetAmountRounded(netAmount: Double, vatRate: Float): Double {
-        return calculateVatFromNetAmountRounded(toBigDecimal(netAmount), vatRate).toDouble()
+    /**
+     * [roundDownNetAmount] is needed for revenues in Germany where you first have to round down the net amount and
+     * calculate VAT from this value.
+     */
+    @JvmOverloads
+    open fun calculateVatFromNetAmountRounded(netAmount: Double, vatRate: Float, roundDownNetAmount: Boolean = false): Double {
+        return calculateVatFromNetAmountRounded(toBigDecimal(netAmount), vatRate, roundDownNetAmount).toDouble()
     }
 
-    open fun calculateVatFromNetAmount(netAmount: BigDecimal, vatRate: Float): BigDecimal {
-        return netAmount * ensurePercentageIsSmallerZero(vatRate).toBigDecimal()
+    /**
+     * [roundDownNetAmount] is needed for revenues in Germany where you first have to round down the net amount and
+     * calculate VAT from this value.
+     */
+    @JvmOverloads
+    open fun calculateVatFromNetAmount(netAmount: BigDecimal, vatRate: Float, roundDownNetAmount: Boolean = false): BigDecimal {
+        val netAmountForCalculation = if (roundDownNetAmount) round(netAmount, 0, RoundingMode.DOWN) else netAmount
+
+        return netAmountForCalculation * ensurePercentageIsSmallerZero(vatRate).toBigDecimal()
     }
 
-    open fun calculateVatFromNetAmountRounded(netAmount: BigDecimal, vatRate: Float): BigDecimal {
-        return roundToTwoDecimalPlaces(calculateVatFromNetAmount(netAmount, vatRate))
+    /**
+     * [roundDownNetAmount] is needed for revenues in Germany where you first have to round down the net amount and
+     * calculate VAT from this value.
+     */
+    @JvmOverloads
+    open fun calculateVatFromNetAmountRounded(netAmount: BigDecimal, vatRate: Float, roundDownNetAmount: Boolean = false): BigDecimal {
+        return roundToTwoDecimalPlaces(calculateVatFromNetAmount(netAmount, vatRate, roundDownNetAmount))
     }
 
 
