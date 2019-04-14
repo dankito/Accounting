@@ -7,6 +7,7 @@ import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.ValueAddedTaxCalculator
 import net.dankito.accounting.service.document.IDocumentService
 import net.dankito.utils.datetime.asUtilDate
+import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.util.*
@@ -96,6 +97,10 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         return CurrencyFormat.format(amount)
     }
 
+    fun getUserCurrencySymbol(): String {
+        return (CurrencyFormat as DecimalFormat).positiveSuffix
+    }
+
     fun getDefaultVatRateForUser(): Float {
         return 19f // TODO: make country / Locale specific
     }
@@ -126,7 +131,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         return getDocumentsInPeriod(documents, periodStart, periodEnd)
     }
 
-    private fun getDocumentsInPeriod(documents: List<Document>, periodStart: Date, periodEnd: Date): List<Document> {
+    fun getDocumentsInPeriod(documents: List<Document>, periodStart: Date, periodEnd: Date): List<Document> {
         return documents.filter {
             it.paymentDate?.let { date -> date in periodStart..periodEnd }
             ?: false
@@ -230,14 +235,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     fun getCurrentAccountingPeriodEndDate(): Date {
         val periodStart = getCurrentAccountingPeriodStartLocalDate()
 
-        val periodEnd = if (accountingPeriod == AccountingPeriod.Monthly) {
-            periodStart.plusMonths(1)
-        } else {
-            periodStart.plusMonths(3)
-        }
-            .minusDays(1)
-
-        return DateConvertUtils.asUtilDate(periodEnd)!!
+        return getAccountingPeriodEndDate(periodStart)
     }
 
     fun getPreviousAccountingPeriodStartDate(): Date {
@@ -249,6 +247,11 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     fun getPreviousAccountingPeriodEndDate(): Date {
         val periodStart = getPreviousAccountingPeriodStartLocalDate()
 
+        return getAccountingPeriodEndDate(periodStart)
+    }
+
+    @JvmOverloads
+    fun getAccountingPeriodEndDate(periodStart: LocalDate, accountingPeriod: AccountingPeriod = this.accountingPeriod): Date {
         val periodEnd = if (accountingPeriod == AccountingPeriod.Monthly) {
             periodStart.plusMonths(1)
         } else {

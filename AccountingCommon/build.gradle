@@ -15,6 +15,8 @@ def mavenArtifact = 'accounting-common'
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
 
+    compile "net.dankito.tax:elster:$elsterVersion"
+
     compile "net.dankito.utils:java-utils:$javaUtilsVersion"
 
     compile "org.eclipse.persistence:javax.persistence:$javaxPersistenceVersion"

@@ -2,19 +2,29 @@ package net.dankito.accounting.javafx.windows.mainwindow.controls
 
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.EventTarget
-import javafx.scene.layout.*
-import javafx.scene.paint.Color
+import javafx.scene.layout.Pane
+import javafx.scene.text.Font
 import javafx.scene.text.TextAlignment
+import net.dankito.accounting.data.dao.JsonPersonDao
 import net.dankito.accounting.data.model.AccountingPeriod
+import net.dankito.accounting.javafx.presenter.ElsterTaxPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
+import net.dankito.accounting.javafx.windows.tax.elster.ElsterTaxDeclarationWindow
+import net.dankito.accounting.service.person.PersonService
+import net.dankito.utils.ThreadPool
 import net.dankito.utils.javafx.ui.extensions.setBorder
 import tornadofx.*
+import java.io.File
 
 
 class SummaryPane(private val presenter: OverviewPresenter) : View() {
 
     companion object {
         private const val SummaryAmountLabelWidth = 90.0
+
+        private const val ElsterButtonsHeight = 30.0
+        private const val ElsterButtonsWidth = 180.0
+        private const val ElsterButtonsFontSize = 12.0
     }
 
 
@@ -114,6 +124,67 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
             currentPeriodSpentVat, "main.window.tab.overview.summary.pane.spent.vat",
             currentPeriodVatBalance, "balance"
         )
+
+        vbox {
+            setBorder()
+
+            paddingAll = 4.0
+
+            vboxConstraints {
+                marginTop = 6.0
+            }
+
+
+            label(messages["main.window.tab.overview.summary.pane.spent.advance.return.for.sales.tax.label"])
+
+            anchorpane {
+                minHeight = ElsterButtonsHeight
+                maxHeight = ElsterButtonsHeight
+
+                vboxConstraints {
+                    marginTop = 4.0
+                }
+
+                button(messages["main.window.tab.overview.summary.pane.spent.advance.return.for.sales.tax.create.elster.xml"]) {
+                    minWidth = ElsterButtonsWidth
+                    maxWidth = ElsterButtonsWidth
+
+                    font = Font.font(ElsterButtonsFontSize)
+
+                    action { createElsterXml() }
+
+                    anchorpaneConstraints {
+                        topAnchor = 0.0
+                        rightAnchor = 0.0
+                        bottomAnchor = 0.0
+                    }
+                }
+            }
+
+            anchorpane {
+                minHeight = ElsterButtonsHeight
+                maxHeight = ElsterButtonsHeight
+
+                vboxConstraints {
+                    marginTop = 4.0
+                }
+
+                button(messages["main.window.tab.overview.summary.pane.spent.advance.return.for.sales.tax.upload.to.elster"]) {
+                    minWidth = ElsterButtonsWidth
+                    maxWidth = ElsterButtonsWidth
+
+                    font = Font.font(ElsterButtonsFontSize)
+
+                    action { uploadToElster() }
+
+                    anchorpaneConstraints {
+                        topAnchor = 0.0
+                        rightAnchor = 0.0
+                        bottomAnchor = 0.0
+                    }
+                }
+            }
+        }
     }
 
     private fun EventTarget.currentAndPreviousPeriodSummary(categoryResourceKey: String,
@@ -243,6 +314,21 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
         currentPeriodReceivedVat.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodReceivedVat())
         currentPeriodSpentVat.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodSpentVat())
         currentPeriodVatBalance.value = presenter.getCurrencyString(presenter.calculateCurrentAccountingPeriodVatBalance())
+    }
+
+
+    private fun createElsterXml() {
+        ElsterTaxDeclarationWindow(
+            ElsterTaxPresenter(PersonService(JsonPersonDao(File("data"))), ThreadPool()),
+            presenter
+        ).show()
+    }
+
+    private fun uploadToElster() {
+        ElsterTaxDeclarationWindow(
+            ElsterTaxPresenter(PersonService(JsonPersonDao(File("data"))), ThreadPool()),
+            presenter
+        ).show()
     }
 
 }
