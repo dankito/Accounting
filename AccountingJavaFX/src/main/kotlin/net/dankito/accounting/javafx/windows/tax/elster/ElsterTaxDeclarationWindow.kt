@@ -22,6 +22,7 @@ import net.dankito.utils.javafx.ui.controls.currencyLabel
 import net.dankito.utils.javafx.ui.controls.doubleTextfield
 import net.dankito.utils.javafx.ui.controls.intTextfield
 import net.dankito.utils.javafx.ui.dialogs.Window
+import net.dankito.utils.javafx.ui.extensions.addStyleToCurrentStyle
 import net.dankito.utils.javafx.util.FXUtils
 import tornadofx.*
 import java.io.File
@@ -337,6 +338,9 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
 
                     prefWidth = 100.0
 
+                    isDisable = true
+                    addStyleToCurrentStyle("-fx-opacity: 1;")
+
                     hboxConstraints {
                         marginLeft = HorizontalSpaceAfterLabel
                         marginRight = 4.0
@@ -348,6 +352,9 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
                     alignment = Pos.CENTER_RIGHT
 
                     prefWidth = 100.0
+
+                    isDisable = true
+                    addStyleToCurrentStyle("-fx-opacity: 1;")
 
                     hboxConstraints {
                         marginLeft = HorizontalSpaceAfterLabel
