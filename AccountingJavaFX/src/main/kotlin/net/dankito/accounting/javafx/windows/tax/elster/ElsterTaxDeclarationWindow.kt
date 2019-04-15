@@ -68,20 +68,20 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     private val vatBalance = SimpleDoubleProperty()
 
 
-    private val taxpayer = SimpleObjectProperty<Person>()
+    private val taxpayer = SimpleObjectProperty<Person>(overviewPresenter.settings.elsterTaxDeclarationSettings.taxpayer)
 
-    private val bundesland = SimpleObjectProperty<Bundesland>()
+    private val bundesland = SimpleObjectProperty<Bundesland>(overviewPresenter.settings.elsterTaxDeclarationSettings.bundesland)
 
-    private val finanzamt = SimpleObjectProperty<Finanzamt>()
+    private val finanzamt = SimpleObjectProperty<Finanzamt>(overviewPresenter.settings.elsterTaxDeclarationSettings.finanzamt)
 
-    private val certificateFilePath = SimpleStringProperty("")
-    private val isCertificateFileSet = SimpleBooleanProperty(false)
-    private var lastSelectedCertificateFile: File? = null
+    private var lastSelectedCertificateFile: File? = overviewPresenter.settings.elsterTaxDeclarationSettings.certificateFile
+    private val certificateFilePath = SimpleStringProperty(lastSelectedCertificateFile?.absolutePath ?: "")
+    private val isCertificateFileSet = SimpleBooleanProperty(checkIfCertificateFileExists(certificateFilePath.value))
 
-    private val certificatePassword = SimpleStringProperty("")
+    private val certificatePassword = SimpleStringProperty(overviewPresenter.settings.elsterTaxDeclarationSettings.certificatePassword)
 
 
-    private val isATaxpayerSelected = SimpleBooleanProperty(false)
+    private val isATaxpayerSelected = SimpleBooleanProperty(taxpayer.value != null) // TODO: also check if all required Person fields are set
 
     private val allPersons = FXCollections.observableArrayList<Person>()
 
@@ -93,9 +93,9 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     private val finanzaemterForSelectedBundesland = FXCollections.observableArrayList<Finanzamt>()
 
 
-    private var lastSelectedElsterXmlFile: File? = null
+    private var lastSelectedElsterXmlFile: File? = overviewPresenter.settings.elsterTaxDeclarationSettings.lastSelectedElsterXmlFile
 
-    private var taxNumberInput: TaxNumberInput = TaxNumberInput()
+    private var taxNumberInput: TaxNumberInput = TaxNumberInput(overviewPresenter.settings.elsterTaxDeclarationSettings.taxNumber)
 
 
     private val areRequiredFieldsForElsterXmlProvided = SimpleBooleanProperty(false)
@@ -253,7 +253,7 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
                 prefHeight = CertificateTextfieldsHeight
                 prefWidth = 400.0
 
-                textProperty().addListener { _, _, newValue -> checkIfCertificateFileExists(newValue) }
+                textProperty().addListener { _, _, newValue -> updateIsCertificateFileSet(newValue) }
 
                 hboxConstraints {
                     marginRight = 6.0
@@ -499,8 +499,12 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     }
 
 
-    private fun checkIfCertificateFileExists(certificateFilePath: String) {
-        isCertificateFileSet.value = File(certificateFilePath).exists()
+    private fun updateIsCertificateFileSet(certificateFilePath: String) {
+        isCertificateFileSet.value = checkIfCertificateFileExists(certificateFilePath)
+    }
+
+    private fun checkIfCertificateFileExists(certificateFilePath: String): Boolean {
+        return File(certificateFilePath).exists()
     }
 
     private fun selectCertificateFile() {
@@ -521,11 +525,14 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
 
         fileChooser.showOpenDialog(currentStage)?.let { selectedFile ->
             certificateFilePath.value = selectedFile.absolutePath
+            lastSelectedCertificateFile = selectedFile
         }
     }
 
 
     private fun makeUmsatzsteuerVoranmeldung() {
+        updateSettings()
+
         val result = presenter.makeUmsatzsteuerVoranmeldung(createUmsatzsteuerVoranmeldungData())
 
         if (result.successful) {
@@ -556,6 +563,8 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     }
 
     private fun createUmsatzsteuerVoranmeldungXmlFile() {
+        updateSettings()
+
         val fileChooser = FileChooser()
 
         fileChooser.extensionFilters.addAll(FileChooser.ExtensionFilter(
@@ -602,6 +611,21 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
 
         return Steuerpflichtiger(person.firstName, person.lastName, address.street, address.streetNumber,
             address.zipCode, address.city, address.country, null, null) // TODO: set telephone and e-mail
+    }
+
+
+    private fun updateSettings() {
+        overviewPresenter.settings.elsterTaxDeclarationSettings.apply {
+            taxpayer = this@ElsterTaxDeclarationWindow.taxpayer.value
+            finanzamt = this@ElsterTaxDeclarationWindow.finanzamt.value
+            bundesland = this@ElsterTaxDeclarationWindow.bundesland.value
+            taxNumber = taxNumberInput.taxNumber.value
+            certificateFile = File(certificateFilePath.value)
+            certificatePassword = this@ElsterTaxDeclarationWindow.certificatePassword.value
+            lastSelectedElsterXmlFile = this@ElsterTaxDeclarationWindow.lastSelectedElsterXmlFile
+        }
+
+        overviewPresenter.saveAppSettings()
     }
 
 

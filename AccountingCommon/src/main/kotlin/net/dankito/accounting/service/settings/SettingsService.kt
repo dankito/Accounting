@@ -3,6 +3,7 @@ package net.dankito.accounting.service.settings
 import net.dankito.accounting.data.dao.IAppSettingsDao
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.settings.AppSettings
+import net.dankito.accounting.data.model.settings.ElsterTaxDeclarationSettings
 import org.slf4j.LoggerFactory
 
 
@@ -25,7 +26,7 @@ open class SettingsService(protected val appSettingsDao: IAppSettingsDao) : ISet
         val all = appSettingsDao.getAll()
 
         if (all.isEmpty()) {
-            val newAppSettings = AppSettings(AccountingPeriod.Monthly)
+            val newAppSettings = AppSettings(AccountingPeriod.Monthly, ElsterTaxDeclarationSettings())
 
             appSettingsDao.saveOrUpdate(newAppSettings)
 

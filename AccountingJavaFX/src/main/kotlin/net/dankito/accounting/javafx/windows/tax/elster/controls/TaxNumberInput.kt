@@ -8,19 +8,22 @@ import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.control.TextField
 import net.dankito.utils.javafx.ui.controls.intTextfield
+import org.slf4j.LoggerFactory
 import tornadofx.View
 import tornadofx.hbox
 import tornadofx.hboxConstraints
 import tornadofx.label
 
 
-class TaxNumberInput : View() {
+class TaxNumberInput(taxNumber: String) : View() {
 
     companion object {
         const val TaxNumberPartsSeparator = "/"
 
         private const val TaxNumberPartHeight = 28.0
         private const val TaxNumberPartWidth = 60.0
+
+        private val logger = LoggerFactory.getLogger(TaxNumberInput::class.java)
     }
 
 
@@ -39,6 +42,8 @@ class TaxNumberInput : View() {
         taxNumberPart1.addListener { _, _, _ -> updateTaxNumberAndIsEnteredTaxNumberIsValid() }
         taxNumberPart2.addListener { _, _, _ -> updateTaxNumberAndIsEnteredTaxNumberIsValid() }
         taxNumberPart3.addListener { _, _, _ -> updateTaxNumberAndIsEnteredTaxNumberIsValid() }
+
+        tryToParseTaxNumber(taxNumber)
     }
 
 
@@ -86,6 +91,20 @@ class TaxNumberInput : View() {
                 taxNumberPart1.value in 100..999 &&
                 taxNumberPart2.value in 100..9999 &&
                 taxNumberPart3.value in 1000..99999
+    }
+
+    private fun tryToParseTaxNumber(taxNumber: String) {
+        try {
+            val parts = taxNumber.split('/')
+
+            if (parts.size == 3) {
+                taxNumberPart1.value = parts[0].toInt()
+                taxNumberPart2.value = parts[1].toInt()
+                taxNumberPart3.value = parts[2].toInt()
+            }
+        } catch (e: Exception) {
+            logger.warn("Could not parse tax number '$taxNumber'", e)
+        }
     }
 
 }

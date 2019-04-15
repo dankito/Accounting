@@ -3,6 +3,7 @@ package net.dankito.accounting.javafx.presenter
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentType
+import net.dankito.accounting.data.model.settings.AppSettings
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.ValueAddedTaxCalculator
 import net.dankito.accounting.service.document.IDocumentService
@@ -35,6 +36,8 @@ open class OverviewPresenter(private val documentService: IDocumentService,
             }
         }
 
+    val settings: AppSettings = settingsService.appSettings
+
     private val documentsUpdatedListeners = mutableListOf<() -> Unit>() // TODO: find a better event bus
 
 
@@ -43,6 +46,10 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         callDocumentsUpdatedListeners()
 
         settingsService.appSettings.accountingPeriod = newAccountingPeriod
+        saveAppSettings()
+    }
+
+    fun saveAppSettings() {
         settingsService.saveAppSettings()
     }
 
