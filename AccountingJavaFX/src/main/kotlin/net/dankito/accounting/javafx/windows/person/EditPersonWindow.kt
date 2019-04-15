@@ -41,6 +41,11 @@ class EditPersonWindow(private val person: Person, private val personService: IP
     private val country = SimpleStringProperty(person.primaryAddress.country)
 
 
+    fun show() {
+        show(messages["edit.person.window.title"])
+    }
+
+
     override val root = vbox {
         prefWidth = 450.0
 
