@@ -16,6 +16,9 @@ import net.dankito.accounting.javafx.presenter.ElsterTaxPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.tax.elster.controls.TaxNumberInput
 import net.dankito.tax.elster.model.*
+import net.dankito.tax.elster.test.TestFinanzamt
+import net.dankito.tax.elster.test.TestHerstellerID
+import net.dankito.tax.elster.test.Teststeuernummern
 import net.dankito.utils.datetime.asLocalDate
 import net.dankito.utils.io.FileUtils
 import net.dankito.utils.javafx.ui.controls.currencyLabel
@@ -79,6 +82,9 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     private val isCertificateFileSet = SimpleBooleanProperty(checkIfCertificateFileExists(certificateFilePath.value))
 
     private val certificatePassword = SimpleStringProperty(overviewPresenter.settings.elsterTaxDeclarationSettings.certificatePassword)
+
+    // TODO: remove again
+    private val herstellerID = SimpleStringProperty(TestHerstellerID.T_74931.herstellerID)
 
 
     private val isATaxpayerSelected = SimpleBooleanProperty(taxpayer.value != null) // TODO: also check if all required Person fields are set
@@ -289,6 +295,35 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
             }
         }
 
+        // TODO: remove again
+        label("Wir haben noch keine HerstellerID, deshalb bitte diese manuell eintragen.\n" +
+                "Falls die TestHerstellerID (74931) verwendet wird, wird der TestMarker gesetzt, als\n" +
+                "Steuernummer '198/113/10010' und als Finanzamt 'Bayern 9198' verwendet") {
+            minHeight = 60.0
+            maxWidth = this@vbox.prefWidth - 100.0
+
+            vboxConstraints {
+                marginTop = VerticalSpaceBetweenSections
+            }
+        }
+
+        hbox {
+            alignment = Pos.CENTER_LEFT
+
+            label("HerstellerID") {
+                prefWidth = TaxPayerLabelsWidth
+            }
+
+            textfield(herstellerID) {
+                prefHeight = CertificateTextfieldsHeight
+                prefWidth = 250.0
+            }
+
+            vboxConstraints {
+                marginTop = VerticalSpaceBetweenSections
+            }
+        }
+
         hbox {
             alignment = Pos.CENTER_LEFT
 
@@ -411,7 +446,6 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
         showVatAmountsForPeriod()
 
         showAvailablePersons()
-        // TODO: select last selected taxpayer
 
         areRequiredFieldsForElsterXmlProvided.bind(isATaxpayerSelected.and(taxNumberInput.isEnteredTaxNumberValid))
         areRequiredFieldsForElsterUploadProvided.bind(areRequiredFieldsForElsterXmlProvided.and(isCertificateFileSet))
@@ -598,12 +632,17 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     }
 
     private fun createUmsatzsteuerVoranmeldungData(): UmsatzsteuerVoranmeldung {
-        val taxNumber = taxNumberInput.taxNumber.value
+        // TODO: remove again
+        val useTestValues = herstellerID.value == TestHerstellerID.T_74931.herstellerID
 
-        return UmsatzsteuerVoranmeldung(jahr.value, zeitraum.value, finanzamt.value, taxNumber,
+        val taxNumber = if (useTestValues) Teststeuernummern.T_198_113_10010.steuernummer else taxNumberInput.taxNumber.value
+        val finanzamt = if (useTestValues) TestFinanzamt.Bayern_9198.finanzamt else finanzamt.value
+        val herstellerID = herstellerID.value
+
+        return UmsatzsteuerVoranmeldung(jahr.value, zeitraum.value, finanzamt, taxNumber,
             mapPersonToSteuerpflichtiger(taxpayer.value), File(certificateFilePath.value), certificatePassword.value,
             revenuesWith19PercentVatNetAmount.value, revenuesWith7PercentVatNetAmount.value,
-            spentVatWith19Percent.value + spentWith7Percent.value, vatBalance.value)
+            spentVatWith19Percent.value + spentWith7Percent.value, vatBalance.value, herstellerID)
     }
 
     private fun mapPersonToSteuerpflichtiger(person: Person): Steuerpflichtiger {
