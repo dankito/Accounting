@@ -285,7 +285,7 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
                 prefWidth = TaxPayerLabelsWidth
             }
 
-            textfield(certificatePassword) {
+            passwordfield(certificatePassword) {
                 prefHeight = CertificateTextfieldsHeight
                 prefWidth = 250.0
             }
