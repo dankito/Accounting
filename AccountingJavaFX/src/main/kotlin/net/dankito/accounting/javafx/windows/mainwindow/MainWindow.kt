@@ -46,7 +46,7 @@ class MainWindow : Fragment(String.format(FX.messages["application.title"], Pack
                 tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
 
                 tab(messages["main.window.tab.overview.title"]) {
-                    add(OverviewTab(overviewPresenter).root)
+                    add(OverviewTab(overviewPresenter, threadPool).root)
                 }
             }
         }

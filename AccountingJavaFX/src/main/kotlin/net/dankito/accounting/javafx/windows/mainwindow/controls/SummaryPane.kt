@@ -19,7 +19,7 @@ import tornadofx.*
 import java.io.File
 
 
-class SummaryPane(private val presenter: OverviewPresenter) : View() {
+class SummaryPane(private val presenter: OverviewPresenter, private val threadPool: ThreadPool = ThreadPool()) : View() {
 
     companion object {
         private const val SummaryAmountLabelWidth = 90.0
@@ -321,14 +321,14 @@ class SummaryPane(private val presenter: OverviewPresenter) : View() {
 
     private fun createElsterXml() {
         ElsterTaxDeclarationWindow(
-            ElsterTaxPresenter(PersonService(JsonPersonDao(File("data"))), ThreadPool()),
+            ElsterTaxPresenter(PersonService(JsonPersonDao(File("data"))), threadPool),
             presenter
         ).show()
     }
 
     private fun uploadToElster() {
         ElsterTaxDeclarationWindow(
-            ElsterTaxPresenter(PersonService(JsonPersonDao(File("data"))), ThreadPool()),
+            ElsterTaxPresenter(PersonService(JsonPersonDao(File("data"))), threadPool),
             presenter
         ).show()
     }

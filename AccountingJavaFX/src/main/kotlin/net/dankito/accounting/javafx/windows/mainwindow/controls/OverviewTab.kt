@@ -2,10 +2,11 @@ package net.dankito.accounting.javafx.windows.mainwindow.controls
 
 import javafx.scene.layout.Priority
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
+import net.dankito.utils.ThreadPool
 import tornadofx.*
 
 
-class OverviewTab(presenter: OverviewPresenter) : View() {
+class OverviewTab(presenter: OverviewPresenter, threadPool: ThreadPool) : View() {
 
     companion object {
         private const val DocumentsOverviewSpace = 12.0
@@ -29,7 +30,7 @@ class OverviewTab(presenter: OverviewPresenter) : View() {
         }
 
 
-        add(SummaryPane(presenter))
+        add(SummaryPane(presenter, threadPool))
     }
 
 }
