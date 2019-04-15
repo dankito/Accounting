@@ -6,6 +6,7 @@ import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.ValueAddedTaxCalculator
 import net.dankito.accounting.service.document.IDocumentService
+import net.dankito.accounting.service.settings.ISettingsService
 import net.dankito.utils.datetime.asUtilDate
 import java.text.DecimalFormat
 import java.text.NumberFormat
@@ -14,6 +15,7 @@ import java.util.*
 
 
 open class OverviewPresenter(private val documentService: IDocumentService,
+                             private val settingsService: ISettingsService,
                              private val router: Router,
                              private val vatCalculator: ValueAddedTaxCalculator = ValueAddedTaxCalculator()
 ) {
@@ -24,16 +26,25 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     }
 
 
-    var accountingPeriod: AccountingPeriod = AccountingPeriod.Monthly
+    var accountingPeriod: AccountingPeriod = settingsService.appSettings.accountingPeriod
         set(newAccountingPeriod) {
             if (newAccountingPeriod != field) {
                 field = newAccountingPeriod
 
-                callDocumentsUpdatedListeners()
+                accountingPeriodChanged(newAccountingPeriod)
             }
         }
 
     private val documentsUpdatedListeners = mutableListOf<() -> Unit>() // TODO: find a better event bus
+
+
+
+    private fun accountingPeriodChanged(newAccountingPeriod: AccountingPeriod) {
+        callDocumentsUpdatedListeners()
+
+        settingsService.appSettings.accountingPeriod = newAccountingPeriod
+        settingsService.saveAppSettings()
+    }
 
 
     fun saveOrUpdate(document: Document) {
