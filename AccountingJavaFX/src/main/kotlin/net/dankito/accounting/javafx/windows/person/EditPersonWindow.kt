@@ -73,6 +73,8 @@ class EditPersonWindow(private val person: Person, private val personService: IP
             button(messages["ok"]) {
                 prefWidth = ButtonsWidth
 
+                isDefaultButton = true
+
                 action { saveAndClose() }
 
                 anchorpaneConstraints {
@@ -84,6 +86,8 @@ class EditPersonWindow(private val person: Person, private val personService: IP
 
             button(messages["cancel"]) {
                 prefWidth = ButtonsWidth
+
+                isCancelButton = true
 
                 action { askUserToSaveChangesAndClose() }
 
