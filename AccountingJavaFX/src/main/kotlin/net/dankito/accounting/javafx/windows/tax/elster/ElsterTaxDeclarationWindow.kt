@@ -107,15 +107,6 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     }
 
 
-    override fun beforeShow(dialogStage: Stage) {
-        super.beforeShow(dialogStage)
-
-        dialogStage.setOnCloseRequest {
-            presenter.close()
-        }
-    }
-
-
     override val root = vbox {
 
         prefWidth = 850.0

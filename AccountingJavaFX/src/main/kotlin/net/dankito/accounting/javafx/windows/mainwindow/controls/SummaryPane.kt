@@ -63,6 +63,9 @@ class SummaryPane(private val presenter: OverviewPresenter, private val threadPo
     private val currentPeriodBalance = SimpleDoubleProperty()
 
 
+    private var elsterTaxPresenter: ElsterTaxPresenter? = null
+
+
     init {
         updateValues()
 
@@ -320,17 +323,27 @@ class SummaryPane(private val presenter: OverviewPresenter, private val threadPo
 
 
     private fun createElsterXml() {
-        ElsterTaxDeclarationWindow(
-            ElsterTaxPresenter(PersonService(JsonPersonDao(File("data"))), threadPool),
-            presenter
-        ).show()
+        ElsterTaxDeclarationWindow(getElsterTaxPresenter(), presenter).show()
     }
 
     private fun uploadToElster() {
-        ElsterTaxDeclarationWindow(
-            ElsterTaxPresenter(PersonService(JsonPersonDao(File("data"))), threadPool),
-            presenter
-        ).show()
+        ElsterTaxDeclarationWindow(getElsterTaxPresenter(), presenter).show()
+    }
+
+    /**
+     * Don't create ElsterTaxPresenter twice as creating the contained ERiC (via ElsterClient) a second time would
+     * result in a JVM crash.
+     */
+    private fun getElsterTaxPresenter(): ElsterTaxPresenter {
+        elsterTaxPresenter?.let {
+            return it
+        }
+
+        val newPresenter = ElsterTaxPresenter(PersonService(JsonPersonDao(File("data"))), threadPool)
+
+        this.elsterTaxPresenter = newPresenter
+
+        return newPresenter
     }
 
 }

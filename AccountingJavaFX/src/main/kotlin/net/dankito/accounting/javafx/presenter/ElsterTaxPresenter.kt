@@ -19,6 +19,10 @@ class ElsterTaxPresenter(private val personService: IPersonService, private val 
         private val PeriodStartDateFormatter = SimpleDateFormat("dd.MM.yyyy")
     }
 
+    /**
+     * Don't create an ElsterClient - and therefore this class - a second time, even not after calling close(), as
+     * creating the contained ERiC a second time crashes the JVM (even after thoroughly cleaning it up before).
+     */
     private val client = ElsterClient()
 
 
