@@ -73,9 +73,9 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
 
     private val taxpayer = SimpleObjectProperty<Person>(overviewPresenter.settings.elsterTaxDeclarationSettings.taxpayer)
 
-    private val bundesland = SimpleObjectProperty<Bundesland>(overviewPresenter.settings.elsterTaxDeclarationSettings.bundesland)
+    private val bundesland = SimpleObjectProperty<Bundesland>(getInitialBundesland())
 
-    private val finanzamt = SimpleObjectProperty<Finanzamt>(overviewPresenter.settings.elsterTaxDeclarationSettings.finanzamt)
+    private val finanzamt = SimpleObjectProperty<Finanzamt>(getInitialFinanzamt())
 
     private var lastSelectedCertificateFile: File? = overviewPresenter.settings.elsterTaxDeclarationSettings.certificateFile
     private val certificateFilePath = SimpleStringProperty(lastSelectedCertificateFile?.absolutePath ?: "")
@@ -487,6 +487,24 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
 
         this.vatBalance.value = receivedVatWith19Percent.value + receivedVatWith7Percent.value -
                 (spentVatWith19Percent.value + spentWith7Percent.value)
+    }
+
+    private fun getInitialBundesland(): Bundesland? {
+        if (overviewPresenter.settings.elsterTaxDeclarationSettings.bundesland.name.isEmpty()) { // initial value, Bundesland not set yet
+            return null
+        }
+        else {
+            return overviewPresenter.settings.elsterTaxDeclarationSettings.bundesland
+        }
+    }
+
+    private fun getInitialFinanzamt(): Finanzamt? {
+        if (overviewPresenter.settings.elsterTaxDeclarationSettings.finanzamt.name.isEmpty()) { // initial value, Finanzamt not set yet
+            return null
+        }
+        else {
+            return overviewPresenter.settings.elsterTaxDeclarationSettings.finanzamt
+        }
     }
 
     private fun retrievedFinanzaemterOffUiThread(finanzaemter: Map<Bundesland, List<Finanzamt>>) {
