@@ -5,7 +5,7 @@ import net.dankito.accounting.data.model.Person
 import net.dankito.accounting.data.model.tax.FederalState
 import net.dankito.accounting.data.model.tax.TaxOffice
 import net.dankito.accounting.javafx.windows.person.EditPersonWindow
-import net.dankito.accounting.service.address.AddressService
+import net.dankito.accounting.service.address.IAddressService
 import net.dankito.accounting.service.person.IPersonService
 import net.dankito.accounting.service.tax.IFederalStateService
 import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
@@ -19,7 +19,7 @@ import kotlin.collections.ArrayList
 
 class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationService,
                          private val personService: IPersonService,
-                         private val addressService: AddressService,
+                         private val addressService: IAddressService,
                          private val federalStateService: IFederalStateService,
                          private val threadPool: IThreadPool): AutoCloseable {
 
