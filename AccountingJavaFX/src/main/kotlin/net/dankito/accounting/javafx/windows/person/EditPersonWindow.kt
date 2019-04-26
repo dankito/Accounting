@@ -6,12 +6,13 @@ import javafx.geometry.Pos
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import net.dankito.accounting.data.model.Person
-import net.dankito.accounting.service.person.IPersonService
+import net.dankito.accounting.javafx.presenter.EditPersonPresenter
 import net.dankito.utils.javafx.ui.dialogs.Window
 import tornadofx.*
 
 
-class EditPersonWindow(private val person: Person, private val personService: IPersonService,
+// TODO: add validation (e. g. a name has to be entered, country may not be longer than 20 characters, ...)
+class EditPersonWindow(private val person: Person, private val presenter: EditPersonPresenter,
                        private val didUserSavePersonCallback: ((Boolean) -> Unit)? = null) : Window() {
 
     companion object {
@@ -137,7 +138,7 @@ class EditPersonWindow(private val person: Person, private val personService: IP
         person.primaryAddress.city = city.value
         person.primaryAddress.country = country.value
 
-        personService.saveOrUpdate(person)
+        presenter.saveOrUpdate(person)
 
         closeWindow(true)
     }

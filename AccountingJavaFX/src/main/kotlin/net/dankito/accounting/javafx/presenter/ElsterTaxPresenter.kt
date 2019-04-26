@@ -126,7 +126,7 @@ class ElsterTaxPresenter(private val personService: IPersonService, private val 
     }
 
     fun showEditPersonWindow(person: Person, userDidEditPersonCallback: (Boolean) -> Unit) {
-        EditPersonWindow(person, personService, userDidEditPersonCallback).show()
+        EditPersonWindow(person, EditPersonPresenter(personService), userDidEditPersonCallback).show()
     }
 
 }
