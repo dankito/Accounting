@@ -1,8 +1,7 @@
 package net.dankito.accounting.data.model.tax
 
 import net.dankito.accounting.data.model.BaseEntity
-import javax.persistence.Column
-import javax.persistence.Entity
+import javax.persistence.*
 
 
 @Entity
@@ -12,7 +11,10 @@ class FederalState(
     val name: String,
 
     @Column(name = FederalStateIdColumnName)
-    val federalStateId: Int
+    val federalStateId: Int,
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ])
+    val taxOffices: List<TaxOffice>
 
 ) : BaseEntity() {
 
@@ -27,7 +29,7 @@ class FederalState(
     }
 
 
-    internal constructor() : this("", FederalStateIdUnset) // for object deserializers
+    internal constructor() : this("", FederalStateIdUnset, listOf()) // for object deserializers
 
 
     override fun toString(): String {

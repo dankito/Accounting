@@ -1,4 +1,4 @@
-package net.dankito.accounting.service.settings
+package net.dankito.accounting.service.tax.elster
 
 import net.dankito.accounting.data.model.tax.elster.ElsterTaxDeclarationSettings
 

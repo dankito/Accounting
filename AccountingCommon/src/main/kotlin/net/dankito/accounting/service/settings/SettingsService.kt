@@ -3,6 +3,7 @@ package net.dankito.accounting.service.settings
 import net.dankito.accounting.data.dao.IAppSettingsDao
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.settings.AppSettings
+import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
 import org.slf4j.LoggerFactory
 
 
