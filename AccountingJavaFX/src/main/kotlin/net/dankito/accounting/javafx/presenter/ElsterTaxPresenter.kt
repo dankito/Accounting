@@ -7,6 +7,7 @@ import net.dankito.accounting.data.model.tax.TaxOffice
 import net.dankito.accounting.javafx.windows.person.EditPersonWindow
 import net.dankito.accounting.service.address.AddressService
 import net.dankito.accounting.service.person.IPersonService
+import net.dankito.accounting.service.settings.IElsterTaxDeclarationService
 import net.dankito.tax.elster.ElsterClient
 import net.dankito.tax.elster.model.*
 import net.dankito.utils.IThreadPool
@@ -14,7 +15,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class ElsterTaxPresenter(private val personService: IPersonService,
+class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationService,
+                         private val personService: IPersonService,
                          private val addressService: AddressService,
                          private val threadPool: IThreadPool): AutoCloseable {
 
@@ -31,10 +33,17 @@ class ElsterTaxPresenter(private val personService: IPersonService,
     private val client = ElsterClient()
 
 
+    val settings = settingsService.settings
+
+
     override fun close() {
         client.close()
     }
 
+
+    fun saveSettings() {
+        settingsService.saveSettings()
+    }
 
     fun getAllPersons(): List<Person> {
         return personService.getAll()

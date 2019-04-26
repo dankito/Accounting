@@ -73,16 +73,16 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     private val vatBalance = SimpleDoubleProperty()
 
 
-    private val taxpayer = SimpleObjectProperty<Person>(overviewPresenter.settings.elsterTaxDeclarationSettings.taxpayer)
+    private val taxpayer = SimpleObjectProperty<Person>(presenter.settings.taxpayer)
 
     private val federalState = SimpleObjectProperty<FederalState>(getInitialFederalState())
 
     private val taxOffice = SimpleObjectProperty<TaxOffice>(getInitialTaxOffice())
 
-    private val certificateFilePath = SimpleStringProperty(overviewPresenter.settings.elsterTaxDeclarationSettings.certificateFilePath)
+    private val certificateFilePath = SimpleStringProperty(presenter.settings.certificateFilePath)
     private val isCertificateFileSet = SimpleBooleanProperty(checkIfCertificateFileExists())
 
-    private val certificatePassword = SimpleStringProperty(overviewPresenter.settings.elsterTaxDeclarationSettings.certificatePassword ?: "")
+    private val certificatePassword = SimpleStringProperty(presenter.settings.certificatePassword ?: "")
 
     // TODO: remove again
     private val herstellerID = SimpleStringProperty(TestHerstellerID.T_74931.herstellerID)
@@ -100,9 +100,9 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     private val taxOfficesForSelectedFederalState = FXCollections.observableArrayList<TaxOffice>()
 
 
-    private var lastSelectedElsterXmlFile: File? = overviewPresenter.settings.elsterTaxDeclarationSettings.lastSelectedElsterXmlFilePath?.let { File(it) }
+    private var lastSelectedElsterXmlFile: File? = presenter.settings.lastSelectedElsterXmlFilePath?.let { File(it) }
 
-    private var taxNumberInput: TaxNumberInput = TaxNumberInput(overviewPresenter.settings.elsterTaxDeclarationSettings.taxNumber)
+    private var taxNumberInput: TaxNumberInput = TaxNumberInput(presenter.settings.taxNumber)
 
 
     private val areRequiredFieldsForElsterXmlProvided = SimpleBooleanProperty(false)
@@ -491,20 +491,20 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     }
 
     private fun getInitialFederalState(): FederalState? {
-        if (overviewPresenter.settings.elsterTaxDeclarationSettings.federalState.federalStateId == FederalState.FederalStateIdUnset) { // initial value, FederalState not set yet
+        if (presenter.settings.federalState.federalStateId == FederalState.FederalStateIdUnset) { // initial value, FederalState not set yet
             return null
         }
         else {
-            return overviewPresenter.settings.elsterTaxDeclarationSettings.federalState
+            return presenter.settings.federalState
         }
     }
 
     private fun getInitialTaxOffice(): TaxOffice? {
-        if (overviewPresenter.settings.elsterTaxDeclarationSettings.taxOffice.taxOfficeId == TaxOffice.TaxOfficeIdUnset) { // initial value, TaxOffice not set yet
+        if (presenter.settings.taxOffice.taxOfficeId == TaxOffice.TaxOfficeIdUnset) { // initial value, TaxOffice not set yet
             return null
         }
         else {
-            return overviewPresenter.settings.elsterTaxDeclarationSettings.taxOffice
+            return presenter.settings.taxOffice
         }
     }
 
@@ -583,7 +583,7 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
 
 
     private fun makeUmsatzsteuerVoranmeldung() {
-        updateSettings()
+        saveSettings()
 
         val result = presenter.makeUmsatzsteuerVoranmeldung(createUmsatzsteuerVoranmeldungData())
 
@@ -615,7 +615,7 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     }
 
     private fun createUmsatzsteuerVoranmeldungXmlFile() {
-        updateSettings() // TODO: find a better strategy when to save app settings
+        saveSettings() // TODO: find a better strategy when to save app settings
 
         val fileChooser = FileChooser()
 
@@ -629,7 +629,7 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
 
         fileChooser.showSaveDialog(currentStage)?.let { xmlOutputFile ->
             lastSelectedElsterXmlFile = xmlOutputFile
-            updateSettings() // needed here to save lastSelectedElsterXmlFile
+            saveSettings() // needed here to save lastSelectedElsterXmlFile
 
             val result = presenter.createUmsatzsteuerVoranmeldungXmlFile(createUmsatzsteuerVoranmeldungData())
 
@@ -674,8 +674,8 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     }
 
 
-    private fun updateSettings() {
-        overviewPresenter.settings.elsterTaxDeclarationSettings.apply {
+    private fun saveSettings() {
+        presenter.settings.apply {
             taxpayer = this@ElsterTaxDeclarationWindow.taxpayer.value
             taxOffice = this@ElsterTaxDeclarationWindow.taxOffice.value
             federalState = this@ElsterTaxDeclarationWindow.federalState.value
@@ -685,7 +685,7 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
             lastSelectedElsterXmlFilePath = this@ElsterTaxDeclarationWindow.lastSelectedElsterXmlFile?.absolutePath
         }
 
-        overviewPresenter.saveAppSettings()
+        presenter.saveSettings()
     }
 
 

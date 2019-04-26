@@ -12,6 +12,7 @@ import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.tax.elster.ElsterTaxDeclarationWindow
 import net.dankito.accounting.service.address.AddressService
 import net.dankito.accounting.service.person.IPersonService
+import net.dankito.accounting.service.settings.IElsterTaxDeclarationService
 import net.dankito.utils.ThreadPool
 import net.dankito.utils.javafx.ui.controls.currencyLabel
 import net.dankito.utils.javafx.ui.extensions.setBorder
@@ -21,6 +22,7 @@ import tornadofx.*
 class SummaryPane(private val presenter: OverviewPresenter,
                   private val personService: IPersonService,
                   private val addressService: AddressService,
+                  private val elsterTaxDeclarationService: IElsterTaxDeclarationService,
                   private val threadPool: ThreadPool = ThreadPool()) : View() {
 
     companion object {
@@ -341,7 +343,7 @@ class SummaryPane(private val presenter: OverviewPresenter,
             return it
         }
 
-        val newPresenter = ElsterTaxPresenter(personService, addressService, threadPool)
+        val newPresenter = ElsterTaxPresenter(elsterTaxDeclarationService, personService, addressService, threadPool)
 
         this.elsterTaxPresenter = newPresenter
 
