@@ -436,6 +436,10 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
 
 
     private fun initFields() {
+        federalState.value?.let { previouslySelectedFederalState ->
+            showTaxOfficesForSelectedFederalState(previouslySelectedFederalState)
+        }
+
         retrievedTaxOffices(presenter.persistedFederalStates) // show last retrieved federal states
 
         presenter.getAllTaxOfficesAsync { taxOffices -> // then try to get current list from Elster (requires online connection)
@@ -547,13 +551,18 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     }
 
     private fun selectedFederalStateChanged(newValue: FederalState) {
-        taxOfficesForSelectedFederalState.setAll(newValue.taxOffices.sortedBy { it.name })
+        showTaxOfficesForSelectedFederalState(newValue)
 
         if (taxOfficesForSelectedFederalState.isNotEmpty()) {
             taxOffice.value = taxOfficesForSelectedFederalState[0]
-        } else {
+        }
+        else {
             taxOffice.value = null
         }
+    }
+
+    private fun showTaxOfficesForSelectedFederalState(newValue: FederalState) {
+        taxOfficesForSelectedFederalState.setAll(newValue.taxOffices.sortedBy { it.name })
     }
 
 
