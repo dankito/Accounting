@@ -4,13 +4,15 @@ import javafx.scene.layout.Priority
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.service.address.AddressService
 import net.dankito.accounting.service.person.IPersonService
-import net.dankito.accounting.service.settings.IElsterTaxDeclarationService
+import net.dankito.accounting.service.tax.FederalStateService
+import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
 import net.dankito.utils.ThreadPool
 import tornadofx.*
 
 
 class OverviewTab(presenter: OverviewPresenter, personService: IPersonService, addressService: AddressService,
-                  elsterTaxDeclarationService: IElsterTaxDeclarationService, threadPool: ThreadPool) : View() {
+                  elsterTaxDeclarationService: IElsterTaxDeclarationService, federalStatesService: FederalStateService,
+                  threadPool: ThreadPool) : View() {
 
     companion object {
         private const val DocumentsOverviewSpace = 12.0
@@ -34,7 +36,8 @@ class OverviewTab(presenter: OverviewPresenter, personService: IPersonService, a
         }
 
 
-        add(SummaryPane(presenter, personService, addressService, elsterTaxDeclarationService, threadPool))
+        add(SummaryPane(presenter, personService, addressService, elsterTaxDeclarationService, federalStatesService,
+            threadPool))
     }
 
 }

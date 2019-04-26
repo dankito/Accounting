@@ -7,17 +7,20 @@ import net.dankito.accounting.data.model.tax.TaxOffice
 import net.dankito.accounting.javafx.windows.person.EditPersonWindow
 import net.dankito.accounting.service.address.AddressService
 import net.dankito.accounting.service.person.IPersonService
-import net.dankito.accounting.service.settings.IElsterTaxDeclarationService
+import net.dankito.accounting.service.tax.IFederalStateService
+import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
 import net.dankito.tax.elster.ElsterClient
 import net.dankito.tax.elster.model.*
 import net.dankito.utils.IThreadPool
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationService,
                          private val personService: IPersonService,
                          private val addressService: AddressService,
+                         private val federalStateService: IFederalStateService,
                          private val threadPool: IThreadPool): AutoCloseable {
 
     companion object {
@@ -32,8 +35,13 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
      */
     private val client = ElsterClient()
 
+    private var persistedFederalStatesProperty = federalStateService.getAll()
+
 
     val settings = settingsService.settings
+
+    val persistedFederalStates: List<FederalState>
+        get() = ArrayList(persistedFederalStatesProperty)
 
 
     override fun close() {
@@ -49,24 +57,31 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
         return personService.getAll()
     }
 
-    fun getAllTaxOfficesAsync(callback: (Map<FederalState, List<TaxOffice>>) -> Unit) {
+    fun getAllTaxOfficesAsync(callback: (List<FederalState>) -> Unit) {
         threadPool.runAsync {
-            callback(mapToTaxOffices(client.getFinanzämter()))
+            val federalStates = mapToFederalStates(client.getFinanzämter())
+
+            val previousFederalStates = ArrayList(persistedFederalStatesProperty)
+
+            federalStateService.saveOrUpdate(federalStates)
+
+            persistedFederalStatesProperty = federalStates
+
+            federalStateService.delete(previousFederalStates)
+
+            callback(federalStates)
         }
     }
 
-    private fun mapToTaxOffices(orderedFinanzaemter: Map<Bundesland, List<Finanzamt>>): Map<FederalState, List<TaxOffice>> {
-        val taxOffices = mutableMapOf<FederalState, List<TaxOffice>>()
-
-        orderedFinanzaemter.forEach { bundesland, finanzaemter ->
-            taxOffices.put(mapToFederalState(bundesland), finanzaemter.map { mapToTaxOffice(it) })
+    private fun mapToFederalStates(orderedFinanzaemter: Map<Bundesland, List<Finanzamt>>): List<FederalState> {
+        return orderedFinanzaemter.map { entry ->
+            mapToFederalState(entry.key, entry.value)
         }
-
-        return taxOffices
     }
 
-    private fun mapToFederalState(bundesland: Bundesland): FederalState {
-        return FederalState(bundesland.name, bundesland.elsterFinanzamtLandId)
+    private fun mapToFederalState(bundesland: Bundesland, finanzaemterForBundesland: List<Finanzamt>): FederalState {
+        return FederalState(bundesland.name, bundesland.elsterFinanzamtLandId,
+            finanzaemterForBundesland.map { mapToTaxOffice(it) })
     }
 
     private fun mapToTaxOffice(finanzamt: Finanzamt): TaxOffice {

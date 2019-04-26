@@ -93,8 +93,6 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     private val allPersons = FXCollections.observableArrayList<Person>()
 
 
-    private val taxOfficesForFederalState: MutableMap<FederalState, List<TaxOffice>> = mutableMapOf()
-
     private val federalStates = FXCollections.observableArrayList<FederalState>()
 
     private val taxOfficesForSelectedFederalState = FXCollections.observableArrayList<TaxOffice>()
@@ -438,7 +436,9 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
 
 
     private fun initFields() {
-        presenter.getAllTaxOfficesAsync { taxOffices ->
+        retrievedTaxOffices(presenter.persistedFederalStates) // show last retrieved federal states
+
+        presenter.getAllTaxOfficesAsync { taxOffices -> // then try to get current list from Elster (requires online connection)
             retrievedTaxOfficesOffUiThread(taxOffices)
         }
 
@@ -508,15 +508,19 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
         }
     }
 
-    private fun retrievedTaxOfficesOffUiThread(taxOffices: Map<FederalState, List<TaxOffice>>) {
-        taxOfficesForFederalState.putAll(taxOffices)
-
+    private fun retrievedTaxOfficesOffUiThread(taxOfficesForFederalState: List<FederalState>) {
         runLater {
-            federalStates.setAll(taxOfficesForFederalState.keys.sortedBy { it.name })
+            retrievedTaxOffices(taxOfficesForFederalState)
+        }
+    }
 
-            if (federalStates.isNotEmpty() && federalState.value == null) {
-                federalState.value = federalStates[0]
-            }
+    private fun retrievedTaxOffices(taxOfficesForFederalState: List<FederalState>) {
+        federalStates.setAll(taxOfficesForFederalState.sortedBy { it.name })
+
+        if (federalStates.isNotEmpty() && federalState.value == null) {
+            federalState.value = federalStates[0]
+
+            selectedFederalStateChanged(federalState.value)
         }
     }
 
@@ -543,7 +547,8 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     }
 
     private fun selectedFederalStateChanged(newValue: FederalState) {
-        taxOfficesForSelectedFederalState.setAll(taxOfficesForFederalState[newValue]?.sortedBy { it.name } ?: listOf())
+        taxOfficesForSelectedFederalState.setAll(newValue.taxOffices.sortedBy { it.name })
+
         if (taxOfficesForSelectedFederalState.isNotEmpty()) {
             taxOffice.value = taxOfficesForSelectedFederalState[0]
         } else {
