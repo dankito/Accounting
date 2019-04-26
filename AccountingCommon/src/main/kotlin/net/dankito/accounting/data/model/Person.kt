@@ -1,19 +1,42 @@
 package net.dankito.accounting.data.model
 
+import javax.persistence.*
 
-class Person(var firstName: String,
-             var lastName: String,
-             var primaryAddress: Address
+
+@Entity
+class Person(
+
+    @Column(name = FirstNameColumnName)
+    var firstName: String,
+
+    @Column(name = LastNameColumnName)
+    var lastName: String,
+
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ])
+    @JoinColumn(name = PrimaryAddressJoinColumnName)
+    var primaryAddress: Address
+
 ) : BaseEntity() {
 
-    constructor() : this("", "", Address("", "", "", "", ""))
+    companion object {
+
+        const val FirstNameColumnName = "first_name"
+
+        const val LastNameColumnName = "last_name"
+
+        const val PrimaryAddressJoinColumnName = "address"
+
+    }
+
+    constructor() : this("", "", Address("", "", "", "", "")) // for object deserializers
 
 
     /**
      * Returns "[firstName] [lastName]".
      */
     val name: String
-        get() = "$firstName $lastName"
+        @Transient get() = "$firstName $lastName"
 
 
     override fun toString(): String {

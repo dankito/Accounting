@@ -10,6 +10,7 @@ import javax.persistence.*
  *
  * (German: Beleg)
  */
+@Entity
 open class Document() : BaseEntity() {
 
     companion object {

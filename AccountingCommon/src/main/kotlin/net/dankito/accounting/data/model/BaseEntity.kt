@@ -31,7 +31,7 @@ abstract class BaseEntity : Serializable {
 
     @Column(name = IdColumnName)
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     var id: String? = null
 
     @Column(name = CreatedOnColumnName, updatable = false)

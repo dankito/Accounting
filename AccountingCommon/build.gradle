@@ -1,5 +1,7 @@
 apply plugin: 'kotlin'
 
+apply plugin: 'kotlin-kapt'
+
 
 sourceCompatibility = 1.7
 
@@ -11,6 +13,15 @@ compileTestKotlin.kotlinOptions.jvmTarget = "1.6"
 def mavenArtifact = 'accounting-common'
 
 
+sourceSets {
+    main {
+        java {
+            srcDirs += [ "${buildDir.absolutePath}/generated/source/kapt/main/" ]
+        }
+    }
+}
+
+
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
@@ -19,7 +30,13 @@ dependencies {
 
     compile "net.dankito.utils:java-utils:$javaUtilsVersion"
 
-    compile "org.eclipse.persistence:javax.persistence:$javaxPersistenceVersion"
+
+    compile "com.couchbase.lite:couchbase-lite-java:$couchbaseLiteVersion"
+
+    compile "net.dankito.jpa.couchbaselite:couchbase-lite-jpa:$couchbaseLiteJpaVersion"
+
+
+    kapt "net.dankito.jpa.annotationreader:jpa-apt:$jpaAptVersion"
 
 
     testCompile "junit:junit:$junitVersion"

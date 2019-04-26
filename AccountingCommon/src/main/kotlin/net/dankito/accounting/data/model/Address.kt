@@ -1,13 +1,44 @@
 package net.dankito.accounting.data.model
 
+import javax.persistence.Column
+import javax.persistence.Entity
 
-class Address(var street: String,
-              var streetNumber: String,
-              var zipCode: String,
-              var city: String,
-              var country: String
+
+@Entity
+class Address(
+
+    @Column(name = StreetColumnName)
+    var street: String,
+
+    @Column(name = StreetNumberColumnName)
+    var streetNumber: String,
+
+    @Column(name = ZipCodeColumnName)
+    var zipCode: String,
+
+    @Column(name = CityColumnName)
+    var city: String,
+
+    @Column(name = CountryColumnName)
+    var country: String
+
 ) : BaseEntity() {
 
-    protected constructor() : this("", "", "", "", "") // for Jackson, ...
+    companion object {
+
+        const val StreetColumnName = "street"
+
+        const val StreetNumberColumnName = "street_number"
+
+        const val ZipCodeColumnName = "zip_code"
+
+        const val CityColumnName = "city"
+
+        const val CountryColumnName = "country"
+
+    }
+
+
+    protected constructor() : this("", "", "", "", "") // for object deserializers
 
 }

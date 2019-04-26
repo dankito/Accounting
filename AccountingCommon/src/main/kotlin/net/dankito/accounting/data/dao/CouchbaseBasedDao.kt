@@ -1,0 +1,27 @@
+package net.dankito.accounting.data.dao
+
+import net.dankito.accounting.data.model.BaseEntity
+import net.dankito.jpa.entitymanager.IEntityManager
+
+
+abstract class CouchbaseBasedDao<T : BaseEntity>(private val entityClass: Class<T>,
+                                                 protected val entityManager: IEntityManager) : IBaseDao<T> {
+
+    override fun getAll(): List<T> {
+        return entityManager.getAllEntitiesOfType(entityClass)
+    }
+
+    override fun saveOrUpdate(entity: T) {
+        if (entity.isPersisted() == false) {
+            entityManager.persistEntity(entity)
+        }
+        else {
+            entityManager.updateEntity(entity)
+        }
+    }
+
+    override fun delete(entity: T) {
+        entityManager.deleteEntity(entity)
+    }
+
+}

@@ -3,6 +3,7 @@ package net.dankito.accounting.javafx.presenter
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.Person
 import net.dankito.accounting.javafx.windows.person.EditPersonWindow
+import net.dankito.accounting.service.address.AddressService
 import net.dankito.accounting.service.person.IPersonService
 import net.dankito.tax.elster.ElsterClient
 import net.dankito.tax.elster.model.*
@@ -11,7 +12,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class ElsterTaxPresenter(private val personService: IPersonService, private val threadPool: IThreadPool): AutoCloseable {
+class ElsterTaxPresenter(private val personService: IPersonService,
+                         private val addressService: AddressService,
+                         private val threadPool: IThreadPool): AutoCloseable {
 
     companion object {
         private val DateToYearFormatter = SimpleDateFormat("yyyy")
@@ -126,7 +129,7 @@ class ElsterTaxPresenter(private val personService: IPersonService, private val 
     }
 
     fun showEditPersonWindow(person: Person, userDidEditPersonCallback: (Boolean) -> Unit) {
-        EditPersonWindow(person, EditPersonPresenter(personService), userDidEditPersonCallback).show()
+        EditPersonWindow(person, EditPersonPresenter(personService, addressService), userDidEditPersonCallback).show()
     }
 
 }

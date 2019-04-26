@@ -6,20 +6,22 @@ import javafx.event.EventTarget
 import javafx.scene.layout.Pane
 import javafx.scene.text.Font
 import javafx.scene.text.TextAlignment
-import net.dankito.accounting.data.dao.JsonPersonDao
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.javafx.presenter.ElsterTaxPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.tax.elster.ElsterTaxDeclarationWindow
-import net.dankito.accounting.service.person.PersonService
+import net.dankito.accounting.service.address.AddressService
+import net.dankito.accounting.service.person.IPersonService
 import net.dankito.utils.ThreadPool
 import net.dankito.utils.javafx.ui.controls.currencyLabel
 import net.dankito.utils.javafx.ui.extensions.setBorder
 import tornadofx.*
-import java.io.File
 
 
-class SummaryPane(private val presenter: OverviewPresenter, private val threadPool: ThreadPool = ThreadPool()) : View() {
+class SummaryPane(private val presenter: OverviewPresenter,
+                  private val personService: IPersonService,
+                  private val addressService: AddressService,
+                  private val threadPool: ThreadPool = ThreadPool()) : View() {
 
     companion object {
         private const val SummaryAmountLabelWidth = 90.0
@@ -339,7 +341,7 @@ class SummaryPane(private val presenter: OverviewPresenter, private val threadPo
             return it
         }
 
-        val newPresenter = ElsterTaxPresenter(PersonService(JsonPersonDao(File("data"))), threadPool)
+        val newPresenter = ElsterTaxPresenter(personService, addressService, threadPool)
 
         this.elsterTaxPresenter = newPresenter
 

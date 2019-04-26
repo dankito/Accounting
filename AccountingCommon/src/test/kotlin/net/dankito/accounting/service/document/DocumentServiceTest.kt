@@ -1,9 +1,12 @@
 package net.dankito.accounting.service.document
 
-import net.dankito.accounting.data.dao.JsonDocumentDao
+import net.dankito.accounting.data.dao.DocumentDao
+import net.dankito.accounting.data.db.JavaCouchbaseLiteEntityManager
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.data.model.PaymentState
+import net.dankito.jpa.couchbaselite.CouchbaseLiteEntityManagerBase
+import net.dankito.jpa.entitymanager.EntityManagerConfiguration
 import net.dankito.utils.io.FileUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
@@ -12,9 +15,15 @@ import java.io.File
 
 class DocumentServiceTest {
 
+    private val fileUtils = FileUtils()
+
+
     private val dataFolder = File("testData")
 
-    private val fileUtils = FileUtils()
+    private val entityManagerConfiguration = EntityManagerConfiguration(dataFolder.path, "accounting")
+
+    private val entityManager: CouchbaseLiteEntityManagerBase
+
 
     private val underTest: DocumentService
 
@@ -22,7 +31,9 @@ class DocumentServiceTest {
     init {
         clearDataFolder()
 
-        underTest = DocumentService(JsonDocumentDao(dataFolder))
+        entityManager = JavaCouchbaseLiteEntityManager(entityManagerConfiguration)
+
+        underTest = DocumentService(DocumentDao(entityManager))
     }
 
     @After

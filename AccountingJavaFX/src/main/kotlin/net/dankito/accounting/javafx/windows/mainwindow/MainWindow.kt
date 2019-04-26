@@ -1,14 +1,18 @@
 package net.dankito.accounting.javafx.windows.mainwindow
 
 import javafx.scene.control.TabPane
-import net.dankito.accounting.data.dao.JsonAppSettingsDao
-import net.dankito.accounting.data.dao.JsonDocumentDao
+import net.dankito.accounting.data.dao.*
+import net.dankito.accounting.data.db.JavaCouchbaseLiteEntityManager
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.javafx.windows.mainwindow.controls.MainMenuBar
 import net.dankito.accounting.javafx.windows.mainwindow.controls.OverviewTab
+import net.dankito.accounting.service.address.AddressService
 import net.dankito.accounting.service.document.DocumentService
+import net.dankito.accounting.service.person.PersonService
+import net.dankito.accounting.service.settings.ElsterTaxDeclarationService
 import net.dankito.accounting.service.settings.SettingsService
+import net.dankito.jpa.entitymanager.EntityManagerConfiguration
 import net.dankito.utils.PackageInfo
 import net.dankito.utils.ThreadPool
 import tornadofx.*
@@ -23,20 +27,26 @@ class MainWindow : Fragment(String.format(FX.messages["application.title"], Pack
     private val router = Router(this)
 
 
-    private val documentsService = DocumentService(JsonDocumentDao(dataFolder))
+    private val entityManagerConfiguration = EntityManagerConfiguration(dataFolder.path, "accounting")
 
-    private val settingsService = SettingsService(JsonAppSettingsDao(dataFolder))
+    private val entityManager = JavaCouchbaseLiteEntityManager(entityManagerConfiguration)
+
+
+    private val documentsService = DocumentService(DocumentDao(entityManager))
+
+    private val addressService = AddressService(AddressDao(entityManager))
+
+    private val personService = PersonService(PersonDao(entityManager))
+
+    private val elsterTaxDeclarationService = ElsterTaxDeclarationService(ElsterTaxDeclarationSettingsDao(entityManager))
+
+    private val settingsService = SettingsService(AppSettingsDao(entityManager), elsterTaxDeclarationService)
 
 
     private val threadPool = ThreadPool()
 
 
     private val overviewPresenter = OverviewPresenter(documentsService, settingsService, router)
-
-
-    init {
-
-    }
 
 
     override val root = borderpane {
@@ -51,7 +61,7 @@ class MainWindow : Fragment(String.format(FX.messages["application.title"], Pack
                 tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
 
                 tab(messages["main.window.tab.overview.title"]) {
-                    add(OverviewTab(overviewPresenter, threadPool).root)
+                    add(OverviewTab(overviewPresenter, personService, addressService, threadPool).root)
                 }
             }
         }
