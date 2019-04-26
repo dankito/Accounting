@@ -9,7 +9,7 @@ import javax.persistence.Entity
 class TaxOffice(
 
     @Column(name = NameColumnName)
-    val name: String,
+    var name: String,
 
     @Column(name = TaxOfficeIdColumnName)
     val taxOfficeId: Int

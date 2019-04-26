@@ -3,6 +3,7 @@ package net.dankito.accounting.javafx.windows.mainwindow
 import javafx.scene.control.TabPane
 import net.dankito.accounting.data.dao.*
 import net.dankito.accounting.data.dao.tax.FederalStateDao
+import net.dankito.accounting.data.dao.tax.TaxOfficeDao
 import net.dankito.accounting.data.db.JavaCouchbaseLiteEntityManager
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.service.Router
@@ -13,6 +14,7 @@ import net.dankito.accounting.service.document.DocumentService
 import net.dankito.accounting.service.person.PersonService
 import net.dankito.accounting.service.settings.SettingsService
 import net.dankito.accounting.service.tax.FederalStateService
+import net.dankito.accounting.service.tax.TaxOfficeService
 import net.dankito.accounting.service.tax.elster.ElsterTaxDeclarationService
 import net.dankito.jpa.entitymanager.EntityManagerConfiguration
 import net.dankito.utils.PackageInfo
@@ -42,6 +44,8 @@ class MainWindow : Fragment(String.format(FX.messages["application.title"], Pack
 
     private val federalStatesService = FederalStateService(FederalStateDao(entityManager))
 
+    private val taxOfficeService = TaxOfficeService(TaxOfficeDao(entityManager))
+
     private val elsterTaxDeclarationService = ElsterTaxDeclarationService(ElsterTaxDeclarationSettingsDao(entityManager))
 
     private val settingsService = SettingsService(AppSettingsDao(entityManager), elsterTaxDeclarationService)
@@ -66,7 +70,7 @@ class MainWindow : Fragment(String.format(FX.messages["application.title"], Pack
 
                 tab(messages["main.window.tab.overview.title"]) {
                     add(OverviewTab(overviewPresenter, personService, addressService, elsterTaxDeclarationService,
-                        federalStatesService, threadPool).root)
+                        federalStatesService, taxOfficeService, threadPool).root)
                 }
             }
         }

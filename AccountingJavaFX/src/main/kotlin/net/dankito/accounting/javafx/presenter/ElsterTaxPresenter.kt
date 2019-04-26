@@ -8,6 +8,7 @@ import net.dankito.accounting.javafx.windows.person.EditPersonWindow
 import net.dankito.accounting.service.address.IAddressService
 import net.dankito.accounting.service.person.IPersonService
 import net.dankito.accounting.service.tax.IFederalStateService
+import net.dankito.accounting.service.tax.ITaxOfficeService
 import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
 import net.dankito.tax.elster.ElsterClient
 import net.dankito.tax.elster.model.*
@@ -21,6 +22,7 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
                          private val personService: IPersonService,
                          private val addressService: IAddressService,
                          private val federalStateService: IFederalStateService,
+                         private val taxOfficeService: ITaxOfficeService,
                          private val threadPool: IThreadPool): AutoCloseable {
 
     companion object {
@@ -63,10 +65,13 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
 
             val previousFederalStates = ArrayList(persistedFederalStatesProperty)
 
+            taxOfficeService.saveOrUpdate(federalStates.flatMap { it.taxOffices })
+
             federalStateService.saveOrUpdate(federalStates)
 
             persistedFederalStatesProperty = federalStates
 
+            previousFederalStates.removeAll(federalStates)
             federalStateService.delete(previousFederalStates)
 
             callback(federalStates)
@@ -80,12 +85,35 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
     }
 
     private fun mapToFederalState(bundesland: Bundesland, finanzaemterForBundesland: List<Finanzamt>): FederalState {
-        return FederalState(bundesland.name, bundesland.elsterFinanzamtLandId,
-            finanzaemterForBundesland.map { mapToTaxOffice(it) })
+        val taxOffices = finanzaemterForBundesland.map { mapToTaxOffice(it) }
+
+        getExistingFederalState(bundesland)?.let { federalState ->
+            federalState.name = bundesland.name
+            federalState.setTaxOffices(taxOffices)
+
+            return federalState
+        }
+
+        return FederalState(bundesland.name, bundesland.elsterFinanzamtLandId, taxOffices)
+    }
+
+    private fun getExistingFederalState(bundesland: Bundesland): FederalState? {
+        return persistedFederalStatesProperty.firstOrNull { it.federalStateId == bundesland.elsterFinanzamtLandId }
     }
 
     private fun mapToTaxOffice(finanzamt: Finanzamt): TaxOffice {
+        getExistingTaxOffice(finanzamt)?.let { taxOffice ->
+            taxOffice.name = finanzamt.name
+
+            return taxOffice
+        }
+
         return TaxOffice(finanzamt.name, finanzamt.finanzamtsnummer)
+    }
+
+    private fun getExistingTaxOffice(finanzamt: Finanzamt): TaxOffice? {
+        return persistedFederalStatesProperty.flatMap { it.taxOffices }
+                                             .firstOrNull { it.taxOfficeId == finanzamt.finanzamtsnummer }
     }
 
 

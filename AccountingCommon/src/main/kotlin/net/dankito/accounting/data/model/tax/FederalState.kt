@@ -8,7 +8,7 @@ import javax.persistence.*
 class FederalState(
 
     @Column(name = NameColumnName)
-    val name: String,
+    var name: String,
 
     @Column(name = FederalStateIdColumnName)
     val federalStateId: Int,
@@ -30,6 +30,15 @@ class FederalState(
 
 
     internal constructor() : this("", FederalStateIdUnset, listOf()) // for object deserializers
+
+
+    fun setTaxOffices(taxOffices: List<TaxOffice>) {
+        (this.taxOffices as? MutableList)?.let { mutableTaxOffices ->
+            mutableTaxOffices.clear()
+
+            mutableTaxOffices.addAll(taxOffices)
+        }
+    }
 
 
     override fun toString(): String {
