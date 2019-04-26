@@ -14,10 +14,12 @@ class ElsterTaxDeclarationSettings(
     @JoinColumn(name = TaxPayerJoinColumnName)
     var taxpayer: Person?,
 
-    @Transient // TODO
+    @OneToOne(fetch = FetchType.EAGER, cascade = [ CascadeType.PERSIST ])
+    @JoinColumn(name = FederalStateJoinColumnName)
     var federalState: FederalState,
 
-    @Transient // TODO
+    @OneToOne(fetch = FetchType.EAGER, cascade = [ CascadeType.PERSIST ])
+    @JoinColumn(name = TaxOfficeJoinColumnName)
     var taxOffice: TaxOffice,
 
     @Column(name = TaxNumberColumnName)
@@ -37,6 +39,10 @@ class ElsterTaxDeclarationSettings(
     companion object {
 
         const val TaxPayerJoinColumnName = "tax_payer"
+
+        const val FederalStateJoinColumnName = "federal_state"
+
+        const val TaxOfficeJoinColumnName = "tax_office"
 
         const val TaxNumberColumnName = "tax_number"
 
