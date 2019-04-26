@@ -2,6 +2,7 @@ package net.dankito.accounting.data.model.settings
 
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.BaseEntity
+import net.dankito.accounting.data.model.tax.elster.ElsterTaxDeclarationSettings
 import javax.persistence.*
 
 

@@ -1,9 +1,9 @@
-package net.dankito.accounting.data.model.settings
+package net.dankito.accounting.data.model.tax.elster
 
 import net.dankito.accounting.data.model.BaseEntity
 import net.dankito.accounting.data.model.Person
-import net.dankito.tax.elster.model.Bundesland
-import net.dankito.tax.elster.model.Finanzamt
+import net.dankito.accounting.data.model.tax.FederalState
+import net.dankito.accounting.data.model.tax.TaxOffice
 import javax.persistence.*
 
 
@@ -15,10 +15,10 @@ class ElsterTaxDeclarationSettings(
     var taxpayer: Person?,
 
     @Transient // TODO
-    var bundesland: Bundesland,
+    var federalState: FederalState,
 
     @Transient // TODO
-    var finanzamt: Finanzamt,
+    var taxOffice: TaxOffice,
 
     @Column(name = TaxNumberColumnName)
     var taxNumber: String,
@@ -49,6 +49,6 @@ class ElsterTaxDeclarationSettings(
     }
 
 
-    internal constructor() : this(null, Bundesland("", -1), Finanzamt("", -1), "") // for object deserializers
+    internal constructor() : this(null, FederalState(), TaxOffice(), "") // for object deserializers
 
 }

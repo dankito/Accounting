@@ -12,6 +12,8 @@ import javafx.stage.FileChooser
 import javafx.stage.Screen
 import javafx.stage.Stage
 import net.dankito.accounting.data.model.Person
+import net.dankito.accounting.data.model.tax.FederalState
+import net.dankito.accounting.data.model.tax.TaxOffice
 import net.dankito.accounting.javafx.presenter.ElsterTaxPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.tax.elster.controls.TaxNumberInput
@@ -73,9 +75,9 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
 
     private val taxpayer = SimpleObjectProperty<Person>(overviewPresenter.settings.elsterTaxDeclarationSettings.taxpayer)
 
-    private val bundesland = SimpleObjectProperty<Bundesland>(getInitialBundesland())
+    private val federalState = SimpleObjectProperty<FederalState>(getInitialFederalState())
 
-    private val finanzamt = SimpleObjectProperty<Finanzamt>(getInitialFinanzamt())
+    private val taxOffice = SimpleObjectProperty<TaxOffice>(getInitialTaxOffice())
 
     private val certificateFilePath = SimpleStringProperty(overviewPresenter.settings.elsterTaxDeclarationSettings.certificateFilePath)
     private val isCertificateFileSet = SimpleBooleanProperty(checkIfCertificateFileExists())
@@ -91,11 +93,11 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     private val allPersons = FXCollections.observableArrayList<Person>()
 
 
-    private val finanzaemterForBundesland: MutableMap<Bundesland, List<Finanzamt>> = mutableMapOf()
+    private val taxOfficesForFederalState: MutableMap<FederalState, List<TaxOffice>> = mutableMapOf()
 
-    private val bundeslaender = FXCollections.observableArrayList<Bundesland>()
+    private val federalStates = FXCollections.observableArrayList<FederalState>()
 
-    private val finanzaemterForSelectedBundesland = FXCollections.observableArrayList<Finanzamt>()
+    private val taxOfficesForSelectedFederalState = FXCollections.observableArrayList<TaxOffice>()
 
 
     private var lastSelectedElsterXmlFile: File? = overviewPresenter.settings.elsterTaxDeclarationSettings.lastSelectedElsterXmlFilePath?.let { File(it) }
@@ -209,19 +211,19 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
                 prefWidth = TaxPayerLabelsWidth
             }
 
-            combobox(bundesland, bundeslaender) {
+            combobox(federalState, federalStates) {
                 prefWidth = 230.0
 
                 cellFormat { text = it.name }
 
-                valueProperty().addListener { _, _, newValue -> selectedBundeslandChanged(newValue) }
+                valueProperty().addListener { _, _, newValue -> selectedFederalStateChanged(newValue) }
 
                 hboxConstraints {
                     marginRight = 6.0
                 }
             }
 
-            combobox(finanzamt, finanzaemterForSelectedBundesland) {
+            combobox(taxOffice, taxOfficesForSelectedFederalState) {
                 prefWidth = 300.0
 
                 cellFormat { text = it.name }
@@ -436,8 +438,8 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
 
 
     private fun initFields() {
-        presenter.getAllFinanzaemterAsync { finanzaemter ->
-            retrievedFinanzaemterOffUiThread(finanzaemter)
+        presenter.getAllTaxOfficesAsync { taxOffices ->
+            retrievedTaxOfficesOffUiThread(taxOffices)
         }
 
         initYearAndPeriod()
@@ -488,32 +490,32 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
                 (spentVatWith19Percent.value + spentWith7Percent.value)
     }
 
-    private fun getInitialBundesland(): Bundesland? {
-        if (overviewPresenter.settings.elsterTaxDeclarationSettings.bundesland.name.isEmpty()) { // initial value, Bundesland not set yet
+    private fun getInitialFederalState(): FederalState? {
+        if (overviewPresenter.settings.elsterTaxDeclarationSettings.federalState.federalStateId == FederalState.FederalStateIdUnset) { // initial value, FederalState not set yet
             return null
         }
         else {
-            return overviewPresenter.settings.elsterTaxDeclarationSettings.bundesland
+            return overviewPresenter.settings.elsterTaxDeclarationSettings.federalState
         }
     }
 
-    private fun getInitialFinanzamt(): Finanzamt? {
-        if (overviewPresenter.settings.elsterTaxDeclarationSettings.finanzamt.name.isEmpty()) { // initial value, Finanzamt not set yet
+    private fun getInitialTaxOffice(): TaxOffice? {
+        if (overviewPresenter.settings.elsterTaxDeclarationSettings.taxOffice.taxOfficeId == TaxOffice.TaxOfficeIdUnset) { // initial value, TaxOffice not set yet
             return null
         }
         else {
-            return overviewPresenter.settings.elsterTaxDeclarationSettings.finanzamt
+            return overviewPresenter.settings.elsterTaxDeclarationSettings.taxOffice
         }
     }
 
-    private fun retrievedFinanzaemterOffUiThread(finanzaemter: Map<Bundesland, List<Finanzamt>>) {
-        finanzaemterForBundesland.putAll(finanzaemter)
+    private fun retrievedTaxOfficesOffUiThread(taxOffices: Map<FederalState, List<TaxOffice>>) {
+        taxOfficesForFederalState.putAll(taxOffices)
 
         runLater {
-            bundeslaender.setAll(finanzaemterForBundesland.keys.sortedBy { it.name })
+            federalStates.setAll(taxOfficesForFederalState.keys.sortedBy { it.name })
 
-            if (bundeslaender.isNotEmpty() && bundesland.value == null) {
-                bundesland.value = bundeslaender[0]
+            if (federalStates.isNotEmpty() && federalState.value == null) {
+                federalState.value = federalStates[0]
             }
         }
     }
@@ -540,12 +542,12 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
         allPersons.setAll(presenter.getAllPersons())
     }
 
-    private fun selectedBundeslandChanged(newValue: Bundesland) {
-        finanzaemterForSelectedBundesland.setAll(finanzaemterForBundesland[newValue]?.sortedBy { it.name } ?: listOf())
-        if (finanzaemterForSelectedBundesland.isNotEmpty()) {
-            finanzamt.value = finanzaemterForSelectedBundesland[0]
+    private fun selectedFederalStateChanged(newValue: FederalState) {
+        taxOfficesForSelectedFederalState.setAll(taxOfficesForFederalState[newValue]?.sortedBy { it.name } ?: listOf())
+        if (taxOfficesForSelectedFederalState.isNotEmpty()) {
+            taxOffice.value = taxOfficesForSelectedFederalState[0]
         } else {
-            finanzamt.value = null
+            taxOffice.value = null
         }
     }
 
@@ -655,10 +657,10 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
         val useTestValues = herstellerID.value == TestHerstellerID.T_74931.herstellerID
 
         val taxNumber = if (useTestValues) Teststeuernummern.T_198_113_10010.steuernummer else taxNumberInput.taxNumber.value
-        val finanzamt = if (useTestValues) TestFinanzamt.Bayern_9198.finanzamt else finanzamt.value
+        val taxOffice = if (useTestValues) TestFinanzamt.Bayern_9198.finanzamt else Finanzamt(taxOffice.value.name, taxOffice.value.taxOfficeId)
         val herstellerID = herstellerID.value
 
-        return UmsatzsteuerVoranmeldung(jahr.value, zeitraum.value, finanzamt, taxNumber,
+        return UmsatzsteuerVoranmeldung(jahr.value, zeitraum.value, taxOffice, taxNumber,
             mapPersonToSteuerpflichtiger(taxpayer.value), File(certificateFilePath.value), certificatePassword.value,
             revenuesWith19PercentVatNetAmount.value, revenuesWith7PercentVatNetAmount.value,
             spentVatWith19Percent.value + spentWith7Percent.value, vatBalance.value, herstellerID)
@@ -675,8 +677,8 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     private fun updateSettings() {
         overviewPresenter.settings.elsterTaxDeclarationSettings.apply {
             taxpayer = this@ElsterTaxDeclarationWindow.taxpayer.value
-            finanzamt = this@ElsterTaxDeclarationWindow.finanzamt.value
-            bundesland = this@ElsterTaxDeclarationWindow.bundesland.value
+            taxOffice = this@ElsterTaxDeclarationWindow.taxOffice.value
+            federalState = this@ElsterTaxDeclarationWindow.federalState.value
             taxNumber = taxNumberInput.taxNumber.value
             certificateFilePath = this@ElsterTaxDeclarationWindow.certificateFilePath.value
             certificatePassword = this@ElsterTaxDeclarationWindow.certificatePassword.value

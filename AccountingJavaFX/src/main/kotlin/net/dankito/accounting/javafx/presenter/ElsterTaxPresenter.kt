@@ -2,6 +2,8 @@ package net.dankito.accounting.javafx.presenter
 
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.Person
+import net.dankito.accounting.data.model.tax.FederalState
+import net.dankito.accounting.data.model.tax.TaxOffice
 import net.dankito.accounting.javafx.windows.person.EditPersonWindow
 import net.dankito.accounting.service.address.AddressService
 import net.dankito.accounting.service.person.IPersonService
@@ -38,10 +40,28 @@ class ElsterTaxPresenter(private val personService: IPersonService,
         return personService.getAll()
     }
 
-    fun getAllFinanzaemterAsync(callback: (Map<Bundesland, List<Finanzamt>>) -> Unit) {
+    fun getAllTaxOfficesAsync(callback: (Map<FederalState, List<TaxOffice>>) -> Unit) {
         threadPool.runAsync {
-            callback(client.getFinanzämter())
+            callback(mapToTaxOffices(client.getFinanzämter()))
         }
+    }
+
+    private fun mapToTaxOffices(orderedFinanzaemter: Map<Bundesland, List<Finanzamt>>): Map<FederalState, List<TaxOffice>> {
+        val taxOffices = mutableMapOf<FederalState, List<TaxOffice>>()
+
+        orderedFinanzaemter.forEach { bundesland, finanzaemter ->
+            taxOffices.put(mapToFederalState(bundesland), finanzaemter.map { mapToTaxOffice(it) })
+        }
+
+        return taxOffices
+    }
+
+    private fun mapToFederalState(bundesland: Bundesland): FederalState {
+        return FederalState(bundesland.name, bundesland.elsterFinanzamtLandId)
+    }
+
+    private fun mapToTaxOffice(finanzamt: Finanzamt): TaxOffice {
+        return TaxOffice(finanzamt.name, finanzamt.finanzamtsnummer)
     }
 
 

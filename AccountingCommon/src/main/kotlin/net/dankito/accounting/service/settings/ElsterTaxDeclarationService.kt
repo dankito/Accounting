@@ -1,7 +1,7 @@
 package net.dankito.accounting.service.settings
 
 import net.dankito.accounting.data.dao.IElsterTaxDeclarationSettingsDao
-import net.dankito.accounting.data.model.settings.ElsterTaxDeclarationSettings
+import net.dankito.accounting.data.model.tax.elster.ElsterTaxDeclarationSettings
 import org.slf4j.LoggerFactory
 
 

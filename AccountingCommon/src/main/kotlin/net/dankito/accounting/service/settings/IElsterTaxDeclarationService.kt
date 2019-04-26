@@ -1,6 +1,6 @@
 package net.dankito.accounting.service.settings
 
-import net.dankito.accounting.data.model.settings.ElsterTaxDeclarationSettings
+import net.dankito.accounting.data.model.tax.elster.ElsterTaxDeclarationSettings
 
 
 interface IElsterTaxDeclarationService {
