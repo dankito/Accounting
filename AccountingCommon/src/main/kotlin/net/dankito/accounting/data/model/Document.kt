@@ -120,11 +120,11 @@ open class Document() : DocumentBase() {
     @OneToMany(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
     var items: List<DocumentItem> = listOf()
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST ])
     @JoinColumn(name = IssuerJoinColumnName)
     var issuer: NaturalOrLegalPerson? = null
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST ])
     @JoinColumn(name = RecipientJoinColumnName)
     var recipient: NaturalOrLegalPerson? = null
 
