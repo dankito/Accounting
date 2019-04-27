@@ -44,11 +44,12 @@ class PresenterModule {
                                   personService: IPersonService,
                                   federalStateService: IFederalStateService,
                                   taxOfficeService: ITaxOfficeService,
+                                  router: Router,
                                   threadPool: IThreadPool
     ) : ElsterTaxPresenter {
 
         return ElsterTaxPresenter(
-            settingsService, personService, federalStateService, taxOfficeService, threadPool)
+            settingsService, personService, federalStateService, taxOfficeService, router, threadPool)
     }
 
 }

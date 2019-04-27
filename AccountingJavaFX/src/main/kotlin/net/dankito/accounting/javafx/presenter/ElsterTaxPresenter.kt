@@ -5,7 +5,7 @@ import net.dankito.accounting.data.model.Person
 import net.dankito.accounting.data.model.tax.FederalState
 import net.dankito.accounting.data.model.tax.TaxOffice
 import net.dankito.accounting.data.model.tax.elster.ElsterTaxDeclarationSettings
-import net.dankito.accounting.javafx.windows.person.EditPersonWindow
+import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.person.IPersonService
 import net.dankito.accounting.service.tax.IFederalStateService
 import net.dankito.accounting.service.tax.ITaxOfficeService
@@ -26,6 +26,7 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
                          private val personService: IPersonService,
                          private val federalStateService: IFederalStateService,
                          private val taxOfficeService: ITaxOfficeService,
+                         private val router: Router,
                          private val threadPool: IThreadPool): AutoCloseable {
 
     companion object {
@@ -217,7 +218,7 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
     }
 
     fun showEditPersonWindow(person: Person, userDidEditPersonCallback: (Boolean) -> Unit) {
-        EditPersonWindow(person, userDidEditPersonCallback).show()
+        router.showEditPersonWindow(person, userDidEditPersonCallback)
     }
 
 }
