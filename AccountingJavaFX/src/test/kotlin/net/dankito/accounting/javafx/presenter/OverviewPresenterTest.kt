@@ -1,6 +1,8 @@
 package net.dankito.accounting.javafx.presenter
 
+import com.nhaarman.mockito_kotlin.doReturn
 import net.dankito.accounting.data.model.AccountingPeriod
+import net.dankito.accounting.data.model.settings.AppSettings
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.document.IDocumentService
 import net.dankito.accounting.service.settings.ISettingsService
@@ -16,6 +18,8 @@ class OverviewPresenterTest {
 
     private val mockedTodayValue = AtomicReference<LocalDate>(LocalDate.now())
 
+    private val appSettingsMock = mock(AppSettings::class.java)
+
     private val documentsServiceMock = mock(IDocumentService::class.java)
 
     private val settingsServiceMock = mock(ISettingsService::class.java)
@@ -23,12 +27,21 @@ class OverviewPresenterTest {
     private val routerMock = mock(Router::class.java)
 
 
-    private val underTest = object : OverviewPresenter(documentsServiceMock, settingsServiceMock, routerMock) {
+    private val underTest :OverviewPresenter
 
-        override fun getToday(): LocalDate {
-            return mockedTodayValue.get()
+
+    init {
+        doReturn(AccountingPeriod.Monthly).`when`(appSettingsMock).accountingPeriod
+
+        doReturn(appSettingsMock).`when`(settingsServiceMock).appSettings
+
+        underTest = object : OverviewPresenter(documentsServiceMock, settingsServiceMock, routerMock) {
+
+            override fun getToday(): LocalDate {
+                return mockedTodayValue.get()
+            }
+
         }
-
     }
 
 
