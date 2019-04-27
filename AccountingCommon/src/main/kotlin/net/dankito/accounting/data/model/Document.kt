@@ -11,24 +11,11 @@ import javax.persistence.*
  * (German: Beleg)
  */
 @Entity
-open class Document() : BaseEntity() {
+open class Document() : DocumentBase() {
 
     companion object {
 
-        val UnsetAmount = Double.NaN
-
-        val UnsetVatRate = Float.NaN
-
-
         const val DocumentTypeColumnName = "type"
-
-        const val NetAmountColumnName = "net_amount"
-
-        const val ValueAddedTaxRateColumnName = "value_added_tax_rate"
-
-        const val ValueAddedTaxColumnName = "value_added_tax"
-
-        const val TotalAmountColumnName = "total_amount"
 
         const val IsSelfCreatedInvoiceColumnName = "is_self_created_invoice"
 
@@ -42,18 +29,20 @@ open class Document() : BaseEntity() {
 
         const val DocumentNumberColumnName = "document_number"
 
-        const val DocumentDescriptionColumnName = "document_description"
-
         const val FilePathColumnName = "file_path"
 
 
         @JvmOverloads
-        fun createInvoice(netAmount: Double, valueAddedTaxRate: Float, valueAddedTax: Double, totalAmount: Double,
-                          documentNumber: String?, documentDescription: String?,
-                          issueDate: Date = Date(), dueDate: Date? = null, filePath: File? = null): Document {
+        fun createInvoice(invoiceItems: List<DocumentItem>, documentNumber: String?,
+                          issueDate: Date = Date(), dueDate: Date? = null): Document {
+
+            val netAmount = invoiceItems.sumByDouble { it.netAmount }
+            val valueAddedTaxRate = if (invoiceItems.isEmpty()) 0f else invoiceItems[0].valueAddedTaxRate
+            val valueAddedTax = invoiceItems.sumByDouble { it.valueAddedTax }
+            val totalAmount = invoiceItems.sumByDouble { it.totalAmount }
 
             return Document(DocumentType.Revenue, true, netAmount, valueAddedTaxRate, valueAddedTax, totalAmount,
-                documentNumber, documentDescription, PaymentState.Outstanding, issueDate, dueDate, null, filePath)
+                documentNumber, null, PaymentState.Outstanding, issueDate, dueDate, null, null, invoiceItems)
         }
 
     }
@@ -73,19 +62,21 @@ open class Document() : BaseEntity() {
 
     constructor(type: DocumentType, isSelfCreatedInvoice: Boolean, netAmount: Double, valueAddedTaxRate: Float,
                 valueAddedTax: Double, totalAmount: Double, documentNumber: String?, documentDescription: String?,
-                paymentState: PaymentState, issueDate: Date?, dueDate: Date?, paymentDate: Date?, filePath: File?
+                paymentState: PaymentState, issueDate: Date?, dueDate: Date?, paymentDate: Date?, filePath: File?,
+                items: List<DocumentItem> = listOf()
     ) : this(type, totalAmount, valueAddedTaxRate) {
 
         this.isSelfCreatedInvoice = isSelfCreatedInvoice
         this.netAmount = netAmount
         this.valueAddedTax = valueAddedTax
         this.documentNumber = documentNumber
-        this.documentDescription = documentDescription
+        this.description = documentDescription
         this.paymentState = paymentState
         this.issueDate = issueDate
         this.dueDate = dueDate
         this.paymentDate = paymentDate
         this.filePath = filePath
+        this.items = items
     }
 
 
@@ -98,23 +89,8 @@ open class Document() : BaseEntity() {
     @Column(name = IsSelfCreatedInvoiceColumnName, columnDefinition = "SMALLINT DEFAULT 0", nullable = false)
     var isSelfCreatedInvoice: Boolean = false
 
-    @Column(name = NetAmountColumnName)
-    var netAmount: Double = UnsetAmount
-
-    @Column(name = ValueAddedTaxRateColumnName)
-    var valueAddedTaxRate: Float = UnsetVatRate
-
-    @Column(name = ValueAddedTaxColumnName)
-    var valueAddedTax: Double = UnsetAmount
-
-    @Column(name = TotalAmountColumnName)
-    var totalAmount: Double = UnsetAmount
-
     @Column(name = DocumentNumberColumnName)
     var documentNumber: String? = null
-
-    @Column(name = DocumentDescriptionColumnName)
-    var documentDescription: String? = null
 
     @Enumerated(EnumType.ORDINAL)
     @Column(name = PaymentStateColumnName)
@@ -135,27 +111,13 @@ open class Document() : BaseEntity() {
     @Column(name = FilePathColumnName)
     var filePath: File? = null
 
+    @OneToMany(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
+    var items: List<DocumentItem> = listOf()
 
-
-    val isNetAmountSet: Boolean
-        @Transient
-        get() = netAmount.isNaN() == false // != UnsetAmount
-
-    val isTotalAmountSet: Boolean
-        @Transient
-        get() = totalAmount.isNaN() == false
-
-    val isValueAddedTaxSet: Boolean
-        @Transient
-        get() = valueAddedTax.isNaN() == false
-
-    val isValueAddedTaxRateSet: Boolean
-        @Transient
-        get() = valueAddedTaxRate.isNaN() == false // != UnsetVatRate does not work
 
 
     override fun toString(): String {
-        return "$type of $totalAmount ($paymentState) for $documentDescription)"
+        return "$type of $totalAmount ($paymentState) for $description)"
     }
 
 
