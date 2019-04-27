@@ -37,8 +37,8 @@ class ServiceModule {
 
     @Provides
     @Singleton
-    fun provideDocumentService(dao: IDocumentDao) : IDocumentService {
-        return DocumentService(dao)
+    fun provideDocumentService(dao: IDocumentDao, documentItemDao: IDocumentItemDao) : IDocumentService {
+        return DocumentService(dao, documentItemDao)
     }
 
 

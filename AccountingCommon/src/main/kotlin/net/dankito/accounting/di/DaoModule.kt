@@ -37,6 +37,12 @@ class DaoModule(private val dataFolder: File = File("data")) {
         return DocumentDao(entityManager)
     }
 
+    @Provides
+    @Singleton
+    fun provideDocumentItemDao(entityManager: IEntityManager) : IDocumentItemDao {
+        return DocumentItemDao(entityManager)
+    }
+
 
     @Provides
     @Singleton

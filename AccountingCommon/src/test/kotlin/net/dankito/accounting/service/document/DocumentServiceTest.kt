@@ -1,7 +1,9 @@
 package net.dankito.accounting.service.document
 
 import net.dankito.accounting.data.dao.DocumentDao
+import net.dankito.accounting.data.dao.DocumentItemDao
 import net.dankito.accounting.data.model.Document
+import net.dankito.accounting.data.model.DocumentItem
 import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.data.model.PaymentState
 import net.dankito.accounting.service.util.db.JavaCouchbaseLiteEntityManager
@@ -34,7 +36,7 @@ class DocumentServiceTest {
 
         entityManager = JavaCouchbaseLiteEntityManager(entityManagerConfiguration)
 
-        underTest = DocumentService(DocumentDao(entityManager))
+        underTest = DocumentService(DocumentDao(entityManager), DocumentItemDao(entityManager))
     }
 
     @After
@@ -110,6 +112,11 @@ class DocumentServiceTest {
 
         assertThat(underTest.getCreatedInvoices()).hasSize(1)
         assertThat(underTest.getCreatedInvoices().get(0)).isEqualTo(invoice)
+
+        assertThat(invoice.items).isNotEmpty
+        invoice.items.forEach { documentItem ->
+            assertThat(documentItem.isPersisted()).isTrue()
+        }
     }
 
     @Test
@@ -139,6 +146,11 @@ class DocumentServiceTest {
 
         assertThat(underTest.getCreatedInvoices()).hasSize(1)
         assertThat(underTest.getCreatedInvoices().get(0)).isEqualTo(invoice)
+
+        assertThat(invoice.items).isNotEmpty
+        invoice.items.forEach { documentItem ->
+            assertThat(documentItem.isPersisted()).isTrue()
+        }
     }
 
     private fun createInvoice(): Document {

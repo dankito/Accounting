@@ -1,15 +1,21 @@
 package net.dankito.accounting.service.document
 
 import net.dankito.accounting.data.dao.IDocumentDao
+import net.dankito.accounting.data.dao.IDocumentItemDao
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.data.model.PaymentState
 
 
-open class DocumentService(protected val dao: IDocumentDao) : IDocumentService {
+open class DocumentService(protected val dao: IDocumentDao, protected val documentItemDao: IDocumentItemDao) : IDocumentService {
 
 
     override fun saveOrUpdate(document: Document) {
+        // TODO: how to get removed DocumentItems and delete them from database?
+        document.items.forEach { item ->
+            documentItemDao.saveOrUpdate(item)
+        }
+
         dao.saveOrUpdate(document)
     }
 
