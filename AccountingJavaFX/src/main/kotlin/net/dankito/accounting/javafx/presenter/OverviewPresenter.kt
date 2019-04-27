@@ -78,6 +78,18 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         }
     }
 
+
+    fun delete(documents: List<Document>) {
+        documents.forEach { delete(it) }
+    }
+
+    fun delete(document: Document) {
+        documentService.delete(document)
+
+        callDocumentsUpdatedListeners()
+    }
+
+
     /**
      * [roundDownNetAmount] is needed for revenues in Germany where you first have to round down the net amount and
      * calculate VAT from this value.

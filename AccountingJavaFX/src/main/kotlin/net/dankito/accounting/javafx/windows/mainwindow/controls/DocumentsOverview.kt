@@ -1,6 +1,9 @@
 package net.dankito.accounting.javafx.windows.mainwindow.controls
 
 import javafx.collections.FXCollections
+import javafx.scene.control.SelectionMode
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.utils.javafx.ui.controls.AddButton
@@ -82,9 +85,14 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
             currencyColumn(messages["main.window.documents.table.total.amount.column.header"], Document::totalAmount, OverviewPresenter.CurrencyFormat)
 
 
+            selectionModel.selectionMode = SelectionMode.MULTIPLE
+
+
             onDoubleClick {
                 selectedItem?.let { clickedItem -> presenter.showEditDocumentWindow(clickedItem) }
             }
+
+            setOnKeyReleased { event -> keyPressed(event, selectionModel.selectedItems) }
         }
 
     }
@@ -106,5 +114,17 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
     protected open fun getDocumentsInCurrentAndPreviousAccountingPeriod(retrievedDocuments: List<Document>) =
         presenter.getDocumentsInCurrentAndPreviousAccountingPeriod(retrievedDocuments)
+
+
+    private fun keyPressed(event: KeyEvent, selectedItems: List<Document>) {
+        if (event.code == KeyCode.DELETE) {
+            deleteDocuments(selectedItems)
+        }
+    }
+
+    private fun deleteDocuments(documentsToDelete: List<Document>) {
+        // TODO: ask user first
+        presenter.delete(documentsToDelete)
+    }
 
 }

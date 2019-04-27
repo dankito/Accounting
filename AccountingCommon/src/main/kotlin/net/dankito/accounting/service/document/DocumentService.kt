@@ -19,6 +19,14 @@ open class DocumentService(protected val dao: IDocumentDao, protected val docume
         dao.saveOrUpdate(document)
     }
 
+    override fun delete(document: Document) {
+        document.items.forEach { item ->
+            documentItemDao.delete(item)
+        }
+
+        dao.delete(document)
+    }
+
 
     override fun getRevenues(): List<Document> {
         return getAll().filter { it.type == DocumentType.Revenue && it.paymentState == PaymentState.Paid }

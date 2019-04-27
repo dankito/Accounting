@@ -7,6 +7,8 @@ interface IDocumentService {
 
     fun saveOrUpdate(document: Document)
 
+    fun delete(document: Document)
+
 
     fun getRevenues(): List<Document>
 
