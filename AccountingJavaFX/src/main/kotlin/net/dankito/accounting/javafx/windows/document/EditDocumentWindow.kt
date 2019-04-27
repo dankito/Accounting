@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.event.EventTarget
 import javafx.scene.control.Label
 import javafx.scene.layout.Priority
+import javafx.scene.text.TextAlignment
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.utils.datetime.asLocalDate
@@ -26,9 +27,12 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
 
         private const val LabelsWidth = 135.0
 
-        private const val AmountTextFieldsWidth = 160.0
+        private const val AmountTextFieldsWidth = 140.0
 
-        private const val DatePickerWidth = 160.0
+        private const val CurrencyLabelWidth = 10.0
+        private const val CurrencyLabelLeftMargin = 4.0
+
+        private const val DatePickerWidth = AmountTextFieldsWidth + CurrencyLabelWidth + CurrencyLabelLeftMargin
 
         private const val ButtonsHeight = 38.0
         private const val ButtonsWidth = 120.0
@@ -102,6 +106,18 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
             doubleTextfield(totalAmount, 2, false) {
                 minWidth = AmountTextFieldsWidth
                 maxWidth = AmountTextFieldsWidth
+
+                anchorpaneConstraints {
+                    topAnchor = 0.0
+                    rightAnchor = CurrencyLabelWidth + CurrencyLabelLeftMargin
+                    bottomAnchor = 0.0
+                }
+            }
+
+            label(presenter.getUserCurrencySymbol()) {
+                prefWidth = CurrencyLabelWidth
+
+                textAlignment = TextAlignment.RIGHT
 
                 anchorpaneConstraints {
                     topAnchor = 0.0
