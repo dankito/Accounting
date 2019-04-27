@@ -46,4 +46,6 @@ dependencies {
 
     testCompile "junit:junit:$junitVersion"
     testCompile "org.assertj:assertj-core:$assertJVersion"
+
+    testCompile "com.couchbase.lite:couchbase-lite-java:$couchbaseLiteVersion"
 }

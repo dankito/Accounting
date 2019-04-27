@@ -1,10 +1,10 @@
 package net.dankito.accounting.service.document
 
 import net.dankito.accounting.data.dao.DocumentDao
-import net.dankito.accounting.data.db.JavaCouchbaseLiteEntityManager
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.data.model.PaymentState
+import net.dankito.accounting.service.util.db.JavaCouchbaseLiteEntityManager
 import net.dankito.jpa.couchbaselite.CouchbaseLiteEntityManagerBase
 import net.dankito.jpa.entitymanager.EntityManagerConfiguration
 import net.dankito.utils.io.FileUtils
@@ -12,6 +12,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Test
 import java.io.File
+
 
 class DocumentServiceTest {
 
@@ -92,8 +93,7 @@ class DocumentServiceTest {
     fun saveCreatedInvoice() {
 
         // given
-        val invoice = Document.createInvoice(1000.0, 19f, 190.0, 1190.0,
-            "1", "Webshop for Amazon")
+        val invoice = createInvoice()
 
         assertThat(underTest.getRevenues()).isEmpty()
         assertThat(underTest.getExpenditures()).isEmpty()
@@ -116,8 +116,7 @@ class DocumentServiceTest {
     fun invoiceGetsPaid_IsNowARevenue() {
 
         // given
-        val invoice = Document.createInvoice(1000.0, 19f, 190.0, 1190.0,
-            "1", "Webshop for Amazon")
+        val invoice = createInvoice()
 
         underTest.saveOrUpdate(invoice)
 
@@ -140,6 +139,12 @@ class DocumentServiceTest {
 
         assertThat(underTest.getCreatedInvoices()).hasSize(1)
         assertThat(underTest.getCreatedInvoices().get(0)).isEqualTo(invoice)
+    }
+
+    private fun createInvoice(): Document {
+        val items = listOf(DocumentItem(1000.0, 19f, 190.0, 1190.0, "Webshop for Amazon"))
+
+        return Document.createInvoice(items, "1")
     }
 
 
