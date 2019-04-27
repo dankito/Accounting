@@ -4,7 +4,7 @@ import javafx.scene.control.TabPane
 import net.dankito.accounting.data.dao.*
 import net.dankito.accounting.data.dao.tax.FederalStateDao
 import net.dankito.accounting.data.dao.tax.TaxOfficeDao
-import net.dankito.accounting.data.db.JavaCouchbaseLiteEntityManager
+import net.dankito.accounting.javafx.db.JavaCouchbaseLiteEntityManager
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.javafx.windows.mainwindow.controls.MainMenuBar

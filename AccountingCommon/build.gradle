@@ -31,7 +31,7 @@ dependencies {
     compile "net.dankito.utils:java-utils:$javaUtilsVersion"
 
 
-    compile "com.couchbase.lite:couchbase-lite-java:$couchbaseLiteVersion"
+    compile "com.couchbase.lite:couchbase-lite-java-core:$couchbaseLiteVersion"
 
     compile "net.dankito.jpa.couchbaselite:couchbase-lite-jpa:$couchbaseLiteJpaVersion"
 

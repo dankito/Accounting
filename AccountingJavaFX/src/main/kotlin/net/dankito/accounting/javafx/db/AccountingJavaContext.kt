@@ -1,4 +1,4 @@
-package net.dankito.accounting.data.db
+package net.dankito.accounting.javafx.db
 
 import com.couchbase.lite.JavaContext
 
