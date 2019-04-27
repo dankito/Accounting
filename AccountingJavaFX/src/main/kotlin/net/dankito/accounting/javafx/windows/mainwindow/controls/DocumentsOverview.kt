@@ -69,7 +69,7 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
 
         tableview<Document>(documents) {
-            column(messages["main.window.documents.table.description.column.header"], Document::documentDescription) {
+            column(messages["main.window.documents.table.description.column.header"], Document::description) {
                 this.initiallyUseRemainingSpace(this@tableview)
             }
 

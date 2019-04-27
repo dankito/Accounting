@@ -41,7 +41,7 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
     }
 
 
-    private val documentDescription = SimpleStringProperty(document.documentDescription)
+    private val documentDescription = SimpleStringProperty(document.description)
 
     private val vatRate = SimpleFloatProperty(if (document.isValueAddedTaxRateSet) document.valueAddedTaxRate
                                                 else presenter.getDefaultVatRateForUser())
@@ -196,7 +196,7 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
 
 
     private fun saveAndClose() {
-        document.documentDescription = documentDescription.value
+        document.description = documentDescription.value
         document.valueAddedTaxRate = vatRate.value
         document.totalAmount = totalAmount.value
         document.paymentDate = paymentDate.value.asUtilDate()
