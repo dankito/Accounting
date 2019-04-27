@@ -55,31 +55,24 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
 
     fun saveOrUpdate(document: Document) {
-        setVatIfNotSet(document)
+        updateVat(document)
 
         documentService.saveOrUpdate(document)
 
         callDocumentsUpdatedListeners()
     }
 
-    private fun setVatIfNotSet(document: Document) {
+    private fun updateVat(document: Document) {
         if (document.isValueAddedTaxRateSet) {
             if (document.isTotalAmountSet) {
-                if (document.isNetAmountSet == false) {
-                    if (document.isValueAddedTaxSet == false) {
-                        document.valueAddedTax = calculateVatFromTotalAmount(document)
-                    }
+                document.valueAddedTax = calculateVatFromTotalAmount(document)
 
-                    document.netAmount = document.totalAmount - document.valueAddedTax
-                }
-            } else {
-                if (document.isNetAmountSet) {
-                    if (document.isValueAddedTaxSet == false) {
-                        document.valueAddedTax = calculateVatFromNetAmount(document)
-                    }
+                document.netAmount = document.totalAmount - document.valueAddedTax
+            }
+            else if (document.isNetAmountSet) {
+                document.valueAddedTax = calculateVatFromNetAmount(document)
 
-                    document.totalAmount = document.netAmount + document.valueAddedTax
-                }
+                document.totalAmount = document.netAmount + document.valueAddedTax
             }
         }
     }
