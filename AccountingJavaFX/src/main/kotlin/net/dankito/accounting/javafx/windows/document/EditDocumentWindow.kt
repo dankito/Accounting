@@ -11,6 +11,7 @@ import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.utils.datetime.asLocalDate
 import net.dankito.utils.datetime.asUtilDate
+import net.dankito.utils.javafx.ui.controls.doubleTextfield
 import net.dankito.utils.javafx.ui.dialogs.Window
 import tornadofx.*
 import java.time.LocalDate
@@ -98,7 +99,7 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
 
             label("edit.document.window.total.amount.label")
 
-            textfield(totalAmount) {
+            doubleTextfield(totalAmount, 2, false) {
                 minWidth = AmountTextFieldsWidth
                 maxWidth = AmountTextFieldsWidth
 
