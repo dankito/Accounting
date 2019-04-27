@@ -669,7 +669,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
     }
 
     private fun mapPersonToSteuerpflichtiger(person: Person): Steuerpflichtiger {
-        val address = person.primaryAddress
+        val address = person.address
 
         return Steuerpflichtiger(person.firstName, person.lastName, address.street, address.streetNumber,
             address.zipCode, address.city, address.country, null, null) // TODO: set telephone and e-mail

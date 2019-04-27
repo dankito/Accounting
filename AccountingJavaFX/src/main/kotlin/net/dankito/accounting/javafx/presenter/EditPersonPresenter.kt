@@ -8,7 +8,7 @@ import net.dankito.accounting.service.person.IPersonService
 class EditPersonPresenter(private val personService: IPersonService, private val addressService: IAddressService) {
 
     fun saveOrUpdate(person: Person) {
-        addressService.saveOrUpdate(person.primaryAddress)
+        addressService.saveOrUpdate(person.address)
 
         personService.saveOrUpdate(person)
     }

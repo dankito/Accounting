@@ -37,15 +37,15 @@ class EditPersonWindow(private val person: Person, private val didUserSavePerson
 
     private val lastName = SimpleStringProperty(person.lastName)
 
-    private val street = SimpleStringProperty(person.primaryAddress.street)
+    private val street = SimpleStringProperty(person.address.street)
 
-    private val streetNumber = SimpleStringProperty(person.primaryAddress.streetNumber)
+    private val streetNumber = SimpleStringProperty(person.address.streetNumber)
 
-    private val zipCode = SimpleStringProperty(person.primaryAddress.zipCode)
+    private val zipCode = SimpleStringProperty(person.address.zipCode)
 
-    private val city = SimpleStringProperty(person.primaryAddress.city)
+    private val city = SimpleStringProperty(person.address.city)
 
-    private val country = SimpleStringProperty(person.primaryAddress.country)
+    private val country = SimpleStringProperty(person.address.country)
 
 
     init {
@@ -143,11 +143,11 @@ class EditPersonWindow(private val person: Person, private val didUserSavePerson
         person.firstName = firstName.value
         person.lastName = lastName.value
 
-        person.primaryAddress.street = street.value
-        person.primaryAddress.streetNumber = streetNumber.value
-        person.primaryAddress.zipCode = zipCode.value
-        person.primaryAddress.city = city.value
-        person.primaryAddress.country = country.value
+        person.address.street = street.value
+        person.address.streetNumber = streetNumber.value
+        person.address.zipCode = zipCode.value
+        person.address.city = city.value
+        person.address.country = country.value
 
         presenter.saveOrUpdate(person)
 

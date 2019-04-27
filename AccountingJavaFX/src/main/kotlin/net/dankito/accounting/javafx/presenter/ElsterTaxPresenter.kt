@@ -60,7 +60,7 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
     }
 
     fun getAllPersons(): List<Person> {
-        return personService.getAll()
+        return personService.getAllPersons()
     }
 
     fun getAllTaxOfficesAsync(callback: (List<FederalState>) -> Unit) {

@@ -52,6 +52,12 @@ class DaoModule(private val dataFolder: File = File("data")) {
 
     @Provides
     @Singleton
+    fun provideCompanyDao(entityManager: IEntityManager) : ICompanyDao {
+        return CompanyDao(entityManager)
+    }
+
+    @Provides
+    @Singleton
     fun provideAddressDao(entityManager: IEntityManager) : IAddressDao {
         return AddressDao(entityManager)
     }
