@@ -4,6 +4,7 @@ import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.Person
 import net.dankito.accounting.data.model.tax.FederalState
 import net.dankito.accounting.data.model.tax.TaxOffice
+import net.dankito.accounting.data.model.tax.elster.ElsterTaxDeclarationSettings
 import net.dankito.accounting.javafx.windows.person.EditPersonWindow
 import net.dankito.accounting.service.address.IAddressService
 import net.dankito.accounting.service.person.IPersonService
@@ -189,6 +190,19 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
 
     fun makeUmsatzsteuerVoranmeldung(data: UmsatzsteuerVoranmeldung): ElsterTransactionResult {
         return client.makeUmsatzsteuerVoranmeldung(data)
+    }
+
+
+    fun getHerstellerID(): String? {
+        ElsterTaxDeclarationSettings::class.java.classLoader.getResourceAsStream("config/elster.properties")?.let { inputStream ->
+            val properties = Properties()
+
+            properties.load(inputStream)
+
+            return properties.getProperty("tax.elster.herstellerID", null)
+        }
+
+        return null
     }
 
 

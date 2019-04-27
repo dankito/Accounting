@@ -22,3 +22,5 @@ out/
 **/*.log
 
 keys.gradle
+
+elster.properties
