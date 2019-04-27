@@ -30,7 +30,9 @@ open class ValueAddedTaxCalculator {
     }
 
     open fun calculateNetAmountFromTotalAmount(totalAmount: BigDecimal, vatRate: Float): BigDecimal {
-        return totalAmount / toBigDecimal(1 + ensurePercentageIsSmallerZero(vatRate))
+        val divisor = toBigDecimal(1 + ensurePercentageIsSmallerOne(vatRate))
+
+        return totalAmount.divide(divisor, 5, RoundingMode.DOWN)
     }
 
     open fun calculateVatFromTotalAmountRounded(totalAmount: BigDecimal, vatRate: Float): BigDecimal {
@@ -64,7 +66,7 @@ open class ValueAddedTaxCalculator {
     open fun calculateVatFromNetAmount(netAmount: BigDecimal, vatRate: Float, roundDownNetAmount: Boolean = false): BigDecimal {
         val netAmountForCalculation = if (roundDownNetAmount) round(netAmount, 0, RoundingMode.DOWN) else netAmount
 
-        return netAmountForCalculation * ensurePercentageIsSmallerZero(vatRate).toBigDecimal()
+        return netAmountForCalculation * ensurePercentageIsSmallerOne(vatRate).toBigDecimal()
     }
 
     /**
@@ -77,7 +79,7 @@ open class ValueAddedTaxCalculator {
     }
 
 
-    protected open fun ensurePercentageIsSmallerZero(percentage: Float): Float {
+    protected open fun ensurePercentageIsSmallerOne(percentage: Float): Float {
         if (percentage > 1f) {
             return percentage / 100f
         }

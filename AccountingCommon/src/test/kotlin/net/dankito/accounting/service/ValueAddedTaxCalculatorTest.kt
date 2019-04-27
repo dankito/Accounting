@@ -56,6 +56,17 @@ class ValueAddedTaxCalculatorTest {
 
 
     @Test
+    fun calculateVatFromTotalAmount_34_90_to_5_57() {
+
+        // when
+        val result = underTest.calculateVatFromTotalAmount(34.90, GermanDefaultVatRate)
+
+        // then
+        assertThat(result).isEqualTo(5.57, within(0.01))
+    }
+
+
+    @Test
     fun calculateVatFromTotalAmount_836_27_to_133_52() {
 
         // when
