@@ -48,8 +48,8 @@ class ServiceModule {
 
     @Provides
     @Singleton
-    fun providePersonService(personDao: IPersonDao, companyDao: ICompanyDao) : IPersonService {
-        return PersonService(personDao, companyDao)
+    fun providePersonService(personDao: IPersonDao, companyDao: ICompanyDao, addressDao: IAddressDao) : IPersonService {
+        return PersonService(personDao, companyDao, addressDao)
     }
 
     @Provides

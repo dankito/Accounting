@@ -1,5 +1,6 @@
 package net.dankito.accounting.service.person
 
+import net.dankito.accounting.data.dao.IAddressDao
 import net.dankito.accounting.data.dao.ICompanyDao
 import net.dankito.accounting.data.dao.IPersonDao
 import net.dankito.accounting.data.model.Company
@@ -7,7 +8,8 @@ import net.dankito.accounting.data.model.NaturalOrLegalPerson
 import net.dankito.accounting.data.model.Person
 
 
-open class PersonService(protected val personDao: IPersonDao, protected val companyDao: ICompanyDao): IPersonService {
+open class PersonService(protected val personDao: IPersonDao, protected val companyDao: ICompanyDao,
+                         protected val addressDao: IAddressDao): IPersonService {
 
     override fun getAll(): List<NaturalOrLegalPerson> {
         val allPersons = mutableListOf<NaturalOrLegalPerson>()
@@ -29,6 +31,8 @@ open class PersonService(protected val personDao: IPersonDao, protected val comp
 
 
     override fun saveOrUpdate(person: NaturalOrLegalPerson) {
+        addressDao.saveOrUpdate(person.address)
+
         if (person is Person) {
             saveOrUpdate(person)
         }
@@ -53,6 +57,8 @@ open class PersonService(protected val personDao: IPersonDao, protected val comp
         else if (person is Company) {
             delete(person)
         }
+
+        addressDao.delete(person.address)
     }
 
     protected open fun delete(person: Person) {
