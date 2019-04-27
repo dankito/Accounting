@@ -6,7 +6,6 @@ import net.dankito.accounting.data.model.tax.FederalState
 import net.dankito.accounting.data.model.tax.TaxOffice
 import net.dankito.accounting.data.model.tax.elster.ElsterTaxDeclarationSettings
 import net.dankito.accounting.javafx.windows.person.EditPersonWindow
-import net.dankito.accounting.service.address.IAddressService
 import net.dankito.accounting.service.person.IPersonService
 import net.dankito.accounting.service.tax.IFederalStateService
 import net.dankito.accounting.service.tax.ITaxOfficeService
@@ -19,9 +18,12 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
+/**
+ * Don't create ElsterTaxPresenter twice as creating the contained ERiC (via ElsterClient) a second time would
+ * result in a JVM crash.
+ */
 class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationService,
                          private val personService: IPersonService,
-                         private val addressService: IAddressService,
                          private val federalStateService: IFederalStateService,
                          private val taxOfficeService: ITaxOfficeService,
                          private val threadPool: IThreadPool): AutoCloseable {
@@ -215,7 +217,7 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
     }
 
     fun showEditPersonWindow(person: Person, userDidEditPersonCallback: (Boolean) -> Unit) {
-        EditPersonWindow(person, EditPersonPresenter(personService, addressService), userDidEditPersonCallback).show()
+        EditPersonWindow(person, userDidEditPersonCallback).show()
     }
 
 }

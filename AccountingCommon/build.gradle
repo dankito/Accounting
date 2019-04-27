@@ -35,8 +35,13 @@ dependencies {
 
     compile "net.dankito.jpa.couchbaselite:couchbase-lite-jpa:$couchbaseLiteJpaVersion"
 
+    compile "com.google.dagger:dagger:$daggerVersion"
+    compileOnly 'javax.annotation:jsr250-api:1.0'
+
 
     kapt "net.dankito.jpa.annotationreader:jpa-apt:$jpaAptVersion"
+
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
 
     testCompile "junit:junit:$junitVersion"

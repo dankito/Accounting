@@ -7,27 +7,16 @@ import javafx.scene.layout.Pane
 import javafx.scene.text.Font
 import javafx.scene.text.TextAlignment
 import net.dankito.accounting.data.model.AccountingPeriod
-import net.dankito.accounting.javafx.presenter.ElsterTaxPresenter
+import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.tax.elster.ElsterTaxDeclarationWindow
-import net.dankito.accounting.service.address.IAddressService
-import net.dankito.accounting.service.person.IPersonService
-import net.dankito.accounting.service.tax.IFederalStateService
-import net.dankito.accounting.service.tax.ITaxOfficeService
-import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
-import net.dankito.utils.ThreadPool
 import net.dankito.utils.javafx.ui.controls.currencyLabel
 import net.dankito.utils.javafx.ui.extensions.setBorder
 import tornadofx.*
+import javax.inject.Inject
 
 
-class SummaryPane(private val presenter: OverviewPresenter,
-                  private val personService: IPersonService,
-                  private val addressService: IAddressService,
-                  private val elsterTaxDeclarationService: IElsterTaxDeclarationService,
-                  private val federalStatesService: IFederalStateService,
-                  private val taxOfficeService: ITaxOfficeService,
-                  private val threadPool: ThreadPool = ThreadPool()) : View() {
+class SummaryPane : View() {
 
     companion object {
         private const val SummaryAmountLabelWidth = 90.0
@@ -36,6 +25,10 @@ class SummaryPane(private val presenter: OverviewPresenter,
         private const val ElsterButtonsWidth = 180.0
         private const val ElsterButtonsFontSize = 12.0
     }
+
+
+    @Inject
+    lateinit var presenter: OverviewPresenter
 
 
     private val previousPeriodLabel = SimpleStringProperty()
@@ -71,10 +64,9 @@ class SummaryPane(private val presenter: OverviewPresenter,
     private val currentPeriodBalance = SimpleDoubleProperty()
 
 
-    private var elsterTaxPresenter: ElsterTaxPresenter? = null
-
-
     init {
+        AppComponent.component.inject(this)
+
         updateValues()
 
         presenter.addDocumentsUpdatedListenerInAMemoryLeakWay {
@@ -331,28 +323,11 @@ class SummaryPane(private val presenter: OverviewPresenter,
 
 
     private fun createElsterXml() {
-        ElsterTaxDeclarationWindow(getElsterTaxPresenter(), presenter).show()
+        ElsterTaxDeclarationWindow(presenter).show()
     }
 
     private fun uploadToElster() {
-        ElsterTaxDeclarationWindow(getElsterTaxPresenter(), presenter).show()
-    }
-
-    /**
-     * Don't create ElsterTaxPresenter twice as creating the contained ERiC (via ElsterClient) a second time would
-     * result in a JVM crash.
-     */
-    private fun getElsterTaxPresenter(): ElsterTaxPresenter {
-        elsterTaxPresenter?.let {
-            return it
-        }
-
-        val newPresenter = ElsterTaxPresenter(elsterTaxDeclarationService, personService, addressService,
-            federalStatesService, taxOfficeService, threadPool)
-
-        this.elsterTaxPresenter = newPresenter
-
-        return newPresenter
+        ElsterTaxDeclarationWindow(presenter).show()
     }
 
 }

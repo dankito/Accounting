@@ -3,6 +3,7 @@ package net.dankito.accounting.javafx.presenter
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.document.IDocumentService
+import net.dankito.accounting.service.settings.ISettingsService
 import net.dankito.utils.datetime.asUtilDate
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -17,10 +18,12 @@ class OverviewPresenterTest {
 
     private val documentsServiceMock = mock(IDocumentService::class.java)
 
+    private val settingsServiceMock = mock(ISettingsService::class.java)
+
     private val routerMock = mock(Router::class.java)
 
 
-    private val underTest = object : OverviewPresenter(documentsServiceMock, routerMock) {
+    private val underTest = object : OverviewPresenter(documentsServiceMock, settingsServiceMock, routerMock) {
 
         override fun getToday(): LocalDate {
             return mockedTodayValue.get()

@@ -19,6 +19,8 @@ ext {
 
 
     javaFxUtilsVersion = '1.0.1-SNAPSHOT'
+    
+    daggerVersion = '2.22.1'
 
     logbackVersion = '1.2.3'
 

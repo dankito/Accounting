@@ -33,6 +33,9 @@ dependencies {
     compile "ch.qos.logback:logback-classic:$logbackVersion"
 
 
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+
+
     testCompile "junit:junit:$junitVersion"
     testCompile "org.assertj:assertj-core:$assertJVersion"
 

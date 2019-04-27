@@ -6,14 +6,16 @@ import javafx.geometry.Pos
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import net.dankito.accounting.data.model.Person
+import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.EditPersonPresenter
 import net.dankito.utils.javafx.ui.dialogs.Window
 import tornadofx.*
+import javax.inject.Inject
 
 
 // TODO: add validation (e. g. a name has to be entered, country may not be longer than 20 characters, ...)
-class EditPersonWindow(private val person: Person, private val presenter: EditPersonPresenter,
-                       private val didUserSavePersonCallback: ((Boolean) -> Unit)? = null) : Window() {
+class EditPersonWindow(private val person: Person, private val didUserSavePersonCallback: ((Boolean) -> Unit)? = null)
+    : Window() {
 
     companion object {
 
@@ -25,6 +27,10 @@ class EditPersonWindow(private val person: Person, private val presenter: EditPe
         private const val ButtonsWidth = 120.0
         private const val ButtonsHorizontalSpace = 12.0
     }
+
+
+    @Inject
+    lateinit var presenter: EditPersonPresenter
 
 
     private val firstName = SimpleStringProperty(person.firstName)
@@ -40,6 +46,11 @@ class EditPersonWindow(private val person: Person, private val presenter: EditPe
     private val city = SimpleStringProperty(person.primaryAddress.city)
 
     private val country = SimpleStringProperty(person.primaryAddress.country)
+
+
+    init {
+        AppComponent.component.inject(this)
+    }
 
 
     fun show() {

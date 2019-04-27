@@ -15,7 +15,7 @@ import tornadofx.hboxConstraints
 import tornadofx.label
 
 
-class TaxNumberInput(taxNumber: String) : View() {
+class TaxNumberInput : View() {
 
     companion object {
         const val TaxNumberPartsSeparator = "/"
@@ -42,8 +42,6 @@ class TaxNumberInput(taxNumber: String) : View() {
         taxNumberPart1.addListener { _, _, _ -> updateTaxNumberAndIsEnteredTaxNumberIsValid() }
         taxNumberPart2.addListener { _, _, _ -> updateTaxNumberAndIsEnteredTaxNumberIsValid() }
         taxNumberPart3.addListener { _, _, _ -> updateTaxNumberAndIsEnteredTaxNumberIsValid() }
-
-        tryToParseTaxNumber(taxNumber)
     }
 
 
@@ -105,6 +103,11 @@ class TaxNumberInput(taxNumber: String) : View() {
         } catch (e: Exception) {
             logger.warn("Could not parse tax number '$taxNumber'", e)
         }
+    }
+
+
+    fun setTaxNumber(taxNumber: String) {
+        tryToParseTaxNumber(taxNumber)
     }
 
 }

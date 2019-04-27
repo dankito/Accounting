@@ -14,6 +14,7 @@ import javafx.stage.Stage
 import net.dankito.accounting.data.model.Person
 import net.dankito.accounting.data.model.tax.FederalState
 import net.dankito.accounting.data.model.tax.TaxOffice
+import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.ElsterTaxPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.tax.elster.controls.TaxNumberInput
@@ -31,10 +32,10 @@ import net.dankito.utils.javafx.ui.extensions.addStyleToCurrentStyle
 import net.dankito.utils.javafx.util.FXUtils
 import tornadofx.*
 import java.io.File
+import javax.inject.Inject
 
 
-class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
-                                 private val overviewPresenter: OverviewPresenter) : Window() {
+class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresenter) : Window() {
 
     companion object {
         private const val VerticalSpaceBetweenSections = 6.0
@@ -52,6 +53,10 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
         private const val ElsterButtonsHeight = 34.0
         private const val ElsterButtonsWidth = 200.0
     }
+
+
+    @Inject
+    lateinit var presenter: ElsterTaxPresenter
 
 
     private val jahr = SimpleObjectProperty<Steuerjahr>()
@@ -73,16 +78,16 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     private val vatBalance = SimpleDoubleProperty()
 
 
-    private val taxpayer = SimpleObjectProperty<Person>(presenter.settings.taxpayer)
+    private val taxpayer = SimpleObjectProperty<Person>()
 
-    private val federalState = SimpleObjectProperty<FederalState>(getInitialFederalState())
+    private val federalState = SimpleObjectProperty<FederalState>()
 
-    private val taxOffice = SimpleObjectProperty<TaxOffice>(getInitialTaxOffice())
+    private val taxOffice = SimpleObjectProperty<TaxOffice>()
 
-    private val certificateFilePath = SimpleStringProperty(presenter.settings.certificateFilePath)
-    private val isCertificateFileSet = SimpleBooleanProperty(checkIfCertificateFileExists())
+    private val certificateFilePath = SimpleStringProperty()
+    private val isCertificateFileSet = SimpleBooleanProperty(false)
 
-    private val certificatePassword = SimpleStringProperty(presenter.settings.certificatePassword ?: "")
+    private val certificatePassword = SimpleStringProperty()
 
 
     private val isATaxpayerSelected = SimpleBooleanProperty(taxpayer.value != null) // TODO: also check if all required Person fields are set
@@ -95,9 +100,9 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
     private val taxOfficesForSelectedFederalState = FXCollections.observableArrayList<TaxOffice>()
 
 
-    private var lastSelectedElsterXmlFile: File? = presenter.settings.lastSelectedElsterXmlFilePath?.let { File(it) }
+    private var lastSelectedElsterXmlFile: File? = null
 
-    private var taxNumberInput: TaxNumberInput = TaxNumberInput(presenter.settings.taxNumber)
+    private var taxNumberInput: TaxNumberInput = TaxNumberInput()
 
 
     private val areRequiredFieldsForElsterXmlProvided = SimpleBooleanProperty(false)
@@ -106,7 +111,7 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
 
 
     init {
-        initFields()
+        AppComponent.component.inject(this)
     }
 
 
@@ -321,6 +326,9 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
             }
         }
 
+
+        initFields()
+
     }
 
     private fun EventTarget.vatAmountField(labelResourceKey: String, value: Property<Number>,
@@ -404,15 +412,26 @@ class ElsterTaxDeclarationWindow(private val presenter: ElsterTaxPresenter,
 
 
     private fun initFields() {
-        federalState.value?.let { previouslySelectedFederalState ->
-            showTaxOfficesForSelectedFederalState(previouslySelectedFederalState)
-        }
+        taxpayer.value = presenter.settings.taxpayer
+
+        federalState.value = getInitialFederalState()
+
+        taxOffice.value = getInitialTaxOffice()
 
         retrievedTaxOffices(presenter.persistedFederalStates) // show last retrieved federal states
 
         presenter.getAllTaxOfficesAsync { taxOffices -> // then try to get current list from Elster (requires online connection)
             retrievedTaxOfficesOffUiThread(taxOffices)
         }
+
+        certificateFilePath.value = presenter.settings.certificateFilePath
+
+        certificatePassword.value = presenter.settings.certificatePassword ?: ""
+
+        lastSelectedElsterXmlFile = presenter.settings.lastSelectedElsterXmlFilePath?.let { File(it) }
+
+        taxNumberInput.setTaxNumber(presenter.settings.taxNumber)
+
 
         initYearAndPeriod()
 
