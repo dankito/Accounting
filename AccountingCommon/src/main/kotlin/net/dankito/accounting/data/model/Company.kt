@@ -4,4 +4,7 @@ import javax.persistence.Entity
 
 
 @Entity
-class Company : NaturalOrLegalPerson()
+class Company(name: String, address: Address) : NaturalOrLegalPerson(name, address) {
+
+    internal constructor() : this("", Address()) // for object deserializers
+}

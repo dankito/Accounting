@@ -24,7 +24,7 @@ abstract class NaturalOrLegalPerson(
 
     }
 
-    constructor() : this("", Address("", "", "", "", "")) // for object deserializers
+    constructor() : this("", Address()) // for object deserializers
 
 
     override fun toString(): String {

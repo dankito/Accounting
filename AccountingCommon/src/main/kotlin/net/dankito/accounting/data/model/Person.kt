@@ -25,7 +25,7 @@ class Person(
 
     }
 
-    constructor() : this("", "", Address("", "", "", "", "")) // for object deserializers
+    constructor() : this("", "", Address()) // for object deserializers
 
 
     /**

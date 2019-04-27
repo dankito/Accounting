@@ -39,6 +39,6 @@ class Address(
     }
 
 
-    protected constructor() : this("", "", "", "", "") // for object deserializers
+    internal constructor() : this("", "", "", "", "") // for object deserializers
 
 }
