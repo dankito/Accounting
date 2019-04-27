@@ -31,6 +31,11 @@ dependencies {
     compile "net.dankito.utils:java-utils:$javaUtilsVersion"
 
 
+    compile "fr.opensagres.xdocreport:fr.opensagres.xdocreport.document.odt:$xdocReportVersion"
+    compile "fr.opensagres.xdocreport:fr.opensagres.xdocreport.template.velocity:$xdocReportVersion"
+    compile "fr.opensagres.xdocreport:fr.opensagres.xdocreport.converter.odt.odfdom:$xdocReportVersion"
+
+
     compile "com.couchbase.lite:couchbase-lite-java-core:$couchbaseLiteVersion"
 
     compile "net.dankito.jpa.couchbaselite:couchbase-lite-jpa:$couchbaseLiteJpaVersion"

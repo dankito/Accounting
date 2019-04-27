@@ -1,0 +1,65 @@
+package net.dankito.accounting.service.invoice
+
+import net.dankito.accounting.data.model.*
+import net.dankito.accounting.data.model.invoice.CreateInvoiceJob
+import org.junit.Test
+import java.awt.Desktop
+import java.io.File
+import java.text.SimpleDateFormat
+
+
+class InvoiceServiceTest {
+
+    companion object {
+        private val DocumentNumberFormat = SimpleDateFormat("yyMMdd")
+
+        private const val TemplateFileName = "InvoiceTemplate.odt"
+
+        private val templateFileUrl = InvoiceServiceTest::class.java.classLoader.getResource(TemplateFileName)
+        private val TemplateFile = File(templateFileUrl.toURI())
+    }
+
+
+    private val underTest = InvoiceService()
+
+
+    @Test
+    fun createInvoice() {
+        val documentNumber = "190327"
+        val issueDate = DocumentNumberFormat.parse(documentNumber)
+
+        val outputFile = File.createTempFile("InvoiceServiceTest_CreatedInvoice", ".pdf")
+
+        val invoiceItems = listOf(
+            createDocumentItem(0, "Support back end development", 75.0, 113.92),
+            createDocumentItem(1, "Consulting", 95.0, 20.4)
+        )
+
+        underTest.createInvoice(CreateInvoiceJob(
+            Document.createInvoice(invoiceItems, documentNumber, issueDate, null, createRecipient()),
+            TemplateFile, outputFile
+        ))
+
+        showFile(outputFile)
+    }
+
+
+    private fun createDocumentItem(index: Int, description: String, unitPrice: Double, quantity: Double): DocumentItem {
+        val netAmount = unitPrice * quantity
+        val vatRate = 0.19f
+        val vat = netAmount * vatRate
+        val totalAmount = netAmount + vat
+
+        return DocumentItem(index, description, unitPrice, quantity, netAmount, vatRate, vat, totalAmount)
+    }
+
+    private fun createRecipient(): NaturalOrLegalPerson? {
+        return Person("Marieke", "Musterfrau", Address("Musterstraße", "42", "12345", "Musterstedt", "Germany"))
+    }
+
+
+    private fun showFile(file: File) {
+        Desktop.getDesktop().open(file)
+    }
+
+}

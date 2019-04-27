@@ -1,0 +1,16 @@
+package net.dankito.accounting.service.invoice
+
+import net.dankito.accounting.data.model.invoice.CreateInvoiceJob
+import java.io.File
+import java.util.*
+
+
+interface IInvoiceService {
+
+    fun createInvoice(job: CreateInvoiceJob)
+
+    fun calculateInvoiceNumber(invoicingDate: Date): String
+
+    fun createDefaultPdfOutputFile(job: CreateInvoiceJob): File
+
+}

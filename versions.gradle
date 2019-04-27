@@ -9,6 +9,9 @@ ext {
 
 
     javaUtilsVersion = '1.0.5-SNAPSHOT'
+
+
+    xdocReportVersion = '2.0.2'
     
 
     couchbaseLiteVersion = '1.4.1'
@@ -19,7 +22,7 @@ ext {
 
 
     javaFxUtilsVersion = '1.0.1-SNAPSHOT'
-    
+
     daggerVersion = '2.22.1'
 
     logbackVersion = '1.2.3'
