@@ -13,7 +13,7 @@ open class ElsterTaxDeclarationService(protected val dao: IElsterTaxDeclarationS
     }
 
 
-    override val settings: ElsterTaxDeclarationSettings = retrieveOrCreateAppSettings()
+    override val settings: ElsterTaxDeclarationSettings = retrieveOrCreateSettings()
 
 
     override fun saveSettings() {
@@ -21,7 +21,7 @@ open class ElsterTaxDeclarationService(protected val dao: IElsterTaxDeclarationS
     }
 
 
-    protected open fun retrieveOrCreateAppSettings(): ElsterTaxDeclarationSettings {
+    protected open fun retrieveOrCreateSettings(): ElsterTaxDeclarationSettings {
         val all = dao.getAll()
 
         if (all.isEmpty()) {

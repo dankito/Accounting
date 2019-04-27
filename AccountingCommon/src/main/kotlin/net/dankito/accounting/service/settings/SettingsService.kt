@@ -3,11 +3,13 @@ package net.dankito.accounting.service.settings
 import net.dankito.accounting.data.dao.IAppSettingsDao
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.settings.AppSettings
+import net.dankito.accounting.service.invoice.IInvoiceService
 import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
 import org.slf4j.LoggerFactory
 
 
 open class SettingsService(protected val appSettingsDao: IAppSettingsDao,
+                           protected val invoiceService: IInvoiceService,
                            protected val elsterTaxDeclarationService: IElsterTaxDeclarationService
 ) : ISettingsService {
 
@@ -28,7 +30,8 @@ open class SettingsService(protected val appSettingsDao: IAppSettingsDao,
         val all = appSettingsDao.getAll()
 
         if (all.isEmpty()) {
-            val newAppSettings = AppSettings(AccountingPeriod.Monthly, elsterTaxDeclarationService.settings)
+            val newAppSettings = AppSettings(AccountingPeriod.Monthly, invoiceService.settings,
+                elsterTaxDeclarationService.settings)
 
             appSettingsDao.saveOrUpdate(newAppSettings)
 

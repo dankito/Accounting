@@ -3,12 +3,15 @@ package net.dankito.accounting.di
 import dagger.Module
 import dagger.Provides
 import net.dankito.accounting.data.dao.*
+import net.dankito.accounting.data.dao.invoice.ICreateInvoiceSettingsDao
 import net.dankito.accounting.data.dao.tax.IFederalStateDao
 import net.dankito.accounting.data.dao.tax.ITaxOfficeDao
 import net.dankito.accounting.service.address.AddressService
 import net.dankito.accounting.service.address.IAddressService
 import net.dankito.accounting.service.document.DocumentService
 import net.dankito.accounting.service.document.IDocumentService
+import net.dankito.accounting.service.invoice.IInvoiceService
+import net.dankito.accounting.service.invoice.InvoiceService
 import net.dankito.accounting.service.person.IPersonService
 import net.dankito.accounting.service.person.PersonService
 import net.dankito.accounting.service.settings.ISettingsService
@@ -28,10 +31,11 @@ class ServiceModule {
 
     @Provides
     @Singleton
-    fun provideSettingsService(dao: IAppSettingsDao, elsterTaxDeclarationService: IElsterTaxDeclarationService)
+    fun provideSettingsService(dao: IAppSettingsDao, invoiceService: IInvoiceService,
+                               elsterTaxDeclarationService: IElsterTaxDeclarationService)
             : ISettingsService {
 
-        return SettingsService(dao,elsterTaxDeclarationService)
+        return SettingsService(dao, invoiceService, elsterTaxDeclarationService)
     }
 
 
@@ -52,6 +56,13 @@ class ServiceModule {
     @Singleton
     fun provideAddressService(dao: IAddressDao) : IAddressService {
         return AddressService(dao)
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideInvoiceService(dao: ICreateInvoiceSettingsDao, personService: IPersonService) : IInvoiceService {
+        return InvoiceService(dao, personService)
     }
 
 

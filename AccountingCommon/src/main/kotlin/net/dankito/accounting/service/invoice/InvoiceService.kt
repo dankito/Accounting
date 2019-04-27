@@ -6,11 +6,14 @@ import fr.opensagres.xdocreport.core.document.DocumentKind
 import fr.opensagres.xdocreport.document.registry.XDocReportRegistry
 import fr.opensagres.xdocreport.template.TemplateEngineKind
 import fr.opensagres.xdocreport.template.formatter.FieldsMetadata
+import net.dankito.accounting.data.dao.invoice.ICreateInvoiceSettingsDao
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentItem
 import net.dankito.accounting.data.model.invoice.CreateInvoiceJob
+import net.dankito.accounting.data.model.invoice.CreateInvoiceSettings
 import net.dankito.accounting.data.model.invoice.FormattedInvoice
 import net.dankito.accounting.data.model.invoice.FormattedInvoiceItem
+import net.dankito.accounting.service.person.IPersonService
 import net.dankito.utils.datetime.asLocalDate
 import net.dankito.utils.datetime.asUtilDate
 import org.slf4j.LoggerFactory
@@ -26,7 +29,8 @@ import java.time.LocalDate
 import java.util.*
 
 
-open class InvoiceService : IInvoiceService {
+open class InvoiceService(protected val dao: ICreateInvoiceSettingsDao, protected val personService: IPersonService)
+    : IInvoiceService {
 
 
     companion object {
@@ -43,6 +47,37 @@ open class InvoiceService : IInvoiceService {
 
         private val log = LoggerFactory.getLogger(InvoiceService::class.java)
 
+    }
+
+
+    override val settings: CreateInvoiceSettings = retrieveOrCreateSettings()
+
+
+    override fun saveSettings() {
+        personService.saveOrUpdate(settings.lastSelectedRecipient)
+
+        dao.saveOrUpdate(settings)
+    }
+
+
+    protected open fun retrieveOrCreateSettings(): CreateInvoiceSettings {
+        val all = dao.getAll()
+
+        if (all.isEmpty()) {
+            val newSettings = CreateInvoiceSettings()
+
+            personService.saveOrUpdate(newSettings.lastSelectedRecipient)
+            dao.saveOrUpdate(newSettings)
+
+            return newSettings
+        }
+        else {
+            if (all.size > 1) { // should never be the case that all contains more than one CreateInvoiceSettings instance
+                log.warn("There are more than on CreateInvoiceSettings persisted. Returning first one: ${all[0]}")
+            }
+
+            return all[0]
+        }
     }
 
 

@@ -3,6 +3,8 @@ package net.dankito.accounting.di
 import dagger.Module
 import dagger.Provides
 import net.dankito.accounting.data.dao.*
+import net.dankito.accounting.data.dao.invoice.CreateInvoiceSettingsDao
+import net.dankito.accounting.data.dao.invoice.ICreateInvoiceSettingsDao
 import net.dankito.accounting.data.dao.tax.FederalStateDao
 import net.dankito.accounting.data.dao.tax.IFederalStateDao
 import net.dankito.accounting.data.dao.tax.ITaxOfficeDao
@@ -60,6 +62,13 @@ class DaoModule(private val dataFolder: File = File("data")) {
     @Singleton
     fun provideAddressDao(entityManager: IEntityManager) : IAddressDao {
         return AddressDao(entityManager)
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideCreateInvoiceSettingsDao(entityManager: IEntityManager) : ICreateInvoiceSettingsDao {
+        return CreateInvoiceSettingsDao(entityManager)
     }
 
 

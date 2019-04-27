@@ -1,8 +1,11 @@
 package net.dankito.accounting.service.invoice
 
+import net.dankito.accounting.data.dao.invoice.ICreateInvoiceSettingsDao
 import net.dankito.accounting.data.model.*
 import net.dankito.accounting.data.model.invoice.CreateInvoiceJob
+import net.dankito.accounting.service.person.IPersonService
 import org.junit.Test
+import org.mockito.Mockito.mock
 import java.awt.Desktop
 import java.io.File
 import java.text.SimpleDateFormat
@@ -20,7 +23,11 @@ class InvoiceServiceTest {
     }
 
 
-    private val underTest = InvoiceService()
+    private val createInvoiceSettingsDaoMock = mock(ICreateInvoiceSettingsDao::class.java)
+
+    private val personServiceMock = mock(IPersonService::class.java)
+
+    private val underTest = InvoiceService(createInvoiceSettingsDaoMock, personServiceMock)
 
 
     @Test
