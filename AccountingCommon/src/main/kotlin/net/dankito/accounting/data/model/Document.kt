@@ -33,8 +33,8 @@ open class Document() : DocumentBase() {
 
 
         @JvmOverloads
-        fun createInvoice(invoiceItems: List<DocumentItem>, documentNumber: String?,
-                          issueDate: Date = Date(), dueDate: Date? = null): Document {
+        fun createInvoice(invoiceItems: List<DocumentItem>, documentNumber: String?, issueDate: Date = Date(),
+                          dueDate: Date? = null, recipient: NaturalOrLegalPerson? = null): Document {
 
             val netAmount = invoiceItems.sumByDouble { it.netAmount }
             val valueAddedTaxRate = if (invoiceItems.isEmpty()) 0f else invoiceItems[0].valueAddedTaxRate
@@ -42,7 +42,7 @@ open class Document() : DocumentBase() {
             val totalAmount = invoiceItems.sumByDouble { it.totalAmount }
 
             return Document(DocumentType.Revenue, true, netAmount, valueAddedTaxRate, valueAddedTax, totalAmount,
-                documentNumber, null, PaymentState.Outstanding, issueDate, dueDate, null, null, invoiceItems)
+                documentNumber, null, PaymentState.Outstanding, issueDate, dueDate, null, null, invoiceItems, null, recipient)
         }
 
     }
@@ -63,7 +63,8 @@ open class Document() : DocumentBase() {
     constructor(type: DocumentType, isSelfCreatedInvoice: Boolean, netAmount: Double, valueAddedTaxRate: Float,
                 valueAddedTax: Double, totalAmount: Double, documentNumber: String?, documentDescription: String?,
                 paymentState: PaymentState, issueDate: Date?, dueDate: Date?, paymentDate: Date?, filePath: File?,
-                items: List<DocumentItem> = listOf()
+                items: List<DocumentItem> = listOf(),
+                issuer: NaturalOrLegalPerson? = null, recipient: NaturalOrLegalPerson? = null
     ) : this(type, totalAmount, valueAddedTaxRate) {
 
         this.isSelfCreatedInvoice = isSelfCreatedInvoice
@@ -77,6 +78,8 @@ open class Document() : DocumentBase() {
         this.paymentDate = paymentDate
         this.filePath = filePath
         this.items = items
+        this.issuer = issuer
+        this.recipient = recipient
     }
 
 
@@ -113,6 +116,12 @@ open class Document() : DocumentBase() {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
     var items: List<DocumentItem> = listOf()
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
+    var issuer: NaturalOrLegalPerson? = null
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
+    var recipient: NaturalOrLegalPerson? = null
 
 
 
