@@ -1,6 +1,5 @@
 package net.dankito.accounting.data.model
 
-import java.io.File
 import java.util.*
 import javax.persistence.*
 
@@ -66,7 +65,7 @@ open class Document() : DocumentBase() {
 
     constructor(type: DocumentType, isSelfCreatedInvoice: Boolean, netAmount: Double, valueAddedTaxRate: Float,
                 valueAddedTax: Double, totalAmount: Double, documentNumber: String?, documentDescription: String?,
-                paymentState: PaymentState, issueDate: Date?, dueDate: Date?, paymentDate: Date?, filePath: File?,
+                paymentState: PaymentState, issueDate: Date?, dueDate: Date?, paymentDate: Date?, filePath: String?,
                 items: List<DocumentItem> = listOf(),
                 issuer: NaturalOrLegalPerson? = null, recipient: NaturalOrLegalPerson? = null
     ) : this(type, totalAmount, valueAddedTaxRate) {
@@ -116,7 +115,7 @@ open class Document() : DocumentBase() {
     var paymentDate: Date? = null
 
     @Column(name = FilePathColumnName)
-    var filePath: File? = null
+    var filePath: String? = null
 
     @OneToMany(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
     var items: List<DocumentItem> = listOf()
