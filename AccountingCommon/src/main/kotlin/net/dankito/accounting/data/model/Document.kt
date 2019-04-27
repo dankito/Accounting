@@ -31,6 +31,10 @@ open class Document() : DocumentBase() {
 
         const val FilePathColumnName = "file_path"
 
+        const val IssuerJoinColumnName = "issuer"
+
+        const val RecipientJoinColumnName = "recipient"
+
 
         @JvmOverloads
         fun createInvoice(invoiceItems: List<DocumentItem>, documentNumber: String?, issueDate: Date = Date(),
@@ -118,9 +122,11 @@ open class Document() : DocumentBase() {
     var items: List<DocumentItem> = listOf()
 
     @OneToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
+    @JoinColumn(name = IssuerJoinColumnName)
     var issuer: NaturalOrLegalPerson? = null
 
     @OneToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
+    @JoinColumn(name = RecipientJoinColumnName)
     var recipient: NaturalOrLegalPerson? = null
 
 
