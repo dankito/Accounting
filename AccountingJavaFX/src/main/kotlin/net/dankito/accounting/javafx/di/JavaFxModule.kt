@@ -3,6 +3,7 @@ package net.dankito.accounting.javafx.di
 import dagger.Module
 import dagger.Provides
 import net.dankito.accounting.javafx.service.Router
+import net.dankito.utils.javafx.os.JavaFxOsService
 import javax.inject.Singleton
 
 
@@ -13,6 +14,12 @@ class JavaFxModule {
     @Singleton
     fun provideRouter() : Router {
         return Router()
+    }
+
+    @Provides
+    @Singleton
+    fun provideOsService() : JavaFxOsService {
+        return JavaFxOsService()
     }
 
 }

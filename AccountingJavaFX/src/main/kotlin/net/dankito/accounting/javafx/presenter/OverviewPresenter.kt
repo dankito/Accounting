@@ -3,6 +3,7 @@ package net.dankito.accounting.javafx.presenter
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentType
+import net.dankito.accounting.data.model.PaymentState
 import net.dankito.accounting.data.model.settings.AppSettings
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.ValueAddedTaxCalculator
@@ -144,9 +145,25 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
     fun getDocumentsInPeriod(documents: List<Document>, periodStart: Date, periodEnd: Date): List<Document> {
         return documents.filter {
-            it.paymentDate?.let { date -> date in periodStart..periodEnd }
-            ?: false
+            isDateInPeriod(it.paymentDate, periodStart, periodEnd)
         }
+    }
+
+    fun getUnpaidInvoicesAndInvoicesInCurrentAndPreviousAccountingPeriod(documents: List<Document>): List<Document> {
+        val periodStart = getPreviousAccountingPeriodStartDate()
+        val periodEnd = getCurrentAccountingPeriodEndDate()
+
+        return documents.filter {
+            isCreatedInvoice(it) &&
+               (it.paymentState == PaymentState.Outstanding || isDateInPeriod(it.issueDate, periodStart, periodEnd))
+        }
+    }
+
+    private fun isCreatedInvoice(it: Document) = it.isSelfCreatedInvoice
+
+    private fun isDateInPeriod(date: Date?, periodStart: Date, periodEnd: Date): Boolean {
+        return date?.let { date -> date in periodStart..periodEnd }
+            ?: false
     }
 
 
@@ -304,6 +321,10 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     // to be overrideable in unit tests
     protected open fun getToday(): LocalDate = LocalDate.now()
 
+
+    fun showCreateInvoiceWindow() {
+        router.showCreateInvoiceWindow()
+    }
 
     fun showCreateRevenueWindow() {
         val newRevenue = Document(DocumentType.Revenue)

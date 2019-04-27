@@ -30,6 +30,11 @@ class OverviewTab : View() {
                 hGrow = Priority.ALWAYS
             }
 
+            add(CreatedInvoicesOverview(presenter).apply {
+                root.minHeight = 80.0
+
+            })
+
             add(RevenuesOverview(presenter))
 
             add(ExpendituresOverview(presenter).apply {

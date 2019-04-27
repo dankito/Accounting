@@ -96,13 +96,15 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
         }
     }
 
-    private fun loadDocumentsInBackgroundAndUpdateOnUiThread() {
+    protected open fun loadDocumentsInBackgroundAndUpdateOnUiThread() {
         val retrievedDocuments = retrieveDocuments().sortedBy { it.paymentDate }
 
-        val documentsInCurrentAccountingPeriod =
-            presenter.getDocumentsInCurrentAndPreviousAccountingPeriod(retrievedDocuments)
+        val documentsInCurrentAccountingPeriod = getDocumentsInCurrentAndPreviousAccountingPeriod(retrievedDocuments)
 
         runLater { documents.setAll(documentsInCurrentAccountingPeriod) }
     }
+
+    protected open fun getDocumentsInCurrentAndPreviousAccountingPeriod(retrievedDocuments: List<Document>) =
+        presenter.getDocumentsInCurrentAndPreviousAccountingPeriod(retrievedDocuments)
 
 }
