@@ -36,7 +36,9 @@ dependencies {
     compile "fr.opensagres.xdocreport:fr.opensagres.xdocreport.converter.odt.odfdom:$xdocReportVersion"
 
     compile "ch.aaap:harvest-client:$harvestClientVersion"
-
+    
+    compile "net.dankito.banking:hbci:$hbciVersion"
+    
 
     compile "com.couchbase.lite:couchbase-lite-java-core:$couchbaseLiteVersion"
 

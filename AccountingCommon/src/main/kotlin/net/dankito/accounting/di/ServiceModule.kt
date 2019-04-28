@@ -3,12 +3,19 @@ package net.dankito.accounting.di
 import dagger.Module
 import dagger.Provides
 import net.dankito.accounting.data.dao.*
+import net.dankito.accounting.data.dao.banking.IBankAccountDao
+import net.dankito.accounting.data.dao.banking.IBankAccountTransactionDao
+import net.dankito.accounting.data.dao.banking.IBankAccountTransactionsDao
 import net.dankito.accounting.data.dao.invoice.ICreateInvoiceSettingsDao
 import net.dankito.accounting.data.dao.tax.IFederalStateDao
 import net.dankito.accounting.data.dao.tax.ITaxOfficeDao
 import net.dankito.accounting.data.dao.timetracker.ITimeTrackerAccountDao
 import net.dankito.accounting.service.address.AddressService
 import net.dankito.accounting.service.address.IAddressService
+import net.dankito.accounting.service.banking.BankAccountService
+import net.dankito.accounting.service.banking.HbciBankingClient
+import net.dankito.accounting.service.banking.IBankAccountService
+import net.dankito.accounting.service.banking.IBankingClient
 import net.dankito.accounting.service.document.DocumentService
 import net.dankito.accounting.service.document.IDocumentService
 import net.dankito.accounting.service.invoice.IInvoiceService
@@ -72,6 +79,23 @@ class ServiceModule {
     @Singleton
     fun provideTimeTrackerService(accountDao: ITimeTrackerAccountDao) : ITimeTrackerService {
         return TimeTrackerService(accountDao)
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideBankingClient() : IBankingClient {
+
+        return HbciBankingClient()
+    }
+
+    @Provides
+    @Singleton
+    fun provideBankAccountService(bankingClient: IBankingClient, accountDao: IBankAccountDao,
+                                  transactionsDao: IBankAccountTransactionsDao,
+                                  transactionDao: IBankAccountTransactionDao) : IBankAccountService {
+
+        return BankAccountService(bankingClient, accountDao, transactionsDao, transactionDao)
     }
 
 

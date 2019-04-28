@@ -20,6 +20,17 @@ abstract class CouchbaseBasedDao<T : BaseEntity>(private val entityClass: Class<
         }
     }
 
+    override fun saveOrUpdate(entities: List<T>) {
+        val unpersistedEntities = entities.filter { it.isPersisted() == false }
+        unpersistedEntities.forEach { unpersistedEntity ->
+            entityManager.persistEntity(unpersistedEntity)
+        }
+
+        val persistedEntities = ArrayList(entities)
+        persistedEntities.removeAll(unpersistedEntities)
+        entityManager.updateEntities(persistedEntities)
+    }
+
     override fun delete(entity: T) {
         entityManager.deleteEntity(entity)
     }

@@ -9,6 +9,8 @@ interface IBaseDao<T : BaseEntity> {
 
     fun saveOrUpdate(entity: T)
 
+    fun saveOrUpdate(entities: List<T>)
+
     fun delete(entity: T)
 
 }
