@@ -1,7 +1,9 @@
 package net.dankito.accounting.data.model.timetracker
 
 import net.dankito.accounting.data.model.BaseEntity
+import java.util.*
 import javax.persistence.CascadeType
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.OneToMany
 
@@ -22,7 +24,10 @@ open class TrackedTimes(
     val projects: List<Project>,
 
     @OneToMany(cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
-    val task: List<Task>
+    val task: List<Task>,
+
+    @Column
+    val retrieved: Date = Date()
 
 ) : BaseEntity() {
 
