@@ -10,10 +10,6 @@ open class TimeEntry(trackedTimeInSeconds: Int,
                      val task: Task? = null)
     : TrackedTimeUnit(trackedTimeInSeconds) {
 
-    init {
-        project?.addEntry(this)
-        task?.addEntry(this)
-    }
 
     override fun toString(): String {
         return "$date: $trackedTimeString for '$description'"

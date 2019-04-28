@@ -5,7 +5,7 @@ import ch.aaap.harvestclient.core.Harvest
 import ch.aaap.harvestclient.domain.reference.dto.ProjectReferenceDto
 import net.dankito.accounting.data.model.timetracker.*
 import net.dankito.accounting.service.timetracker.ITimeTrackerImporter
-import net.dankito.accounting.service.timetracker.TimeEntriesGrouper
+import java.time.LocalDate
 
 
 open class HarvestTimeTrackerImporter : ITimeTrackerImporter {
@@ -13,9 +13,6 @@ open class HarvestTimeTrackerImporter : ITimeTrackerImporter {
     companion object {
         private const val SecondsPerHour = 60 * 60
     }
-
-
-    protected val timeEntriesGrouper = TimeEntriesGrouper()
 
 
     override fun retrieveTrackedTimes(account: TimeTrackerAccount): TrackedTimes {
@@ -27,19 +24,23 @@ open class HarvestTimeTrackerImporter : ITimeTrackerImporter {
         return mapEntries(harvestEntries)
     }
 
-    protected open fun mapEntries(harvestEntries: MutableList<ch.aaap.harvestclient.domain.TimeEntry>): TrackedTimes {
+    protected open fun mapEntries(harvestEntries: List<ch.aaap.harvestclient.domain.TimeEntry>): TrackedTimes {
         val tasksByHarvestTaskId = harvestEntries.mapNotNull { it.task }.associateBy({ it.id }, { Task(it.name) })
         val projectsByHarvestId = harvestEntries.mapNotNull { it.project as? ProjectReferenceDto }
             .associateBy({ it.id }, { Project(it.name) })
 
         val entries = mapEntries(harvestEntries, projectsByHarvestId, tasksByHarvestTaskId)
 
-        val days = timeEntriesGrouper.groupByDays(entries)
+        val days = groupByDays(entries)
+        val months = groupByMonths(days)
+
+        val projects = groupProjectEntries(projectsByHarvestId)
+        val tasks = groupTaskEntries(tasksByHarvestTaskId)
 
         return TrackedTimes(
-            entries, days, timeEntriesGrouper.groupByMonths(days),
-            projectsByHarvestId.values.toList(),
-            tasksByHarvestTaskId.values.toList()
+            entries, days, months,
+            projects,
+            tasks
         )
     }
 
@@ -48,14 +49,60 @@ open class HarvestTimeTrackerImporter : ITimeTrackerImporter {
                            tasksByHarvestTaskId: Map<Long, Task>): List<TimeEntry> {
 
         return harvestEntries.map { entry ->
-            TimeEntry(
-                    entry.hours?.let { (it * SecondsPerHour).toInt() } ?: 0,
-                    entry.spentDate,
-                    entry.notes ?: "",
-                    (entry.project as? ProjectReferenceDto)?.let { projectsByHarvestId[it.id] },
-                    entry.task?.let { tasksByHarvestTaskId[it.id] }
-            )
+            mapToTimeEntry(entry, projectsByHarvestId, tasksByHarvestTaskId)
         }
+    }
+
+    protected open fun mapToTimeEntry(harvestEntry: ch.aaap.harvestclient.domain.TimeEntry,
+                          projectsByHarvestId: Map<Long, Project>, tasksByHarvestTaskId: Map<Long, Task>): TimeEntry {
+
+        val project = (harvestEntry.project as? ProjectReferenceDto)?.let { projectsByHarvestId[it.id] }
+        val task = harvestEntry.task?.let { tasksByHarvestTaskId[it.id] }
+
+        val entry = TimeEntry(
+            harvestEntry.hours?.let { (it * SecondsPerHour).toInt() } ?: 0,
+            harvestEntry.spentDate,
+            harvestEntry.notes ?: "",
+            project,
+            task
+        )
+
+        project?.let { it.addEntry(entry) }
+        task?.let { it.addEntry(entry) }
+
+        return entry
+    }
+
+    protected open fun groupProjectEntries(projectsByHarvestId: Map<Long, Project>): List<Project> {
+        val projects = projectsByHarvestId.values.toList()
+
+        projects.forEach { project ->
+            project.trackedDays = groupByDays(project.trackedTimeEntries)
+            project.trackedMonths = groupByMonths(project.trackedDays)
+        }
+        return projects
+    }
+
+    protected open fun groupTaskEntries(tasksByHarvestTaskId: Map<Long, Task>): List<Task> {
+        val tasks = tasksByHarvestTaskId.values.toList()
+
+        tasks.forEach { task ->
+            task.trackedDays = groupByDays(task.trackedTimeEntries)
+            task.trackedMonths = groupByMonths(task.trackedDays)
+        }
+        return tasks
+    }
+
+    protected open fun groupByDays(entries: List<TimeEntry>): List<TrackedDay> {
+        return entries
+            .groupBy( { it.date }, { it } )
+            .map { TrackedHarvestDay(it.key, it.value) }
+    }
+
+    protected open fun groupByMonths(days: List<TrackedDay>): List<TrackedMonth> {
+        return days
+            .groupBy( { LocalDate.of(it.date.year, it.date.monthValue, 1) }, { it } )
+            .map { TrackedMonth(it.key, it.value) }
     }
 
 }
