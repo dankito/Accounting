@@ -2,7 +2,6 @@ package net.dankito.accounting.data.model
 
 import javax.persistence.Column
 import javax.persistence.MappedSuperclass
-import javax.persistence.Transient
 
 
 /**
@@ -61,19 +60,15 @@ open class DocumentBase() : BaseEntity() {
 
 
     val isNetAmountSet: Boolean
-        @Transient
         get() = netAmount.isNaN() == false // != UnsetAmount
 
     val isTotalAmountSet: Boolean
-        @Transient
         get() = totalAmount.isNaN() == false
 
     val isValueAddedTaxSet: Boolean
-        @Transient
         get() = valueAddedTax.isNaN() == false
 
     val isValueAddedTaxRateSet: Boolean
-        @Transient
         get() = valueAddedTaxRate.isNaN() == false // != UnsetVatRate does not work
 
 
