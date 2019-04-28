@@ -9,6 +9,8 @@ import net.dankito.accounting.data.dao.tax.FederalStateDao
 import net.dankito.accounting.data.dao.tax.IFederalStateDao
 import net.dankito.accounting.data.dao.tax.ITaxOfficeDao
 import net.dankito.accounting.data.dao.tax.TaxOfficeDao
+import net.dankito.accounting.data.dao.timetracker.ITimeTrackerAccountDao
+import net.dankito.accounting.data.dao.timetracker.TimeTrackerAccountDao
 import net.dankito.jpa.entitymanager.EntityManagerConfiguration
 import net.dankito.jpa.entitymanager.IEntityManager
 import java.io.File
@@ -69,6 +71,12 @@ class DaoModule(private val dataFolder: File = File("data")) {
     @Singleton
     fun provideCreateInvoiceSettingsDao(entityManager: IEntityManager) : ICreateInvoiceSettingsDao {
         return CreateInvoiceSettingsDao(entityManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTimeTrackerAccountDao(entityManager: IEntityManager) : ITimeTrackerAccountDao {
+        return TimeTrackerAccountDao(entityManager)
     }
 
 

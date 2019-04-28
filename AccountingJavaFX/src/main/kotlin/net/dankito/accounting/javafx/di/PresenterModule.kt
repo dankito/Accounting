@@ -2,10 +2,7 @@ package net.dankito.accounting.javafx.di
 
 import dagger.Module
 import dagger.Provides
-import net.dankito.accounting.javafx.presenter.CreateInvoicePresenter
-import net.dankito.accounting.javafx.presenter.EditPersonPresenter
-import net.dankito.accounting.javafx.presenter.ElsterTaxPresenter
-import net.dankito.accounting.javafx.presenter.OverviewPresenter
+import net.dankito.accounting.javafx.presenter.*
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.ValueAddedTaxCalculator
 import net.dankito.accounting.service.address.IAddressService
@@ -16,6 +13,7 @@ import net.dankito.accounting.service.settings.ISettingsService
 import net.dankito.accounting.service.tax.IFederalStateService
 import net.dankito.accounting.service.tax.ITaxOfficeService
 import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
+import net.dankito.accounting.service.timetracker.ITimeTrackerService
 import net.dankito.utils.IThreadPool
 import net.dankito.utils.javafx.os.JavaFxOsService
 import javax.inject.Singleton
@@ -46,6 +44,15 @@ class PresenterModule {
     fun provideCreateInvoicePresenter(invoiceService: IInvoiceService, osService: JavaFxOsService) : CreateInvoicePresenter {
 
         return CreateInvoicePresenter(invoiceService, osService)
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideTimeTrackerAccountPresenter(timeTrackerService: ITimeTrackerService, router: Router)
+            : TimeTrackerAccountPresenter {
+
+        return TimeTrackerAccountPresenter(timeTrackerService, router)
     }
 
 

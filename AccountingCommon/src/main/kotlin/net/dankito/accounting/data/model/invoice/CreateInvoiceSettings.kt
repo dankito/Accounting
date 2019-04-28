@@ -4,6 +4,7 @@ import net.dankito.accounting.data.model.Address
 import net.dankito.accounting.data.model.BaseEntity
 import net.dankito.accounting.data.model.Company
 import net.dankito.accounting.data.model.NaturalOrLegalPerson
+import net.dankito.accounting.data.model.timetracker.TimeTrackerAccount
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.JoinColumn
@@ -12,6 +13,10 @@ import javax.persistence.OneToOne
 
 @Entity
 class CreateInvoiceSettings(
+
+    @OneToOne
+    @JoinColumn(name = TimeTrackerAccountJoinColumnName)
+    var timeTrackerAccount: TimeTrackerAccount? = null,
 
     @Column(name = InvoiceTemplateFilePathColumnName)
     var invoiceTemplateFilePath: String = "",
@@ -35,6 +40,8 @@ class CreateInvoiceSettings(
 ) : BaseEntity() {
 
     companion object {
+
+        const val TimeTrackerAccountJoinColumnName = "time_tracker_account"
 
         const val InvoiceTemplateFilePathColumnName = "invoice_template_file_path"
 

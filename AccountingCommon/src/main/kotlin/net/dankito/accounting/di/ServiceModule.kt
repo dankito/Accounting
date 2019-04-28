@@ -6,6 +6,7 @@ import net.dankito.accounting.data.dao.*
 import net.dankito.accounting.data.dao.invoice.ICreateInvoiceSettingsDao
 import net.dankito.accounting.data.dao.tax.IFederalStateDao
 import net.dankito.accounting.data.dao.tax.ITaxOfficeDao
+import net.dankito.accounting.data.dao.timetracker.ITimeTrackerAccountDao
 import net.dankito.accounting.service.address.AddressService
 import net.dankito.accounting.service.address.IAddressService
 import net.dankito.accounting.service.document.DocumentService
@@ -22,6 +23,8 @@ import net.dankito.accounting.service.tax.ITaxOfficeService
 import net.dankito.accounting.service.tax.TaxOfficeService
 import net.dankito.accounting.service.tax.elster.ElsterTaxDeclarationService
 import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
+import net.dankito.accounting.service.timetracker.ITimeTrackerService
+import net.dankito.accounting.service.timetracker.TimeTrackerService
 import javax.inject.Singleton
 
 
@@ -63,6 +66,12 @@ class ServiceModule {
     @Singleton
     fun provideInvoiceService(dao: ICreateInvoiceSettingsDao, personService: IPersonService) : IInvoiceService {
         return InvoiceService(dao, personService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTimeTrackerService(accountDao: ITimeTrackerAccountDao) : ITimeTrackerService {
+        return TimeTrackerService(accountDao)
     }
 
 
