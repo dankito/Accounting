@@ -8,14 +8,14 @@ import net.dankito.accounting.service.timetracker.ITimeTrackerImporter
 import net.dankito.accounting.service.timetracker.TimeEntriesGrouper
 
 
-class HarvestTimeTrackerImporter : ITimeTrackerImporter {
+open class HarvestTimeTrackerImporter : ITimeTrackerImporter {
 
     companion object {
         private const val SecondsPerHour = 60 * 60
     }
 
 
-    private val timeEntriesGrouper = TimeEntriesGrouper()
+    protected val timeEntriesGrouper = TimeEntriesGrouper()
 
 
     override fun retrieveTrackedTimes(account: TimeTrackerAccount): TrackedTimes {
@@ -24,20 +24,26 @@ class HarvestTimeTrackerImporter : ITimeTrackerImporter {
 
         val harvestEntries = harvest.timesheets().list(TimeEntryFilter.emptyFilter())
 
-        val tasksByHarvestTaskId = harvestEntries.mapNotNull { it.task }.associateBy( { it.id }, { Task(it.name) } )
-        val projectsByHarvestId = harvestEntries.mapNotNull { it.project as ProjectReferenceDto }
-                .associateBy( { it.id }, { Project(it.name) } )
+        return mapEntries(harvestEntries)
+    }
+
+    protected open fun mapEntries(harvestEntries: MutableList<ch.aaap.harvestclient.domain.TimeEntry>): TrackedTimes {
+        val tasksByHarvestTaskId = harvestEntries.mapNotNull { it.task }.associateBy({ it.id }, { Task(it.name) })
+        val projectsByHarvestId = harvestEntries.mapNotNull { it.project as? ProjectReferenceDto }
+            .associateBy({ it.id }, { Project(it.name) })
 
         val entries = mapEntries(harvestEntries, projectsByHarvestId, tasksByHarvestTaskId)
 
         val days = timeEntriesGrouper.groupByDays(entries)
 
-        return TrackedTimes(entries, days, timeEntriesGrouper.groupByMonths(days),
-                projectsByHarvestId.values.toList(),
-                tasksByHarvestTaskId.values.toList())
+        return TrackedTimes(
+            entries, days, timeEntriesGrouper.groupByMonths(days),
+            projectsByHarvestId.values.toList(),
+            tasksByHarvestTaskId.values.toList()
+        )
     }
 
-    private fun mapEntries(harvestEntries: List<ch.aaap.harvestclient.domain.TimeEntry>,
+    protected open fun mapEntries(harvestEntries: List<ch.aaap.harvestclient.domain.TimeEntry>,
                            projectsByHarvestId: Map<Long, Project>,
                            tasksByHarvestTaskId: Map<Long, Task>): List<TimeEntry> {
 
