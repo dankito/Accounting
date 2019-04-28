@@ -35,12 +35,12 @@ class CreateInvoicePresenter(private val invoiceService: IInvoiceService, privat
 
 
     fun createDocumentItem(index: Int, quantity: Double): DocumentItem {
-        return createDocumentItem(index, settings.invoiceItemDescription, settings.invoiceItemUnitPrice, quantity)
+        return createDocumentItem(index, settings.invoiceItemDescription, settings.invoiceItemUnitPrice,
+            settings.valueAddedTaxRate.toFloat(), quantity)
     }
 
-    fun createDocumentItem(index: Int, description: String, unitPrice: Double, quantity: Double): DocumentItem {
+    fun createDocumentItem(index: Int, description: String, unitPrice: Double, vatRate: Float, quantity: Double): DocumentItem {
         val netAmount = unitPrice * quantity
-        val vatRate = 0.19f
         val vat = netAmount * vatRate
         val totalAmount = netAmount + vat
 
