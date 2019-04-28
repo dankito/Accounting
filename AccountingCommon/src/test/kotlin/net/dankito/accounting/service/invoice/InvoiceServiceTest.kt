@@ -43,7 +43,7 @@ class InvoiceServiceTest {
         )
 
         underTest.createInvoice(CreateInvoiceJob(
-            Document.createInvoice(invoiceItems, documentNumber, issueDate, null, createRecipient()),
+            Document.createInvoice(invoiceItems, documentNumber, null, issueDate, null, createRecipient()),
             TemplateFile, outputFile
         ))
 
