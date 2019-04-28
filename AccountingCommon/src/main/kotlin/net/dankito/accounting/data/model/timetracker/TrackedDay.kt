@@ -1,17 +1,16 @@
 package net.dankito.accounting.data.model.timetracker
 
-import java.time.LocalDate
 import javax.persistence.CascadeType
-import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 
 
 @Entity
 open class TrackedDay(
 
-    @Column
-    val date: LocalDate,
+    @OneToOne(cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ])
+    val date: TimeTrackerDate,
 
     @OneToMany(cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ])
     val entries: List<TimeEntry>,
@@ -21,7 +20,7 @@ open class TrackedDay(
 ) : TrackedTimeUnit(trackedTimeInSeconds) {
 
 
-    internal constructor() : this(LocalDate.now(), listOf()) // for object deserializers
+    internal constructor() : this(TimeTrackerDate(), listOf()) // for object deserializers
 
 
     override fun toString(): String {

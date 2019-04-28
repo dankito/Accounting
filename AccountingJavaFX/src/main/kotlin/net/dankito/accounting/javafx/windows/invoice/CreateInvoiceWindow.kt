@@ -10,7 +10,9 @@ import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.invoice.CreateInvoiceSettings
 import net.dankito.accounting.data.model.timetracker.TimeTrackerAccount
 import net.dankito.accounting.data.model.timetracker.TrackedMonth
+import net.dankito.accounting.data.model.timetracker.TrackedTimes
 import net.dankito.accounting.javafx.di.AppComponent
+import net.dankito.accounting.javafx.extensions.asLocalDate
 import net.dankito.accounting.javafx.presenter.CreateInvoicePresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.presenter.TimeTrackerAccountPresenter
@@ -93,7 +95,7 @@ class CreateInvoiceWindow : Window() {
         showAvailableTimeTrackerAccounts()
 
         settings.timeTrackerAccount?.let { account ->
-            account.trackedTimes?.let { trackedMonths.setAll(it.months) }
+            account.trackedTimes?.let { showTrackedMonths(it) }
 
             importTimeTrackerData()
         }
@@ -345,16 +347,20 @@ class CreateInvoiceWindow : Window() {
 
     private fun importTimeTrackerData() {
         timeTrackerAccountPresenter.importTimeTrackerDataAsync(settingsViewModel.timeTrackerAccount.value) { trackedTimes ->
-            trackedMonths.setAll(trackedTimes.months)
+            showTrackedMonths(trackedTimes)
         }
+    }
+
+    private fun showTrackedMonths(trackedTimes: TrackedTimes) {
+        trackedMonths.setAll(trackedTimes.months.sortedByDescending { it.month })
     }
 
 
     private fun selectedTrackedMonthChanged(trackedMonth: TrackedMonth) {
         invoiceItemQuantity.value = trackedMonth.decimalHours
 
-        invoiceViewModel.invoiceStartDate.value = trackedMonth.firstTrackedDay
-        invoiceViewModel.invoiceEndDate.value = trackedMonth.lastTrackedDay
+        invoiceViewModel.invoiceStartDate.value = trackedMonth.firstTrackedDay?.asLocalDate()
+        invoiceViewModel.invoiceEndDate.value = trackedMonth.lastTrackedDay?.asLocalDate()
 
         updateInvoiceDescription()
     }
@@ -362,7 +368,7 @@ class CreateInvoiceWindow : Window() {
     private fun updateInvoiceDescription() {
         // TODO: check if user already set this value
         invoiceViewModel.invoiceDescription.value = settingsViewModel.clientName.value +
-                (selectedTrackedMonth.item?.let { " " + MonthDateFormatter.format(it.month) } ?: "")
+                (selectedTrackedMonth.item?.let { " " + MonthDateFormatter.format(it.month.asLocalDate()) } ?: "")
     }
 
     private fun updateInvoiceNumber() {

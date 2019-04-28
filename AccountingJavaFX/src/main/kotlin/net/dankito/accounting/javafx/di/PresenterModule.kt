@@ -51,10 +51,10 @@ class PresenterModule {
 
     @Provides
     @Singleton
-    fun provideTimeTrackerAccountPresenter(timeTrackerService: ITimeTrackerService, router: Router)
+    fun provideTimeTrackerAccountPresenter(timeTrackerService: ITimeTrackerService, router: Router, threadPool: IThreadPool)
             : TimeTrackerAccountPresenter {
 
-        return TimeTrackerAccountPresenter(timeTrackerService, router)
+        return TimeTrackerAccountPresenter(timeTrackerService, router, threadPool)
     }
 
 

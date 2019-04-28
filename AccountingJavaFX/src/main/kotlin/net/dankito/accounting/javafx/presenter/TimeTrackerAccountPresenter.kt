@@ -7,9 +7,11 @@ import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.timetracker.ITimeTrackerImporter
 import net.dankito.accounting.service.timetracker.ITimeTrackerService
 import net.dankito.accounting.service.timetracker.harvest.HarvestTimeTrackerImporter
+import net.dankito.utils.IThreadPool
 
 
-class TimeTrackerAccountPresenter(private val timeTrackerService: ITimeTrackerService, private val router: Router) {
+class TimeTrackerAccountPresenter(private val timeTrackerService: ITimeTrackerService, private val router: Router,
+                                  private val threadPool: IThreadPool) {
 
     fun getAllTimeTrackerAccounts(): List<TimeTrackerAccount> {
         return timeTrackerService.getAccounts()
@@ -49,7 +51,9 @@ class TimeTrackerAccountPresenter(private val timeTrackerService: ITimeTrackerSe
     private fun saveTrackedTimes(account: TimeTrackerAccount, trackedTimes: TrackedTimes) {
         account.trackedTimes = trackedTimes
 
-        timeTrackerService.saveOrUpdate(account)
+        threadPool.runAsync {
+            timeTrackerService.saveOrUpdate(account)
+        }
     }
 
 }

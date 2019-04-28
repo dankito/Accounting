@@ -1,17 +1,16 @@
 package net.dankito.accounting.data.model.timetracker
 
-import java.time.LocalDate
 import javax.persistence.CascadeType
-import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 
 
 @Entity
 class TrackedMonth(
 
-    @Column
-    val month: LocalDate,
+    @OneToOne(cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ])
+    val month: TimeTrackerDate,
 
     @OneToMany(cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ])
     val days: List<TrackedDay>,
@@ -21,21 +20,21 @@ class TrackedMonth(
 ) : TrackedTimeUnit(trackedTimeInSeconds) {
 
 
-    internal constructor() : this(LocalDate.now(), listOf()) // for object deserializers
+    internal constructor() : this(TimeTrackerDate(), listOf()) // for object deserializers
 
 
-    val firstTrackedDay: LocalDate?
+    val firstTrackedDay: TimeTrackerDate?
         get() = days.sortedBy { it.date }.firstOrNull()?.date
 
-    val lastTrackedDay: LocalDate?
+    val lastTrackedDay: TimeTrackerDate?
         get() = days.sortedByDescending { it.date }.firstOrNull()?.date
 
 
-    val firstDayOfTrackedMonth: LocalDate
-        get() = month.withDayOfMonth(1)
+    val firstDayOfTrackedMonth: TimeTrackerDate
+        get() = month.atFirstDayOfMonth()
 
-    val lastDayOfTrackedMonth: LocalDate
-        get() = month.withDayOfMonth(month.lengthOfMonth())
+    val lastDayOfTrackedMonth: TimeTrackerDate
+        get() = month.atLastDayOfMonth()
 
 
     override fun toString(): String {

@@ -5,7 +5,6 @@ import ch.aaap.harvestclient.core.Harvest
 import ch.aaap.harvestclient.domain.reference.dto.ProjectReferenceDto
 import net.dankito.accounting.data.model.timetracker.*
 import net.dankito.accounting.service.timetracker.ITimeTrackerImporter
-import java.time.LocalDate
 
 
 open class HarvestTimeTrackerImporter : ITimeTrackerImporter {
@@ -61,7 +60,7 @@ open class HarvestTimeTrackerImporter : ITimeTrackerImporter {
 
         val entry = TimeEntry(
             harvestEntry.hours?.let { (it * SecondsPerHour).toInt() } ?: 0,
-            harvestEntry.spentDate,
+            TimeTrackerDate(harvestEntry.spentDate.year, harvestEntry.spentDate.monthValue, harvestEntry.spentDate.dayOfMonth),
             harvestEntry.notes ?: "",
             project,
             task
@@ -101,7 +100,7 @@ open class HarvestTimeTrackerImporter : ITimeTrackerImporter {
 
     protected open fun groupByMonths(days: List<TrackedDay>): List<TrackedMonth> {
         return days
-            .groupBy( { LocalDate.of(it.date.year, it.date.monthValue, 1) }, { it } )
+            .groupBy( { it.date.atFirstDayOfMonth() }, { it } )
             .map { TrackedMonth(it.key, it.value) }
     }
 
