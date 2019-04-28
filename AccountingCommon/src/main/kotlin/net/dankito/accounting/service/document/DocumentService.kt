@@ -40,6 +40,10 @@ open class DocumentService(protected val dao: IDocumentDao, protected val docume
         return getAll().filter { it.isSelfCreatedInvoice }
     }
 
+    override fun getUnpaidCreatedInvoices(): List<Document> {
+        return getCreatedInvoices().filter { it.paymentState != PaymentState.Paid }
+    }
+
 
     protected open fun getAll() = dao.getAll().toMutableList()
 

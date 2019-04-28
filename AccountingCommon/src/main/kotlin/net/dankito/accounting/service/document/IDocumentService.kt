@@ -16,4 +16,6 @@ interface IDocumentService {
 
     fun getCreatedInvoices(): List<Document>
 
+    fun getUnpaidCreatedInvoices(): List<Document>
+
 }

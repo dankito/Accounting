@@ -30,6 +30,11 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     }
 
 
+    init {
+        checkUnpaidInvoicesPaymentState()
+    }
+
+
     var accountingPeriod: AccountingPeriod = settingsService.appSettings.accountingPeriod
         set(newAccountingPeriod) {
             if (newAccountingPeriod != field) {
@@ -95,6 +100,14 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         callDocumentsUpdatedListeners()
     }
 
+
+    fun checkUnpaidInvoicesPaymentState() {
+        bankAccountService.updateAccountTransactionsAsync {
+            documentService.getUnpaidCreatedInvoices().forEach { unpaidInvoice ->
+                checkInvoicePaymentState(unpaidInvoice)
+            }
+        }
+    }
 
     fun checkInvoicePaymentState(invoice: Document) {
         if (invoice.paymentState != PaymentState.Paid) {
