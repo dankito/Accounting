@@ -8,6 +8,8 @@ import java.time.LocalDate
 
 class InvoiceViewModel : ViewModel() {
 
+    val invoiceDescription = SimpleStringProperty()
+
     val invoicingDate = SimpleObjectProperty<LocalDate>(LocalDate.now())
 
     val invoiceNumber = SimpleStringProperty()

@@ -25,6 +25,7 @@ import net.dankito.utils.javafx.ui.controls.doubleTextfield
 import net.dankito.utils.javafx.ui.dialogs.Window
 import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
 import tornadofx.*
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 
@@ -39,6 +40,9 @@ class CreateInvoiceWindow : Window() {
         private const val ButtonHeight = 40.0
 
         private const val ButtonBottomAnchor = 24.0
+
+
+        private val MonthDateFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
 
     }
 
@@ -84,6 +88,10 @@ class CreateInvoiceWindow : Window() {
         showAvailableTimeTrackerAccounts()
 
         settings.timeTrackerAccount?.let { importTimeTrackerData() }
+
+        updateInvoiceDescription()
+
+        settingsViewModel.clientName.removeListener { _, _, _ -> updateInvoiceDescription() }
 
         setupSelectFileViews()
     }
@@ -188,6 +196,12 @@ class CreateInvoiceWindow : Window() {
         }
 
         fieldset(messages["create.invoice.window.invoice.settings"]) {
+            field(messages["create.invoice.window.invoice.description"]) {
+                textfield(invoiceViewModel.invoiceDescription) {
+                    promptText = messages["create.invoice.window.invoice.description.hint"]
+                }
+            }
+
             field(messages["create.invoice.window.invoicing.date"]) {
                 datepicker(invoiceViewModel.invoicingDate)
             }
@@ -328,6 +342,14 @@ class CreateInvoiceWindow : Window() {
 
         invoiceViewModel.invoiceStartDate.value = trackedMonth.firstTrackedDay
         invoiceViewModel.invoiceEndDate.value = trackedMonth.lastTrackedDay
+
+        updateInvoiceDescription()
+    }
+
+    private fun updateInvoiceDescription() {
+        // TODO: check if user already set this value
+        invoiceViewModel.invoiceDescription.value = settingsViewModel.clientName.value +
+                (selectedTrackedMonth.item?.let { " " + MonthDateFormatter.format(it.month) } ?: "")
     }
 
 
@@ -339,7 +361,8 @@ class CreateInvoiceWindow : Window() {
         )
 
         val invoice = Document.createInvoice(invoiceItems, invoiceViewModel.invoiceNumber.value,
-            invoiceViewModel.invoicingDate.value.asUtilDate(), null, settings.lastSelectedRecipient)
+            invoiceViewModel.invoiceDescription.value, invoiceViewModel.invoicingDate.value.asUtilDate(), null,
+            settings.lastSelectedRecipient)
 
         presenter.createAndShowInvoice(invoice)
 
