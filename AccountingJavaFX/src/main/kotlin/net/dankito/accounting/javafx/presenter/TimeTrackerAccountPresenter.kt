@@ -42,9 +42,11 @@ class TimeTrackerAccountPresenter(private val timeTrackerService: ITimeTrackerSe
         }
 
         importer.retrieveTrackedTimesAsync(account) { trackedTimes ->
-            saveTrackedTimes(account, trackedTimes)
+            trackedTimes?.let {
+                saveTrackedTimes(account, trackedTimes)
 
-            callback(trackedTimes)
+                callback(trackedTimes)
+            }
         }
     }
 

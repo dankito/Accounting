@@ -7,12 +7,12 @@ import kotlin.concurrent.thread
 
 interface ITimeTrackerImporter {
 
-    fun retrieveTrackedTimesAsync(account: TimeTrackerAccount, callback: (trackedTimes: TrackedTimes) -> Unit) {
+    fun retrieveTrackedTimesAsync(account: TimeTrackerAccount, callback: (trackedTimes: TrackedTimes?) -> Unit) {
         thread {
             callback(retrieveTrackedTimes(account))
         }
     }
 
-    fun retrieveTrackedTimes(account: TimeTrackerAccount): TrackedTimes
+    fun retrieveTrackedTimes(account: TimeTrackerAccount): TrackedTimes?
 
 }

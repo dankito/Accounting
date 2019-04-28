@@ -5,22 +5,31 @@ import ch.aaap.harvestclient.core.Harvest
 import ch.aaap.harvestclient.domain.reference.dto.ProjectReferenceDto
 import net.dankito.accounting.data.model.timetracker.*
 import net.dankito.accounting.service.timetracker.ITimeTrackerImporter
+import org.slf4j.LoggerFactory
 
 
 open class HarvestTimeTrackerImporter : ITimeTrackerImporter {
 
     companion object {
         private const val SecondsPerHour = 60 * 60
+
+        private val log = LoggerFactory.getLogger(HarvestTimeTrackerImporter::class.java)
     }
 
 
-    override fun retrieveTrackedTimes(account: TimeTrackerAccount): TrackedTimes {
-        val config = HarvestConfigBuilder(account).createConfig()
-        val harvest = Harvest(config)
+    override fun retrieveTrackedTimes(account: TimeTrackerAccount): TrackedTimes? {
+        try {
+            val config = HarvestConfigBuilder(account).createConfig()
+            val harvest = Harvest(config)
 
-        val harvestEntries = harvest.timesheets().list(TimeEntryFilter.emptyFilter())
+            val harvestEntries = harvest.timesheets().list(TimeEntryFilter.emptyFilter())
 
-        return mapEntries(harvestEntries)
+            return mapEntries(harvestEntries)
+        } catch (e: Exception) {
+            log.error("Could not retrieve tracked times", e)
+        }
+
+        return null
     }
 
     protected open fun mapEntries(harvestEntries: List<ch.aaap.harvestclient.domain.TimeEntry>): TrackedTimes {
@@ -36,11 +45,7 @@ open class HarvestTimeTrackerImporter : ITimeTrackerImporter {
         val projects = groupProjectEntries(projectsByHarvestId)
         val tasks = groupTaskEntries(tasksByHarvestTaskId)
 
-        return TrackedTimes(
-            entries, days, months,
-            projects,
-            tasks
-        )
+        return TrackedTimes(entries, days, months, projects, tasks)
     }
 
     protected open fun mapEntries(harvestEntries: List<ch.aaap.harvestclient.domain.TimeEntry>,
