@@ -24,6 +24,7 @@ import net.dankito.utils.datetime.asUtilDate
 import net.dankito.utils.javafx.ui.controls.doubleTextfield
 import net.dankito.utils.javafx.ui.dialogs.Window
 import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
+import org.slf4j.LoggerFactory
 import tornadofx.*
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -43,6 +44,10 @@ class CreateInvoiceWindow : Window() {
 
 
         private val MonthDateFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
+
+        private val InvoiceDateFormatter = DateTimeFormatter.ofPattern("yyMMdd'1'")
+
+        private val logger = LoggerFactory.getLogger(CreateInvoiceWindow::class.java)
 
     }
 
@@ -91,7 +96,11 @@ class CreateInvoiceWindow : Window() {
 
         updateInvoiceDescription()
 
-        settingsViewModel.clientName.removeListener { _, _, _ -> updateInvoiceDescription() }
+        settingsViewModel.clientName.addListener { _, _, _ -> updateInvoiceDescription() }
+
+        updateInvoiceNumber()
+
+        invoiceViewModel.invoicingDate.addListener { _, _, _ -> updateInvoiceNumber() }
 
         setupSelectFileViews()
     }
@@ -350,6 +359,15 @@ class CreateInvoiceWindow : Window() {
         // TODO: check if user already set this value
         invoiceViewModel.invoiceDescription.value = settingsViewModel.clientName.value +
                 (selectedTrackedMonth.item?.let { " " + MonthDateFormatter.format(it.month) } ?: "")
+    }
+
+    private fun updateInvoiceNumber() {
+        // TODO: check if user already set this value
+        try {
+            invoiceViewModel.invoiceNumber.value = InvoiceDateFormatter.format(invoiceViewModel.invoicingDate.value)
+        } catch (e: Exception) {
+            logger.warn("Could not create invoice number from date ${invoiceViewModel.invoicingDate.value}", e)
+        }
     }
 
 
