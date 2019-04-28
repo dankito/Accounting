@@ -1,5 +1,6 @@
 package net.dankito.accounting.javafx.windows.invoice
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
@@ -80,6 +81,8 @@ class CreateInvoiceWindow : Window() {
 
 
     private val timeTrackerAccounts = FXCollections.observableArrayList<TimeTrackerAccount>()
+
+    private val isUpdatingTrackedTimes = SimpleBooleanProperty(false)
 
     private val trackedTimesLastUpdated = SimpleStringProperty()
 
@@ -182,11 +185,23 @@ class CreateInvoiceWindow : Window() {
                         }
                     }
                     right {
-                        button(messages["update..."]) {
-                            useMaxHeight = true
-                            prefWidth = 120.0
+                        hbox {
+                            progressindicator {
+                                visibleWhen(isUpdatingTrackedTimes)
 
-                            action { importTimeTrackerData() }
+                                hboxConstraints {
+                                    marginRight = 6.0
+                                }
+                            }
+
+                            button(messages["update..."]) {
+                                useMaxHeight = true
+                                prefWidth = 120.0
+
+                                disableWhen(isUpdatingTrackedTimes)
+
+                                action { importTimeTrackerData() }
+                            }
                         }
                     }
                 }
@@ -378,8 +393,14 @@ class CreateInvoiceWindow : Window() {
     }
 
     private fun importTimeTrackerData() {
+        isUpdatingTrackedTimes.value = true
+
         timeTrackerAccountPresenter.importTimeTrackerDataAsync(settingsViewModel.timeTrackerAccount.value) { trackedTimes ->
-            showTrackedMonths(trackedTimes)
+            runLater {
+                showTrackedMonths(trackedTimes)
+
+                isUpdatingTrackedTimes.value = false
+            }
         }
     }
 
