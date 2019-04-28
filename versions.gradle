@@ -12,6 +12,8 @@ ext {
 
 
     xdocReportVersion = '2.0.2'
+
+    harvestClientVersion = '1.1.1'
     
 
     couchbaseLiteVersion = '1.4.1'

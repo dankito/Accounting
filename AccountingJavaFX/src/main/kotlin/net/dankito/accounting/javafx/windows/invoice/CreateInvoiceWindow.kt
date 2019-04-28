@@ -1,23 +1,29 @@
 package net.dankito.accounting.javafx.windows.invoice
 
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.collections.FXCollections
 import javafx.geometry.Insets
+import javafx.geometry.Pos
 import javafx.stage.FileChooser
-import javafx.util.converter.NumberStringConverter
 import javafx.util.converter.PercentageStringConverter
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.invoice.CreateInvoiceSettings
 import net.dankito.accounting.data.model.timetracker.TimeTrackerAccount
+import net.dankito.accounting.data.model.timetracker.TrackedMonth
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.CreateInvoicePresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.presenter.TimeTrackerAccountPresenter
 import net.dankito.accounting.javafx.windows.invoice.controls.SelectFileView
+import net.dankito.accounting.javafx.windows.invoice.controls.TrackedMonthListCellFragment
 import net.dankito.accounting.javafx.windows.invoice.model.CreateInvoiceSettingsViewModel
 import net.dankito.accounting.javafx.windows.invoice.model.InvoiceViewModel
 import net.dankito.accounting.javafx.windows.invoice.model.SelectFileType
+import net.dankito.accounting.javafx.windows.invoice.model.TrackedMonthItemViewModel
 import net.dankito.utils.datetime.asUtilDate
+import net.dankito.utils.javafx.ui.controls.doubleTextfield
 import net.dankito.utils.javafx.ui.dialogs.Window
+import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
 import tornadofx.*
 import javax.inject.Inject
 
@@ -35,9 +41,6 @@ class CreateInvoiceWindow : Window() {
         private const val ButtonBottomAnchor = 24.0
 
     }
-
-
-    override val root = Form()
 
 
     @Inject
@@ -59,6 +62,12 @@ class CreateInvoiceWindow : Window() {
 
     private val timeTrackerAccounts = FXCollections.observableArrayList<TimeTrackerAccount>()
 
+    private val trackedMonths = FXCollections.observableArrayList<TrackedMonth>()
+
+    private val selectedTrackedMonth = TrackedMonthItemViewModel()
+
+    private val invoiceItemQuantity = SimpleDoubleProperty()
+
 
     private var selectInvoiceTemplateFileView: SelectFileView by singleAssign()
 
@@ -73,6 +82,8 @@ class CreateInvoiceWindow : Window() {
         settingsViewModel = CreateInvoiceSettingsViewModel(settings)
 
         showAvailableTimeTrackerAccounts()
+
+        settings.timeTrackerAccount?.let { importTimeTrackerData() }
 
         setupSelectFileViews()
     }
@@ -102,10 +113,52 @@ class CreateInvoiceWindow : Window() {
                     prefWidth = TimeTrackerAccountButtonsWidth
 
                     action { createNewTimeTrackerAccount() }
+                }
+            }
 
-                    hboxConstraints {
-                        marginLeft = 12.0
+            vbox {
+                visibleWhen(settingsViewModel.isATimeTrackerAccountSelected)
+
+                ensureOnlyUsesSpaceIfVisible()
+
+                borderpane {
+                    minHeight = 32.0
+
+                    vboxConstraints {
+                        marginBottom = 6.0
                     }
+
+                    left {
+                        hbox {
+                            useMaxHeight = true
+                            alignment = Pos.CENTER_LEFT
+
+                            label(messages["create.invoice.window.time.tracker.last.updated"])
+
+                            label() // TODO: show last updated date
+                        }
+                    }
+                    right {
+                        button(messages["update..."]) {
+                            useMaxHeight = true
+                            prefWidth = 120.0
+
+                            action { importTimeTrackerData() }
+                        }
+                    }
+                }
+
+                listview(trackedMonths) {
+                    minHeight = 110.0
+                    maxHeight = minHeight
+                    useMaxWidth = true
+
+                    bindSelected(selectedTrackedMonth)
+
+                    cellFragment(TrackedMonthListCellFragment::class)
+
+                    onDoubleClick { selectedItem?.let { selectedTrackedMonthChanged(it) } }
+
                 }
             }
         }
@@ -150,10 +203,6 @@ class CreateInvoiceWindow : Window() {
             field(messages["create.invoice.window.invoice.end.date"]) {
                 datepicker(invoiceViewModel.invoiceEndDate)
             }
-
-            field(messages["create.invoice.window.invoice.value.added.tax"]) {
-                textfield().bind(settingsViewModel.valueAddedTax, false, PercentageStringConverter())
-            }
         }
 
         fieldset(messages["create.invoice.window.invoice.items.settings"]) {
@@ -164,7 +213,15 @@ class CreateInvoiceWindow : Window() {
             }
 
             field(messages["create.invoice.window.invoice.item.unit.price"]) {
-                textfield().bind(settingsViewModel.invoiceItemUnitPrice, false, NumberStringConverter())
+                doubleTextfield(settingsViewModel.invoiceItemUnitPrice)
+            }
+
+            field(messages["create.invoice.window.invoice.item.quantity"]) {
+                doubleTextfield(invoiceItemQuantity)
+            }
+
+            field(messages["create.invoice.window.invoice.value.added.tax"]) {
+                textfield().bind(settingsViewModel.valueAddedTax, false, PercentageStringConverter())
             }
         }
 
@@ -259,12 +316,26 @@ class CreateInvoiceWindow : Window() {
         timeTrackerAccounts.setAll(timeTrackerAccountPresenter.getAllTimeTrackerAccounts())
     }
 
+    private fun importTimeTrackerData() {
+        timeTrackerAccountPresenter.importTimeTrackerDataAsync(settingsViewModel.timeTrackerAccount.value) { trackedTimes ->
+            trackedMonths.setAll(trackedTimes.months)
+        }
+    }
+
+
+    private fun selectedTrackedMonthChanged(trackedMonth: TrackedMonth) {
+        invoiceItemQuantity.value = trackedMonth.decimalHours
+
+        invoiceViewModel.invoiceStartDate.value = trackedMonth.firstTrackedDay
+        invoiceViewModel.invoiceEndDate.value = trackedMonth.lastTrackedDay
+    }
+
 
     private fun createInvoice() {
         applySettingsChanges()
 
         val invoiceItems = listOf(
-            presenter.createDocumentItem(0, 80.0) // TODO: set quantity
+            presenter.createDocumentItem(0, invoiceItemQuantity.value)
         )
 
         val invoice = Document.createInvoice(invoiceItems, invoiceViewModel.invoiceNumber.value,
@@ -279,6 +350,8 @@ class CreateInvoiceWindow : Window() {
 
     private fun applySettingsChanges() {
         settingsViewModel.commit()
+
+        settings.timeTrackerAccount = settingsViewModel.timeTrackerAccount.value
 
         presenter.saveSettings()
     }
