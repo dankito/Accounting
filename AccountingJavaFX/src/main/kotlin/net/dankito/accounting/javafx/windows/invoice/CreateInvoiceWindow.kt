@@ -1,6 +1,7 @@
 package net.dankito.accounting.javafx.windows.invoice
 
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -28,6 +29,8 @@ import net.dankito.utils.javafx.ui.dialogs.Window
 import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
 import org.slf4j.LoggerFactory
 import tornadofx.*
+import java.io.File
+import java.text.DateFormat
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
@@ -48,6 +51,11 @@ class CreateInvoiceWindow : Window() {
         private val MonthDateFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
 
         private val InvoiceDateFormatter = DateTimeFormatter.ofPattern("yyMMdd'1'")
+
+        private val InvoiceOutputFileDateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
+
+        private val TrackedTimesLastUpdateDateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
+
 
         private val logger = LoggerFactory.getLogger(CreateInvoiceWindow::class.java)
 
@@ -73,6 +81,8 @@ class CreateInvoiceWindow : Window() {
 
     private val timeTrackerAccounts = FXCollections.observableArrayList<TimeTrackerAccount>()
 
+    private val trackedTimesLastUpdated = SimpleStringProperty()
+
     private val trackedMonths = FXCollections.observableArrayList<TrackedMonth>()
 
     private val selectedTrackedMonth = TrackedMonthItemViewModel()
@@ -94,21 +104,27 @@ class CreateInvoiceWindow : Window() {
 
         showAvailableTimeTrackerAccounts()
 
-        settings.timeTrackerAccount?.let { account ->
-            account.trackedTimes?.let { showTrackedMonths(it) }
+        settingsViewModel.timeTrackerAccount.addListener { _, _, newValue -> selectedTimeTrackerAccountChanged(newValue) }
 
-            importTimeTrackerData()
-        }
+        settings.timeTrackerAccount?.let { account -> selectedTimeTrackerAccountChanged(account) }
 
         updateInvoiceDescription()
 
-        settingsViewModel.clientName.addListener { _, _, _ -> updateInvoiceDescription() }
+        settingsViewModel.clientName.addListener { _, _, _ ->
+            updateInvoiceOutputFilename()
+            updateInvoiceDescription()
+        }
 
         updateInvoiceNumber()
 
-        invoiceViewModel.invoicingDate.addListener { _, _, _ -> updateInvoiceNumber() }
+        invoiceViewModel.invoicingDate.addListener { _, _, _ ->
+            updateInvoiceNumber()
+            updateInvoiceOutputFilename()
+        }
 
         setupSelectFileViews()
+
+        updateInvoiceOutputFilename()
     }
 
     override val root = form {
@@ -158,7 +174,11 @@ class CreateInvoiceWindow : Window() {
 
                             label(messages["create.invoice.window.time.tracker.last.updated"])
 
-                            label() // TODO: show last updated date
+                            label(trackedTimesLastUpdated) {
+                                hboxConstraints {
+                                    marginLeft = 4.0
+                                }
+                            }
                         }
                     }
                     right {
@@ -345,6 +365,18 @@ class CreateInvoiceWindow : Window() {
         timeTrackerAccounts.setAll(timeTrackerAccountPresenter.getAllTimeTrackerAccounts())
     }
 
+    private fun selectedTimeTrackerAccountChanged(account: TimeTrackerAccount) {
+        trackedTimesLastUpdated.value = ""
+
+        account.trackedTimes?.let { trackedTimes ->
+            trackedTimesLastUpdated.value = TrackedTimesLastUpdateDateTimeFormat.format(trackedTimes.retrieved)
+
+            showTrackedMonths(trackedTimes)
+        }
+
+        importTimeTrackerData()
+    }
+
     private fun importTimeTrackerData() {
         timeTrackerAccountPresenter.importTimeTrackerDataAsync(settingsViewModel.timeTrackerAccount.value) { trackedTimes ->
             showTrackedMonths(trackedTimes)
@@ -378,6 +410,15 @@ class CreateInvoiceWindow : Window() {
         } catch (e: Exception) {
             logger.warn("Could not create invoice number from date ${invoiceViewModel.invoicingDate.value}", e)
         }
+    }
+
+    private fun updateInvoiceOutputFilename() {
+        val currentFile = File(settings.invoiceOutputFilePath)
+        val filename = "${InvoiceOutputFileDateFormatter.format(invoiceViewModel.invoicingDate.value)}_" +
+                "${settingsViewModel.clientName.value}.pdf"
+        val file = File(currentFile.parentFile, filename)
+
+        selectInvoiceOutputFileView.selectedFile = file
     }
 
 

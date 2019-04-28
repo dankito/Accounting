@@ -21,8 +21,12 @@ class SelectFileView(private val labelText: String,
     private var selectedFileTextField: TextField by singleAssign()
 
 
-    val selectedFile: File
+    var selectedFile: File
         get() = File(selectedFileTextField.text)
+        set(value) {
+            selectedFileTextField.text = value.absolutePath
+            selectedFileTextField.positionCaret(selectedFileTextField.text.length)
+        }
 
 
     override val root = hbox {
