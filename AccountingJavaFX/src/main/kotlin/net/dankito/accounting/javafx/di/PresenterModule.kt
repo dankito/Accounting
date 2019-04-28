@@ -6,6 +6,7 @@ import net.dankito.accounting.javafx.presenter.*
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.ValueAddedTaxCalculator
 import net.dankito.accounting.service.address.IAddressService
+import net.dankito.accounting.service.banking.IBankAccountService
 import net.dankito.accounting.service.document.IDocumentService
 import net.dankito.accounting.service.invoice.IInvoiceService
 import net.dankito.accounting.service.person.IPersonService
@@ -24,11 +25,12 @@ class PresenterModule {
 
     @Provides
     @Singleton
-    fun provideOverviewPresenter(documentService: IDocumentService, settingsService: ISettingsService, router: Router,
-                          vatCalculator: ValueAddedTaxCalculator
+    fun provideOverviewPresenter(documentService: IDocumentService, settingsService: ISettingsService,
+                                 bankAccountService: IBankAccountService, router: Router,
+                                 vatCalculator: ValueAddedTaxCalculator
     ) : OverviewPresenter {
 
-        return OverviewPresenter(documentService, settingsService, router, vatCalculator)
+        return OverviewPresenter(documentService, settingsService, bankAccountService, router, vatCalculator)
     }
 
     @Provides

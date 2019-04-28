@@ -7,6 +7,7 @@ import net.dankito.accounting.data.model.PaymentState
 import net.dankito.accounting.data.model.settings.AppSettings
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.ValueAddedTaxCalculator
+import net.dankito.accounting.service.banking.IBankAccountService
 import net.dankito.accounting.service.document.IDocumentService
 import net.dankito.accounting.service.settings.ISettingsService
 import net.dankito.utils.datetime.asUtilDate
@@ -18,6 +19,7 @@ import java.util.*
 
 open class OverviewPresenter(private val documentService: IDocumentService,
                              private val settingsService: ISettingsService,
+                             private val bankAccountService: IBankAccountService,
                              private val router: Router,
                              private val vatCalculator: ValueAddedTaxCalculator = ValueAddedTaxCalculator()
 ) {
@@ -61,6 +63,10 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         documentService.saveOrUpdate(document)
 
         callDocumentsUpdatedListeners()
+
+        if (document.isSelfCreatedInvoice && document.paymentState != PaymentState.Paid) {
+            checkInvoicePaymentState(document)
+        }
     }
 
     private fun updateVat(document: Document) {
@@ -87,6 +93,18 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         documentService.delete(document)
 
         callDocumentsUpdatedListeners()
+    }
+
+
+    fun checkInvoicePaymentState(invoice: Document) {
+        if (invoice.paymentState != PaymentState.Paid) {
+            bankAccountService.findAccountTransactionThatMatchesDocument(invoice)?.let { transaction ->
+                invoice.paymentState = PaymentState.Paid
+                invoice.paymentDate = transaction.bookingDate
+
+                saveOrUpdate(invoice)
+            }
+        }
     }
 
 
