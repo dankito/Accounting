@@ -1,7 +1,20 @@
 package net.dankito.accounting.data.model.timetracker
 
+import net.dankito.accounting.data.model.BaseEntity
+import javax.persistence.Column
+import javax.persistence.MappedSuperclass
 
-open class TrackedTimeUnit(val trackedTimeInSeconds: Int) {
+
+@MappedSuperclass
+abstract class TrackedTimeUnit(
+
+    @Column
+    val trackedTimeInSeconds: Int
+
+) : BaseEntity() {
+
+    internal constructor() : this(0) // for object deserializers
+
 
     open val totalTrackedMinutes: Int
         get() = (trackedTimeInSeconds / 60.0).toInt()
@@ -30,7 +43,7 @@ open class TrackedTimeUnit(val trackedTimeInSeconds: Int) {
         return "$hours:%02d".format(minutes)
     }
 
-    open fun getDecimalHoursString(countDecimalPlaces: Int = 2): String {
+    protected open fun getDecimalHoursString(countDecimalPlaces: Int = 2): String {
         return String.format("%.${countDecimalPlaces}f", decimalHours)
     }
 

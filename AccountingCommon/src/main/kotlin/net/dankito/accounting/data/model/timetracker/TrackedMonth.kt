@@ -1,12 +1,27 @@
 package net.dankito.accounting.data.model.timetracker
 
 import java.time.LocalDate
+import javax.persistence.CascadeType
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.OneToMany
 
 
-class TrackedMonth(val month: LocalDate,
-                   val days: List<TrackedDay>,
-                   trackedTimeInSeconds: Int = days.sumBy { it.trackedTimeInSeconds } )
-    : TrackedTimeUnit(trackedTimeInSeconds) {
+@Entity
+class TrackedMonth(
+
+    @Column
+    val month: LocalDate,
+
+    @OneToMany(cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ])
+    val days: List<TrackedDay>,
+
+    trackedTimeInSeconds: Int = days.sumBy { it.trackedTimeInSeconds }
+
+) : TrackedTimeUnit(trackedTimeInSeconds) {
+
+
+    internal constructor() : this(LocalDate.now(), listOf()) // for object deserializers
 
 
     val firstTrackedDay: LocalDate?

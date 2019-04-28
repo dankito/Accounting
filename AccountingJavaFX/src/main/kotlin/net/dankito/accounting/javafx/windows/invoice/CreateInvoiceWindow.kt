@@ -92,7 +92,11 @@ class CreateInvoiceWindow : Window() {
 
         showAvailableTimeTrackerAccounts()
 
-        settings.timeTrackerAccount?.let { importTimeTrackerData() }
+        settings.timeTrackerAccount?.let { account ->
+            account.trackedTimes?.let { trackedMonths.setAll(it.months) }
+
+            importTimeTrackerData()
+        }
 
         updateInvoiceDescription()
 

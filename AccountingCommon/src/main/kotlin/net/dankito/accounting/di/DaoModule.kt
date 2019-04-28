@@ -10,8 +10,7 @@ import net.dankito.accounting.data.dao.tax.FederalStateDao
 import net.dankito.accounting.data.dao.tax.IFederalStateDao
 import net.dankito.accounting.data.dao.tax.ITaxOfficeDao
 import net.dankito.accounting.data.dao.tax.TaxOfficeDao
-import net.dankito.accounting.data.dao.timetracker.ITimeTrackerAccountDao
-import net.dankito.accounting.data.dao.timetracker.TimeTrackerAccountDao
+import net.dankito.accounting.data.dao.timetracker.*
 import net.dankito.jpa.entitymanager.EntityManagerConfiguration
 import net.dankito.jpa.entitymanager.IEntityManager
 import java.io.File
@@ -74,10 +73,47 @@ class DaoModule(private val dataFolder: File = File("data")) {
         return CreateInvoiceSettingsDao(entityManager)
     }
 
+
     @Provides
     @Singleton
     fun provideTimeTrackerAccountDao(entityManager: IEntityManager) : ITimeTrackerAccountDao {
         return TimeTrackerAccountDao(entityManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTrackedTimesDao(entityManager: IEntityManager) : ITrackedTimesDao {
+        return TrackedTimesDao(entityManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTimeEntryDao(entityManager: IEntityManager) : ITimeEntryDao {
+        return TimeEntryDao(entityManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTrackedDayDao(entityManager: IEntityManager) : ITrackedDayDao {
+        return TrackedDayDao(entityManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTrackedMonthDao(entityManager: IEntityManager) : ITrackedMonthDao {
+        return TrackedMonthDao(entityManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideProjectDao(entityManager: IEntityManager) : IProjectDao {
+        return ProjectDao(entityManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTaskDao(entityManager: IEntityManager) : ITaskDao {
+        return TaskDao(entityManager)
     }
 
 

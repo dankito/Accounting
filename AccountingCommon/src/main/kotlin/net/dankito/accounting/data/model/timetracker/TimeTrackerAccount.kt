@@ -1,8 +1,10 @@
 package net.dankito.accounting.data.model.timetracker
 
 import net.dankito.accounting.data.model.BaseEntity
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.OneToOne
 
 
 @Entity
@@ -18,7 +20,10 @@ class TimeTrackerAccount(
     var username: String,
 
     @Column(name = PasswordColumnName)
-    var password: String
+    var password: String,
+
+    @OneToOne(cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ] )
+    var trackedTimes: TrackedTimes? = null
 
 ): BaseEntity() {
 

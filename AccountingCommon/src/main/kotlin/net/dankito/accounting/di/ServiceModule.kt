@@ -9,7 +9,7 @@ import net.dankito.accounting.data.dao.banking.IBankAccountTransactionsDao
 import net.dankito.accounting.data.dao.invoice.ICreateInvoiceSettingsDao
 import net.dankito.accounting.data.dao.tax.IFederalStateDao
 import net.dankito.accounting.data.dao.tax.ITaxOfficeDao
-import net.dankito.accounting.data.dao.timetracker.ITimeTrackerAccountDao
+import net.dankito.accounting.data.dao.timetracker.*
 import net.dankito.accounting.service.address.AddressService
 import net.dankito.accounting.service.address.IAddressService
 import net.dankito.accounting.service.banking.BankAccountService
@@ -77,8 +77,13 @@ class ServiceModule {
 
     @Provides
     @Singleton
-    fun provideTimeTrackerService(accountDao: ITimeTrackerAccountDao) : ITimeTrackerService {
-        return TimeTrackerService(accountDao)
+    fun provideTimeTrackerService(accountDao: ITimeTrackerAccountDao, trackedTimesDao: ITrackedTimesDao,
+                                  timeEntryDao: ITimeEntryDao, trackedDayDao: ITrackedDayDao,
+                                  trackedMonthDao: ITrackedMonthDao, projectDao: IProjectDao, taskDao: ITaskDao)
+            : ITimeTrackerService {
+
+        return TimeTrackerService(accountDao, trackedTimesDao, timeEntryDao, trackedDayDao, trackedMonthDao,
+            projectDao, taskDao)
     }
 
 

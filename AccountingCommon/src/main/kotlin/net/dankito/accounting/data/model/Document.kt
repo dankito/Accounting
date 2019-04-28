@@ -36,8 +36,8 @@ open class Document() : DocumentBase() {
 
 
         @JvmOverloads
-        fun createInvoice(invoiceItems: List<DocumentItem>, documentNumber: String?, issueDate: Date = Date(),
-                          dueDate: Date? = null, recipient: NaturalOrLegalPerson? = null): Document {
+        fun createInvoice(invoiceItems: List<DocumentItem>, documentNumber: String?, documentDescription: String? = null,
+                          issueDate: Date = Date(), dueDate: Date? = null, recipient: NaturalOrLegalPerson? = null): Document {
 
             val netAmount = invoiceItems.sumByDouble { it.netAmount }
             val valueAddedTaxRate = if (invoiceItems.isEmpty()) 0f else invoiceItems[0].valueAddedTaxRate
@@ -45,7 +45,7 @@ open class Document() : DocumentBase() {
             val totalAmount = invoiceItems.sumByDouble { it.totalAmount }
 
             return Document(DocumentType.Revenue, true, netAmount, valueAddedTaxRate, valueAddedTax, totalAmount,
-                documentNumber, null, PaymentState.Outstanding, issueDate, dueDate, null, null, invoiceItems, null, recipient)
+                documentNumber, documentDescription, PaymentState.Outstanding, issueDate, dueDate, null, null, invoiceItems, null, recipient)
         }
 
     }
