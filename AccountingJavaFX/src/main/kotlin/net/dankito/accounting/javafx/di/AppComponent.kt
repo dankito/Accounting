@@ -5,6 +5,7 @@ import net.dankito.accounting.di.CommonComponent
 import net.dankito.accounting.di.CommonUtilsModule
 import net.dankito.accounting.di.DaoModule
 import net.dankito.accounting.di.ServiceModule
+import net.dankito.accounting.javafx.windows.banking.BankAccountTransactionDetailsWindow
 import net.dankito.accounting.javafx.windows.invoice.CreateInvoiceWindow
 import net.dankito.accounting.javafx.windows.mainwindow.MainWindow
 import net.dankito.accounting.javafx.windows.mainwindow.controls.BankAccountsTab
@@ -42,6 +43,8 @@ interface AppComponent : CommonComponent {
     fun inject(createInvoiceWindow: CreateInvoiceWindow)
 
     fun inject(editTimeTrackerAccountWindow: EditTimeTrackerAccountWindow)
+
+    fun inject(bankAccountTransactionDetailsWindow: BankAccountTransactionDetailsWindow)
 
     fun inject(elsterTaxDeclarationWindow: ElsterTaxDeclarationWindow)
 

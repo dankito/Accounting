@@ -55,10 +55,16 @@ open class HbciBankingClient : IBankingClient {
     }
 
     protected open fun mapToTransaction(entry: AccountingEntry): BankAccountTransaction {
-        return BankAccountTransaction(entry.value.bigDecimalValue,
-            entry.getUsage1(), entry.getUsage2(),
-            entry.showOtherName(), entry.other.name,
-            entry.bookingDate, entry.type
+        val usage = entry.sepaVerwendungszweck ?: entry.usageWithNoSpecialType
+                    ?: (entry.getUsage1() + (entry.getUsage2()?.let { it } ?: ""))
+
+        val otherName = entry.other.name + if (entry.other.name2.isNullOrBlank()) "" else entry.other.name2
+        val otherAccountNumber = if (entry.other.iban.isNullOrBlank()) entry.other.number else entry.other.iban
+        val otherBankCode = if (entry.other.bic.isNullOrBlank()) entry.other.blz else entry.other.bic
+
+        return BankAccountTransaction(entry.value.bigDecimalValue, usage,
+            entry.showOtherName(), otherName, otherAccountNumber, otherBankCode,
+            entry.valutaDate, entry.type, entry.value.curr, entry.saldo.bigDecimalValue
         )
     }
 

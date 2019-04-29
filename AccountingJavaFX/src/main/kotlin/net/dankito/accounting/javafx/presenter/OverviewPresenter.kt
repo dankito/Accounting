@@ -119,7 +119,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         if (invoice.paymentState != PaymentState.Paid) {
             bankAccountService.findAccountTransactionThatMatchesDocument(invoice)?.let { transaction ->
                 invoice.paymentState = PaymentState.Paid
-                invoice.paymentDate = transaction.bookingDate
+                invoice.paymentDate = transaction.valueDate
 
                 saveOrUpdate(invoice)
             }

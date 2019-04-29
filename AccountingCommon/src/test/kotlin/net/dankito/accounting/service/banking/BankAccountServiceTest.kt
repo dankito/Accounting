@@ -45,8 +45,7 @@ class BankAccountServiceTest {
         // given
         val invoice = createInvoice()
 
-        doReturn(createTransactionsIncluding(BankAccountTransaction(BigDecimal.valueOf(InvoiceTotalAmount),
-            "noise $InvoiceNumber noise", null, true, "", Date())))
+        doReturn(createTransactionsIncluding(createTransaction(InvoiceTotalAmount, "noise $InvoiceNumber noise", "")))
             .`when`(transactionDaoMock).getAll()
 
 
@@ -64,8 +63,7 @@ class BankAccountServiceTest {
         // given
         val invoice = createInvoice()
 
-        doReturn(createTransactionsIncluding(BankAccountTransaction(BigDecimal.valueOf(InvoiceTotalAmount),
-            "noise", null, true, InvoiceRecipientName, Date())))
+        doReturn(createTransactionsIncluding(createTransaction(InvoiceTotalAmount, "noise", InvoiceRecipientName)))
             .`when`(transactionDaoMock).getAll()
 
 
@@ -84,8 +82,7 @@ class BankAccountServiceTest {
         // given
         val invoice = createInvoice()
 
-        doReturn(createTransactionsIncluding(BankAccountTransaction(BigDecimal.valueOf(AnyOtherAmount),
-            "noise $InvoiceNumber noise", null, true, "", Date())))
+        doReturn(createTransactionsIncluding(createTransaction(AnyOtherAmount, "noise $InvoiceNumber noise", "")))
             .`when`(transactionDaoMock).getAll()
 
 
@@ -103,8 +100,7 @@ class BankAccountServiceTest {
         // given
         val invoice = createInvoice()
 
-        doReturn(createTransactionsIncluding(BankAccountTransaction(BigDecimal.valueOf(AnyOtherAmount),
-            "noise", null, true, InvoiceRecipientName, Date())))
+        doReturn(createTransactionsIncluding(createTransaction(AnyOtherAmount, "noise", InvoiceRecipientName)))
             .`when`(transactionDaoMock).getAll()
 
 
@@ -122,8 +118,7 @@ class BankAccountServiceTest {
         // given
         val invoice = createInvoice()
 
-        doReturn(createTransactionsIncluding(BankAccountTransaction(BigDecimal.valueOf(InvoiceTotalAmount),
-            "noise", null, true, "noise", Date())))
+        doReturn(createTransactionsIncluding(createTransaction(InvoiceTotalAmount, "noise", "noise")))
             .`when`(transactionDaoMock).getAll()
 
 
@@ -141,8 +136,7 @@ class BankAccountServiceTest {
         // given
         val invoice = createInvoice()
 
-        doReturn(createTransactionsIncluding(BankAccountTransaction(BigDecimal.valueOf((-1) * InvoiceTotalAmount),
-            "noise", null, true, InvoiceRecipientName, Date())))
+        doReturn(createTransactionsIncluding(createTransaction((-1) * InvoiceTotalAmount, "noise", InvoiceRecipientName)))
             .`when`(transactionDaoMock).getAll()
 
 
@@ -163,15 +157,20 @@ class BankAccountServiceTest {
     private fun createTransactionsIncluding(transaction: BankAccountTransaction): List<BankAccountTransaction> {
         return listOf(
             transaction,
-            BankAccountTransaction(BigDecimal.valueOf(1000.0), "noise", null, true, "noise", Date()),
-            BankAccountTransaction(BigDecimal.valueOf(2000.0), "noise", null, true, "noise", Date()),
-            BankAccountTransaction(BigDecimal.valueOf(3000.0), "noise", null, true, "noise", Date()),
-            BankAccountTransaction(BigDecimal.valueOf(4000.0), "noise", null, true, "noise", Date()),
-            BankAccountTransaction(BigDecimal.valueOf(5000.0), "noise", null, true, "noise", Date()),
-            BankAccountTransaction(BigDecimal.valueOf(6000.0), "noise", null, true, "noise", Date()),
-            BankAccountTransaction(BigDecimal.valueOf(7000.0), "noise", null, true, "noise", Date()),
-            BankAccountTransaction(BigDecimal.valueOf(8000.0), "noise", null, true, "noise", Date()),
-            BankAccountTransaction(BigDecimal.valueOf(9000.0), "noise", null, true, "noise", Date())
+            createTransaction(1000.0, "noise", "noise"),
+            createTransaction(2000.0, "noise", "noise"),
+            createTransaction(3000.0, "noise", "noise"),
+            createTransaction(4000.0, "noise", "noise"),
+            createTransaction(5000.0, "noise", "noise"),
+            createTransaction(6000.0, "noise", "noise"),
+            createTransaction(7000.0, "noise", "noise"),
+            createTransaction(8000.0, "noise", "noise"),
+            createTransaction(9000.0, "noise", "noise")
         )
+    }
+
+    private fun createTransaction(amount: Double, usage: String, senderOrReceiver: String): BankAccountTransaction {
+        return BankAccountTransaction(BigDecimal.valueOf(amount), usage, true, senderOrReceiver, "", "",
+            Date(), "", "", BigDecimal.ZERO)
     }
 }

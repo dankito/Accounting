@@ -35,9 +35,9 @@ class PresenterModule {
 
     @Provides
     @Singleton
-    fun provideBankAccountsPresenter(accountService: IBankAccountService) : BankAccountsPresenter {
+    fun provideBankAccountsPresenter(accountService: IBankAccountService, router: Router) : BankAccountsPresenter {
 
-        return BankAccountsPresenter(accountService)
+        return BankAccountsPresenter(accountService, router)
     }
 
 

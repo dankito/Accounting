@@ -116,8 +116,8 @@ open class BankAccountService(private val bankingClient: IBankingClient,
                 // or sender matches recipient
                 document.recipient?.name?.let { recipientName ->
                     if (transaction.showSenderOrReceiver &&
-                        (transaction.senderOrReceiver.contains(recipientName, true) ||
-                                recipientName.contains(transaction.senderOrReceiver))) {
+                        (transaction.senderOrReceiverName.contains(recipientName, true) ||
+                                recipientName.contains(transaction.senderOrReceiverName))) {
                         return transaction
                     }
                 }

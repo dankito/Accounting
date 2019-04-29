@@ -14,35 +14,40 @@ class BankAccountTransaction(
     val amount: BigDecimal,
 
     @Column
-    val usage1: String,
-
-    @Column
-    val usage2: String?,
+    val usage: String,
 
     @Column(columnDefinition = "SMALLINT DEFAULT 0", nullable = false)
     val showSenderOrReceiver: Boolean,
 
     @Column
-    val senderOrReceiver: String,
+    val senderOrReceiverName: String,
 
     @Column
-    val bookingDate: Date,
+    val senderOrReceiverAccountNumber: String,
 
     @Column
-    val type: String
+    val senderOrReceiverBankCode: String,
+
+    @Column
+    val valueDate: Date,
+
+    @Column
+    val type: String,
+
+    @Column
+    val currency: String,
+
+    @Column
+    val balance: BigDecimal
 
 ) : BaseEntity() {
 
 
-    internal constructor() : this(BigDecimal.ZERO, "", null, false, "", Date(), "") // for object deserializers
-
-
-    val usage: String
-        get() = usage1 + (usage2?.let { it } ?: "")
+    internal constructor() : this(BigDecimal.ZERO, "", false, "", "", "", Date(), "", "", BigDecimal.ZERO) // for object deserializers
 
 
     override fun toString(): String {
-        return "$amount $senderOrReceiver: $usage"
+        return "$amount $senderOrReceiverName: $usage"
     }
 
 }

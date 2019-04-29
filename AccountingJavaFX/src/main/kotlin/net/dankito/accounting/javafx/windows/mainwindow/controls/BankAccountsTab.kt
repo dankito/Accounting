@@ -26,7 +26,7 @@ class BankAccountsTab : View() {
 
     companion object {
 
-        private val BookingDateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM)
+        private val ValueDateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM)
 
     }
 
@@ -93,7 +93,7 @@ class BankAccountsTab : View() {
                     alignment = Pos.CENTER_RIGHT
                 }
 
-                 button("update...") { // TODO: set icon
+                 button(messages["update..."]) { // TODO: set icon
                     disableWhen(isUpdatingTransactions)
 
                     action { updateAccountTransactions() }
@@ -107,11 +107,11 @@ class BankAccountsTab : View() {
         }
 
         tableview<BankAccountTransaction>(transactionsToDisplay) {
-            column(messages["main.window.tab.bank.accounts.column.header.booking.date"], BankAccountTransaction::bookingDate) {
+            column(messages["main.window.tab.bank.accounts.column.header.value.date"], BankAccountTransaction::valueDate) {
                 prefWidth = 150.0
 
                 cellFormat {
-                    text = BookingDateFormat.format(it)
+                    text = ValueDateFormat.format(it)
                     alignment = Pos.CENTER_LEFT
                     paddingLeft = 4.0
                 }
@@ -171,8 +171,8 @@ class BankAccountsTab : View() {
 
         allTransactions.forEach { entry ->
             if (entry.usage.toLowerCase().contains(lowerCaseQuery)
-                || entry.senderOrReceiver.toLowerCase().contains(lowerCaseQuery)
-                || BookingDateFormat.format(entry.bookingDate).contains(lowerCaseQuery)
+                || entry.senderOrReceiverName.toLowerCase().contains(lowerCaseQuery)
+                || ValueDateFormat.format(entry.valueDate).contains(lowerCaseQuery)
                 || entry.amount.toString().contains(lowerCaseQuery)) {
 
                 result.add(entry)
@@ -194,7 +194,7 @@ class BankAccountsTab : View() {
     }
 
     private fun retrievedAccountTransactions(transactions: List<BankAccountTransaction>) {
-        allTransactions.setAll(transactions.sortedByDescending { it.bookingDate })
+        allTransactions.setAll(transactions.sortedByDescending { it.valueDate })
 
         searchEntries()
 
@@ -206,7 +206,7 @@ class BankAccountsTab : View() {
     private fun tableClicked(event: MouseEvent, selectedItem: BankAccountTransaction?) {
         if(event.clickCount == 2 && event.button == MouseButton.PRIMARY) {
             if(selectedItem != null) {
-//                controller.showAccountingEntriesDetailsDialog(selectedItem)
+                presenter.showTransactionDetailsWindow(selectedItem)
             }
         }
     }

@@ -28,8 +28,8 @@ class UsageCellFragment : TableCellFragment<BankAccountTransaction, BankAccountT
             }
         }
 
-        label(entry.otherName) {
-            visibleWhen(entry.showOtherName)
+        label(entry.senderOrReceiverName) {
+            visibleWhen(entry.showSenderOrReceiver)
             ensureOnlyUsesSpaceIfVisible()
 
             vboxConstraints {
@@ -37,18 +37,9 @@ class UsageCellFragment : TableCellFragment<BankAccountTransaction, BankAccountT
             }
         }
 
-        label(entry.usage1) {
+        label(entry.usage) {
             vboxConstraints {
                 margin = LabelMargin
-            }
-        }
-
-        label(entry.usage2) {
-            visibleWhen(entry.isUsage2Set)
-            ensureOnlyUsesSpaceIfVisible()
-
-            vboxConstraints {
-                margin = Insets(0.0, LabelMargin.right, LabelMargin.bottom, LabelMargin.left)
             }
         }
     }

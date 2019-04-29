@@ -10,14 +10,10 @@ class BankAccountTransactionUsageItemViewModel : ItemViewModel<BankAccountTransa
 
     val type = bind { SimpleStringProperty(item?.type) }
 
-    val showOtherName = bind { SimpleBooleanProperty(item?.showSenderOrReceiver ?: false) }
+    val showSenderOrReceiver = bind { SimpleBooleanProperty(item?.showSenderOrReceiver ?: false) }
 
-    val otherName = bind { SimpleStringProperty(item?.senderOrReceiver) }
+    val senderOrReceiverName = bind { SimpleStringProperty(item?.senderOrReceiverName) }
 
-    val usage1 = bind { SimpleStringProperty(item?.usage1) }
-
-    val isUsage2Set = bind { SimpleBooleanProperty(item?.usage2 != null) }
-
-    val usage2 = bind { SimpleStringProperty(item?.usage2) }
+    val usage = bind { SimpleStringProperty(item?.usage) }
 
 }
