@@ -16,7 +16,7 @@ open class BankAccountService(private val bankingClient: IBankingClient,
 
     protected var bankAccountsProperty: List<BankAccount>? = null
 
-    protected var bankAccountTransactionsProperty: List<BankAccountTransaction>? = null
+    protected var bankAccountTransactionsProperty: Set<BankAccountTransaction>? = null
 
 
     override fun getBankAccounts(): List<BankAccount> {
@@ -44,12 +44,12 @@ open class BankAccountService(private val bankingClient: IBankingClient,
 
     override fun getAccountTransactions(): List<BankAccountTransaction> {
         bankAccountTransactionsProperty?.let {
-            return it
+            return it.toList()
         }
 
         val transactions = transactionDao.getAll()
 
-        bankAccountTransactionsProperty = transactions
+        bankAccountTransactionsProperty = transactions.toSet()
 
         return transactions
     }
@@ -67,27 +67,30 @@ open class BankAccountService(private val bankingClient: IBankingClient,
         val accounts = getBankAccounts()
         val countAccountsToRetrieve = accounts.size
         var retrievedAccounts = 0
-        val accountTransactions = getAccountTransactions().toMutableList()
+        val accountTransactions = getAccountTransactions().toMutableSet()
 
         if (accounts.isNotEmpty()) {
             accounts.forEach { account ->
                 getAccountTransactionsAsync(account) { transactions ->
+
                     accountTransactions.addAll(transactions)
 
                     retrievedAccounts++
 
                     if (retrievedAccounts == countAccountsToRetrieve) {
-                        saveOrUpdateTransactions(accountTransactions)
+                        val accountTransactionsList = accountTransactions.toList()
+
+                        saveOrUpdateTransactions(accountTransactionsList)
 
                         bankAccountTransactionsProperty = accountTransactions
 
-                        callback(accountTransactions)
+                        callback(accountTransactionsList)
                     }
                 }
             }
         }
         else {
-            callback(accountTransactions)
+            callback(accountTransactions.toList())
         }
     }
 
