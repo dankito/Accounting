@@ -26,12 +26,15 @@ class BankAccountTransaction(
     val senderOrReceiver: String,
 
     @Column
-    val bookingDate: Date
+    val bookingDate: Date,
+
+    @Column
+    val type: String
 
 ) : BaseEntity() {
 
 
-    internal constructor() : this(BigDecimal.ZERO, "", null, false, "", Date()) // for object deserializers
+    internal constructor() : this(BigDecimal.ZERO, "", null, false, "", Date(), "") // for object deserializers
 
 
     val usage: String

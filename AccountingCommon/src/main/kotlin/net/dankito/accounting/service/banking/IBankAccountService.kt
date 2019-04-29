@@ -24,6 +24,6 @@ interface IBankAccountService {
     fun getAccountTransactionsAsync(account: BankAccount, callback: (List<BankAccountTransaction>) -> Unit)
 
 
-    fun findAccountTransactionThatMatchesDocument(invoice: Document): BankAccountTransaction?
+    fun findAccountTransactionThatMatchesDocument(document: Document): BankAccountTransaction?
 
 }

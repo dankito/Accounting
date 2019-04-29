@@ -58,7 +58,7 @@ open class HbciBankingClient : IBankingClient {
         return BankAccountTransaction(entry.value.bigDecimalValue,
             entry.getUsage1(), entry.getUsage2(),
             entry.showOtherName(), entry.other.name,
-            entry.bookingDate
+            entry.bookingDate, entry.type
         )
     }
 

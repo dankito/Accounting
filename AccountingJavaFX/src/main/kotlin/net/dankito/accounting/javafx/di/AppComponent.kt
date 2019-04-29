@@ -6,6 +6,8 @@ import net.dankito.accounting.di.CommonUtilsModule
 import net.dankito.accounting.di.DaoModule
 import net.dankito.accounting.di.ServiceModule
 import net.dankito.accounting.javafx.windows.invoice.CreateInvoiceWindow
+import net.dankito.accounting.javafx.windows.mainwindow.MainWindow
+import net.dankito.accounting.javafx.windows.mainwindow.controls.BankAccountsTab
 import net.dankito.accounting.javafx.windows.mainwindow.controls.OverviewTab
 import net.dankito.accounting.javafx.windows.mainwindow.controls.SummaryPane
 import net.dankito.accounting.javafx.windows.person.EditPersonWindow
@@ -26,10 +28,14 @@ interface AppComponent : CommonComponent {
     }
 
 
+    fun inject(mainWindow: MainWindow)
 
     fun inject(overviewTab: OverviewTab)
 
     fun inject(summaryPane: SummaryPane)
+
+    fun inject(bankAccountsTab: BankAccountsTab)
+
 
     fun inject(editPersonWindow: EditPersonWindow)
 

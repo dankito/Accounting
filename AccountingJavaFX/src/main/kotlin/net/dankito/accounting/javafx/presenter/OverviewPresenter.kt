@@ -11,6 +11,7 @@ import net.dankito.accounting.service.banking.IBankAccountService
 import net.dankito.accounting.service.document.IDocumentService
 import net.dankito.accounting.service.settings.ISettingsService
 import net.dankito.utils.datetime.asUtilDate
+import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.time.LocalDate
@@ -48,6 +49,11 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
     private val documentsUpdatedListeners = mutableListOf<() -> Unit>() // TODO: find a better event bus
 
+
+    val isBankAccountAdded: Boolean
+        get() {
+            return bankAccountService.getBankAccounts().isNotEmpty()
+        }
 
 
     private fun accountingPeriodChanged(newAccountingPeriod: AccountingPeriod) {
@@ -148,6 +154,10 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     }
 
 
+    fun getCurrencyString(amount: BigDecimal): String {
+        return getCurrencyString(amount.toDouble())
+    }
+
     fun getCurrencyString(amount: Double): String {
         return CurrencyFormat.format(amount)
     }
@@ -205,7 +215,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     private fun isCreatedInvoice(it: Document) = it.isSelfCreatedInvoice
 
     private fun isDateInPeriod(date: Date?, periodStart: Date, periodEnd: Date): Boolean {
-        return date?.let { date -> date in periodStart..periodEnd }
+        return date?.let { date in periodStart..periodEnd }
             ?: false
     }
 

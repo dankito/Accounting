@@ -35,6 +35,14 @@ class PresenterModule {
 
     @Provides
     @Singleton
+    fun provideBankAccountsPresenter(accountService: IBankAccountService) : BankAccountsPresenter {
+
+        return BankAccountsPresenter(accountService)
+    }
+
+
+    @Provides
+    @Singleton
     fun provideEditPersonPresenter(personService: IPersonService, addressService: IAddressService) : EditPersonPresenter {
 
         return EditPersonPresenter(personService, addressService)
