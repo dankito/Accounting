@@ -7,6 +7,7 @@ import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.data.model.timetracker.TimeTrackerAccount
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.banking.BankAccountTransactionDetailsWindow
+import net.dankito.accounting.javafx.windows.banking.EditAutomaticAccountTransactionImportWindow
 import net.dankito.accounting.javafx.windows.document.EditDocumentWindow
 import net.dankito.accounting.javafx.windows.invoice.CreateInvoiceWindow
 import net.dankito.accounting.javafx.windows.person.EditPersonWindow
@@ -37,6 +38,10 @@ class Router {
     fun showBankAccountTransactionDetailsWindow(transaction: BankAccountTransaction) {
         BankAccountTransactionDetailsWindow(transaction).show(messages["bank.account.transaction.details.window.title"],
             modality = Modality.WINDOW_MODAL)
+    }
+
+    fun showEditAutomaticAccountTransactionImportWindow() {
+        EditAutomaticAccountTransactionImportWindow().show()
     }
 
 }

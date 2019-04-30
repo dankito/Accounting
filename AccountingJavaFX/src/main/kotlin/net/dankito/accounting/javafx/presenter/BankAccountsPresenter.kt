@@ -20,4 +20,8 @@ class BankAccountsPresenter(private val accountService: IBankAccountService, pri
         router.showBankAccountTransactionDetailsWindow(transaction)
     }
 
+    fun showEditAutomaticAccountTransactionImportWindow() {
+        router.showEditAutomaticAccountTransactionImportWindow()
+    }
+
 }

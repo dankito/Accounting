@@ -1,21 +1,18 @@
 package net.dankito.accounting.javafx.windows.mainwindow.controls
 
-import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.control.TableColumn
 import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
-import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
-import javafx.util.Callback
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.BankAccountsPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
+import net.dankito.accounting.javafx.windows.banking.controls.BankAccountTransactionsTable
+import net.dankito.utils.javafx.ui.controls.addButton
 import net.dankito.utils.javafx.ui.controls.searchtextfield
 import tornadofx.*
 import java.text.DateFormat
@@ -84,7 +81,7 @@ class BankAccountsTab : View() {
                     hboxConstraints {
                         alignment = Pos.CENTER_LEFT
                         marginLeft = 48.0
-                        marginRight = 12.0
+                        marginRight = 6.0
                     }
                 }
 
@@ -100,55 +97,20 @@ class BankAccountsTab : View() {
 
                     hboxConstraints {
                         marginLeft = 12.0
-                        marginRight = 4.0
+                        marginRight = 12.0
                     }
+                }
+
+                addButton {
+                    action { presenter.showEditAutomaticAccountTransactionImportWindow() }
                 }
             }
         }
 
-        tableview<BankAccountTransaction>(transactionsToDisplay) {
-            column(messages["main.window.tab.bank.accounts.column.header.value.date"], BankAccountTransaction::valueDate) {
-                prefWidth = 150.0
+        add(BankAccountTransactionsTable(overviewPresenter, transactionsToDisplay).apply {
+            setOnMouseClicked { tableClicked(it, this.selectionModel.selectedItem) }
+        })
 
-                cellFormat {
-                    text = ValueDateFormat.format(it)
-                    alignment = Pos.CENTER_LEFT
-                    paddingLeft = 4.0
-                }
-            }
-
-            val usageColumn = TableColumn<BankAccountTransaction, BankAccountTransaction>(messages["main.window.tab.bank.accounts.column.header.usage"])
-            usageColumn.cellFragment(UsageCellFragment::class)
-            usageColumn.cellValueFactory = Callback { object : ObjectBinding<BankAccountTransaction>() {
-                override fun computeValue(): BankAccountTransaction {
-                    return it.value
-                }
-
-            } }
-            usageColumn.weightedWidth(4.0)
-            columns.add(usageColumn)
-
-            column(messages["main.window.tab.bank.accounts.column.header.amount"], BankAccountTransaction::amount) {
-                prefWidth = 100.0
-
-                cellFormat {
-                    text = overviewPresenter.getCurrencyString(it)
-                    alignment = Pos.CENTER_RIGHT
-                    paddingRight = 4.0
-
-                    style {
-                        textFill = if (it.toLong() < 0)  Color.RED else Color.GREEN
-                    }
-                }
-
-
-                columnResizePolicy = SmartResize.POLICY
-
-                vgrow = Priority.ALWAYS
-
-                setOnMouseClicked { tableClicked(it, this@tableview.selectionModel.selectedItem) }
-            }
-        }
     }
 
 

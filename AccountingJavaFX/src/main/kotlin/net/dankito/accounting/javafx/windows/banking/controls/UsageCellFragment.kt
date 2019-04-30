@@ -1,4 +1,4 @@
-package net.dankito.accounting.javafx.windows.mainwindow.controls
+package net.dankito.accounting.javafx.windows.banking.controls
 
 import javafx.geometry.Insets
 import javafx.geometry.Pos
