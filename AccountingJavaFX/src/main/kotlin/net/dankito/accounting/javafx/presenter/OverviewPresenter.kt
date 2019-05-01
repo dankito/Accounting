@@ -4,6 +4,7 @@ import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.data.model.PaymentState
+import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.data.model.settings.AppSettings
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.ValueAddedTaxCalculator
@@ -73,6 +74,10 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
         documentService.saveOrUpdate(document)
 
+        document.createdFromAccountTransaction?.let {
+            bankAccountService.saveOrUpdateTransaction(it)
+        }
+
         callDocumentsUpdatedListeners()
 
         if (document.isSelfCreatedInvoice && document.paymentState != PaymentState.Paid) {
@@ -101,6 +106,12 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     }
 
     fun delete(document: Document) {
+        document.createdFromAccountTransaction?.let { transaction ->
+            transaction.createdDocument = null
+
+            bankAccountService.saveOrUpdateTransaction(transaction)
+        }
+
         documentService.delete(document)
 
         callDocumentsUpdatedListeners()
@@ -124,6 +135,52 @@ open class OverviewPresenter(private val documentService: IDocumentService,
                 saveOrUpdate(invoice)
             }
         }
+    }
+
+
+    fun addToExpendituresAndRevenues(transactions: List<BankAccountTransaction>) {
+        val vatRate = getDefaultVatRateForUser()
+
+        val documents = createDocumentsForTransactions(transactions, vatRate)
+
+        documents.forEach {
+            saveOrUpdate(it)
+        }
+    }
+
+    fun adjustBeforeAddingToExpendituresAndRevenues(transactions: List<BankAccountTransaction>) {
+        val vatRate = getDefaultVatRateForUser()
+
+        val documents = createDocumentsForTransactions(transactions, vatRate)
+
+        documents.forEach {
+            showEditDocumentWindow(it)
+        }
+    }
+
+    private fun createDocumentsForTransactions(transactions: List<BankAccountTransaction>, valueAddedTaxRate: Float)
+            : List<Document> {
+
+        // don't create a second document from the same account transaction
+        val transactionsWithNotYetCreatedDocuments = transactions.filter { it.createdDocument == null }
+
+        return transactionsWithNotYetCreatedDocuments.map { transaction ->
+            mapTransactionToDocument(transaction, valueAddedTaxRate)
+        }
+    }
+
+    private fun mapTransactionToDocument(transaction: BankAccountTransaction, valueAddedTaxRate: Float): Document {
+        val type = if (transaction.isDebit) DocumentType.Expenditure else DocumentType.Revenue
+
+        val document = Document(type, Math.abs(transaction.amount.toDouble()), valueAddedTaxRate)
+
+        document.paymentDate = transaction.valueDate
+        document.description = transaction.senderOrReceiverName + " - " + transaction.usage
+
+        transaction.createdDocument = document
+        document.createdFromAccountTransaction = transaction
+
+        return document
     }
 
 

@@ -141,23 +141,11 @@ class BankAccountTransactionsTable(private val presenter: BankAccountsPresenter,
     }
 
     fun addToExpendituresAndRevenues(transactions: List<BankAccountTransaction>) {
-        val vatRate = overviewPresenter.getDefaultVatRateForUser()
-
-        val documents = presenter.createDocumentsForTransactions(transactions, vatRate)
-
-        documents.forEach {
-            overviewPresenter.saveOrUpdate(it)
-        }
+        overviewPresenter.addToExpendituresAndRevenues(transactions)
     }
 
     private fun adjustBeforeAddingToExpendituresAndRevenues(transactions: List<BankAccountTransaction>) {
-        val vatRate = overviewPresenter.getDefaultVatRateForUser()
-
-        val documents = presenter.createDocumentsForTransactions(transactions, vatRate)
-
-        documents.forEach {
-            overviewPresenter.showEditDocumentWindow(it)
-        }
+        overviewPresenter.adjustBeforeAddingToExpendituresAndRevenues(transactions)
     }
 
     private fun getResourceKeyForDirectlyAddingToExpendituresOrRevenues(type: ExpenditureRevenueType): String {

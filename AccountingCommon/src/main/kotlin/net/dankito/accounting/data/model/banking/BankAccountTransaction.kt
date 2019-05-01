@@ -1,11 +1,13 @@
 package net.dankito.accounting.data.model.banking
 
 import net.dankito.accounting.data.model.BaseEntity
+import net.dankito.accounting.data.model.Document
 import java.math.BigDecimal
 import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
+import javax.persistence.OneToOne
 
 
 @Entity
@@ -42,7 +44,10 @@ class BankAccountTransaction(
     val balance: BigDecimal,
 
     @ManyToOne
-    val account: BankAccount
+    val account: BankAccount,
+
+    @OneToOne(mappedBy = "createdFromAccountTransaction")
+    var createdDocument: Document? = null
 
 ) : BaseEntity() {
 

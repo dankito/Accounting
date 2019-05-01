@@ -209,6 +209,16 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
     private fun askIfChangesShouldBeSavedAndClose() {
         // TODO: check if changes are made and if so ask user if he/she likes to save them
 
+        if (document.isPersisted() == false) {
+            // we were trying to create a document from an bank account transaction.
+            // but as user doesn't want to save it now, remove the document reference from transaction
+            document.createdFromAccountTransaction?.let { transaction ->
+                transaction.createdDocument = null
+
+                document.createdFromAccountTransaction = null
+            }
+        }
+
         close()
     }
 

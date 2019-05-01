@@ -1,5 +1,6 @@
 package net.dankito.accounting.data.model
 
+import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import java.util.*
 import javax.persistence.*
 
@@ -33,6 +34,8 @@ open class Document() : DocumentBase() {
         const val IssuerJoinColumnName = "issuer"
 
         const val RecipientJoinColumnName = "recipient"
+
+        const val CreatedFromDocumentJoinColumnName = "created_from_document"
 
 
         @JvmOverloads
@@ -127,6 +130,10 @@ open class Document() : DocumentBase() {
     @OneToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST ])
     @JoinColumn(name = RecipientJoinColumnName)
     var recipient: NaturalOrLegalPerson? = null
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = CreatedFromDocumentJoinColumnName)
+    var createdFromAccountTransaction: BankAccountTransaction? = null
 
 
 
