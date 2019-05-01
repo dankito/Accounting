@@ -391,8 +391,8 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         router.showEditDocumentWindow(newExpenditure, this)
     }
 
-    fun showEditDocumentWindow(expenditure: Document) {
-        router.showEditDocumentWindow(expenditure, this)
+    fun showEditDocumentWindow(document: Document) {
+        router.showEditDocumentWindow(document, this)
     }
 
 

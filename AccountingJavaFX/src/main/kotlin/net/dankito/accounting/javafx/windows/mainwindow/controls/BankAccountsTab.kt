@@ -5,8 +5,6 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.input.MouseButton
-import javafx.scene.input.MouseEvent
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.BankAccountsPresenter
@@ -107,9 +105,7 @@ class BankAccountsTab : View() {
             }
         }
 
-        add(BankAccountTransactionsTable(overviewPresenter, transactionsToDisplay).apply {
-            setOnMouseClicked { tableClicked(it, this.selectionModel.selectedItem) }
-        })
+        add(BankAccountTransactionsTable(presenter, overviewPresenter, transactionsToDisplay))
 
     }
 
@@ -165,14 +161,6 @@ class BankAccountsTab : View() {
         }
 
         isUpdatingTransactions.value = false
-    }
-
-    private fun tableClicked(event: MouseEvent, selectedItem: BankAccountTransaction?) {
-        if(event.clickCount == 2 && event.button == MouseButton.PRIMARY) {
-            if(selectedItem != null) {
-                presenter.showTransactionDetailsWindow(selectedItem)
-            }
-        }
     }
 
 }

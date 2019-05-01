@@ -76,7 +76,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
         }
 
         listview(appliedFilters) {
-            minHeight = 75.0
+            minHeight = 150.0
             maxHeight = minHeight
             useMaxWidth = true
 
@@ -147,7 +147,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
             }
 
             left {
-                label(messages["edit.automtic.account.transaction.import.window.define.filter"])
+                label(messages["edit.automtic.account.transaction.import.window.transactions.matching.filter"])
             }
 
             right {
@@ -165,7 +165,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
         }
 
-        add(BankAccountTransactionsTable(overviewPresenter, filteredTransactions).apply {
+        add(BankAccountTransactionsTable(presenter, overviewPresenter, filteredTransactions).apply {
             useMaxWidth = true
 
             vboxConstraints {

@@ -46,6 +46,14 @@ class BankAccountTransaction(
     internal constructor() : this(BigDecimal.ZERO, "", false, "", "", "", Date(), "", "", BigDecimal.ZERO) // for object deserializers
 
 
+    val isCredit: Boolean
+        get() = !!! isDebit
+
+    val isDebit: Boolean
+        get() = amount.signum() < 0
+
+
+
     override fun toString(): String {
         return "$amount $senderOrReceiverName: $usage"
     }
