@@ -73,7 +73,8 @@ class BankAccountTransaction(
     }
 
     override fun hashCode(): Int {
-        var result = amount.hashCode()
+        // e.g. BigDecimal of "150.0" produces another hash code as BigDecimal of "-1.5E+2" even though their values are the same -> has to be converted to double before
+        var result = amount.toDouble().hashCode()
         result = 31 * result + usage.hashCode()
         result = 31 * result + senderOrReceiverName.hashCode()
         result = 31 * result + senderOrReceiverAccountNumber.hashCode()
