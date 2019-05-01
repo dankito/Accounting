@@ -140,7 +140,7 @@ class BankAccountTransactionsTable(private val presenter: BankAccountsPresenter,
         return contextMenu
     }
 
-    private fun addToExpendituresAndRevenues(transactions: List<BankAccountTransaction>) {
+    fun addToExpendituresAndRevenues(transactions: List<BankAccountTransaction>) {
         val vatRate = overviewPresenter.getDefaultVatRateForUser()
 
         val documents = presenter.createDocumentsForTransactions(transactions, vatRate)

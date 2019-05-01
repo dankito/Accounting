@@ -21,6 +21,10 @@ import javax.inject.Inject
 
 class EditAutomaticAccountTransactionImportWindow : Window() {
 
+    companion object {
+        private const val ButtonsWidth = 150.0
+    }
+
 
     @Inject
     lateinit var presenter: BankAccountsPresenter
@@ -37,6 +41,8 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
     private val filterItemViewModels = mutableListOf<FilterItemViewModel>()
 
+
+    private var transactionsTable: BankAccountTransactionsTable by singleAssign()
 
     private val filteredTransactions = FXCollections.observableArrayList<BankAccountTransaction>()
 
@@ -165,7 +171,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
         }
 
-        add(BankAccountTransactionsTable(presenter, overviewPresenter, filteredTransactions).apply {
+        transactionsTable = BankAccountTransactionsTable(presenter, overviewPresenter, filteredTransactions).apply {
             useMaxWidth = true
 
             vboxConstraints {
@@ -173,7 +179,42 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
                 vGrow = Priority.ALWAYS
             }
-        })
+        }
+
+        add(transactionsTable)
+
+        anchorpane {
+            minHeight = 36.0
+            maxHeight = minHeight
+
+            vboxConstraints {
+                marginTop = 6.0
+            }
+
+            button(messages["cancel"]) {
+                prefWidth = ButtonsWidth
+
+                action { close() }
+
+                anchorpaneConstraints {
+                    topAnchor = 0.0
+                    rightAnchor = ButtonsWidth + 12.0
+                    bottomAnchor = 0.0
+                }
+            }
+
+            button(messages["edit.automtic.account.transaction.import.window.apply.filter"]) {
+                prefWidth = ButtonsWidth
+
+                action { applyFilter() }
+
+                anchorpaneConstraints {
+                    topAnchor = 0.0
+                    rightAnchor = 0.0
+                    bottomAnchor = 0.0
+                }
+            }
+        }
 
     }
 
@@ -225,6 +266,13 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
             AccountTransactionProperty.SenderOrReceiverName -> transaction.senderOrReceiverName
             AccountTransactionProperty.Usage -> transaction.usage
         }
+    }
+
+
+    private fun applyFilter() {
+        transactionsTable.addToExpendituresAndRevenues(filterTransactions())
+
+        close()
     }
 
 }
