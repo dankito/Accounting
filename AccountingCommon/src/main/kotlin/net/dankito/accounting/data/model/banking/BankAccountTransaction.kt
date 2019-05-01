@@ -62,13 +62,12 @@ class BankAccountTransaction(
         if (this === other) return true
         if (other !is BankAccountTransaction) return false
 
-        if (amount != other.amount) return false
+        if (valueDate != other.valueDate) return false
         if (usage != other.usage) return false
+        if (amount.compareTo(other.amount) != 0) return false
         if (senderOrReceiverName != other.senderOrReceiverName) return false
         if (senderOrReceiverAccountNumber != other.senderOrReceiverAccountNumber) return false
         if (senderOrReceiverBankCode != other.senderOrReceiverBankCode) return false
-        if (valueDate != other.valueDate) return false
-        if (balance != other.balance) return false
 
         return true
     }
@@ -80,7 +79,6 @@ class BankAccountTransaction(
         result = 31 * result + senderOrReceiverAccountNumber.hashCode()
         result = 31 * result + senderOrReceiverBankCode.hashCode()
         result = 31 * result + valueDate.hashCode()
-        result = 31 * result + balance.hashCode()
         return result
     }
 
