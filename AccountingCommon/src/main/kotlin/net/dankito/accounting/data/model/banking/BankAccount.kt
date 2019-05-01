@@ -1,8 +1,10 @@
 package net.dankito.accounting.data.model.banking
 
 import net.dankito.accounting.data.model.BaseEntity
+import java.math.BigDecimal
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.OneToMany
 
 
 @Entity
@@ -15,7 +17,13 @@ class BankAccount(
     var customerId: String,
 
     @Column(name = "password")
-    var password: String
+    var password: String,
+
+    @Column
+    var balance: BigDecimal = BigDecimal.ZERO,
+
+    @OneToMany
+    var transactions: MutableSet<BankAccountTransaction> = mutableSetOf()
 
 ) : BaseEntity() {
 

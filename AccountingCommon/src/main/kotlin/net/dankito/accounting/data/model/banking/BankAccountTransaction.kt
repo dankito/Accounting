@@ -5,6 +5,7 @@ import java.math.BigDecimal
 import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.ManyToOne
 
 
 @Entity
@@ -38,12 +39,15 @@ class BankAccountTransaction(
     val currency: String,
 
     @Column
-    val balance: BigDecimal
+    val balance: BigDecimal,
+
+    @ManyToOne
+    val account: BankAccount
 
 ) : BaseEntity() {
 
 
-    internal constructor() : this(BigDecimal.ZERO, "", false, "", "", "", Date(), "", "", BigDecimal.ZERO) // for object deserializers
+    internal constructor() : this(BigDecimal.ZERO, "", false, "", "", "", Date(), "", "", BigDecimal.ZERO, BankAccount()) // for object deserializers
 
 
     val isCredit: Boolean

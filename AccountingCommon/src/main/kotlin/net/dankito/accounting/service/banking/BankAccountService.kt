@@ -4,8 +4,7 @@ import net.dankito.accounting.data.dao.banking.IBankAccountDao
 import net.dankito.accounting.data.dao.banking.IBankAccountTransactionDao
 import net.dankito.accounting.data.dao.banking.IBankAccountTransactionsDao
 import net.dankito.accounting.data.model.Document
-import net.dankito.accounting.data.model.banking.BankAccount
-import net.dankito.accounting.data.model.banking.BankAccountTransaction
+import net.dankito.accounting.data.model.banking.*
 
 
 open class BankAccountService(private val bankingClient: IBankingClient,
@@ -54,6 +53,7 @@ open class BankAccountService(private val bankingClient: IBankingClient,
         return transactions
     }
 
+    // TODO: update bankAccountTransactionsProperty
     override fun saveOrUpdateTransaction(transaction: BankAccountTransaction) {
         transactionDao.saveOrUpdate(transaction)
     }
@@ -68,13 +68,9 @@ open class BankAccountService(private val bankingClient: IBankingClient,
 
         if (accounts.isNotEmpty()) {
             updateAccountTransactionsForAccountsAsync(accounts) { accountTransactionsSet ->
-                val accountTransactionsList = accountTransactionsSet.toList()
-
-                saveOrUpdateTransactions(accountTransactionsList)
-
                 bankAccountTransactionsProperty = accountTransactionsSet
 
-                callback(accountTransactionsList)
+                callback(accountTransactionsSet.toList())
             }
         }
         else {
@@ -86,29 +82,44 @@ open class BankAccountService(private val bankingClient: IBankingClient,
                                                           callback: (Set<BankAccountTransaction>) -> Unit) {
         val countAccountsToRetrieve = accounts.size
         var retrievedAccounts = 0
-        val accountTransactions = getAccountTransactions().toMutableSet()
+        val allAccountTransactions = getAccountTransactions().toMutableSet()
 
         accounts.forEach { account ->
-            getAccountTransactionsAsync(account) { transactions ->
+            getAccountTransactionsAsync(account) { getAccountTransactionsResult ->
+                getAccountTransactionsResult.transactions?.let { bankAccountTransactions ->
 
-                accountTransactions.addAll(transactions)
+                    updateAccountAndTransactionDataInDb(account, bankAccountTransactions)
 
-                retrievedAccounts++
+                    allAccountTransactions.addAll(bankAccountTransactions.transactions)
 
-                if (retrievedAccounts == countAccountsToRetrieve) {
-                    callback(accountTransactions)
+                    retrievedAccounts++
+
+                    if (retrievedAccounts == countAccountsToRetrieve) {
+                        callback(allAccountTransactions)
+                    }
                 }
+
             }
         }
     }
 
-    override fun getAccountTransactionsAsync(account: BankAccount, callback: (List<BankAccountTransaction>) -> Unit) {
-        bankingClient.getAccountTransactionsAsync(account) { result ->
-            result.transactions?.let {
-                callback(it.transactions)
-            }
-            ?: callback(listOf())
-        }
+    protected open fun updateAccountAndTransactionDataInDb(account: BankAccount,
+                                                      bankAccountTransactions: BankAccountTransactions) {
+
+        // Set implementation of CouchbaseLite JPA doesn't work
+        val accountTransactions = HashSet(account.transactions)
+        accountTransactions.addAll(bankAccountTransactions.transactions)
+
+        account.transactions.clear()
+        account.transactions.addAll(accountTransactions)
+        saveOrUpdateTransactions(account.transactions.toList())
+
+        account.balance = bankAccountTransactions.balance
+        saveOrUpdateAccount(account)
+    }
+
+    override fun getAccountTransactionsAsync(account: BankAccount, callback: (GetAccountTransactionsResult) -> Unit) {
+        bankingClient.getAccountTransactionsAsync(account, callback)
     }
 
     override fun findAccountTransactionThatMatchesDocument(document: Document): BankAccountTransaction? {
