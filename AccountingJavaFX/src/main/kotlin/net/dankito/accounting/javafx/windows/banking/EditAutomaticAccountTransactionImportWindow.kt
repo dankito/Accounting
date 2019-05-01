@@ -1,18 +1,20 @@
 package net.dankito.accounting.javafx.windows.banking
 
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
+import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
+import net.dankito.accounting.data.model.filter.*
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.BankAccountsPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.banking.controls.BankAccountTransactionsTable
-import net.dankito.accounting.javafx.windows.banking.controls.StringFilterField
-import net.dankito.accounting.javafx.windows.banking.model.StringFilterOption
+import net.dankito.accounting.javafx.windows.banking.model.FilterItemViewModel
+import net.dankito.utils.javafx.ui.controls.addButton
+import net.dankito.utils.javafx.ui.controls.removeButton
 import net.dankito.utils.javafx.ui.dialogs.Window
+import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
 import tornadofx.*
 import javax.inject.Inject
 
@@ -27,18 +29,14 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     lateinit var overviewPresenter: OverviewPresenter
 
 
-    private val filterOtherName = SimpleBooleanProperty(true)
-    private val otherNameEnteredFilter = SimpleStringProperty()
-    private val otherNameFilterOption = SimpleObjectProperty<StringFilterOption>(StringFilterOption.Contains)
-    private val otherNameIgnoreCase = SimpleBooleanProperty(true)
+    private val appliedFilters = FXCollections.observableArrayList<AccountTransactionFilter>(createDefaultFilter())
 
-    private val filterUsage = SimpleBooleanProperty(false)
-    private val usageEnteredFilter = SimpleStringProperty()
-    private val usageFilterOption = SimpleObjectProperty<StringFilterOption>(StringFilterOption.Contains)
-    private val usageIgnoreCase = SimpleBooleanProperty(true)
+    private val entityProperties = FXCollections.observableList(AccountTransactionProperty.values().toList())
 
+    private val filterOptions = FXCollections.observableList(StringFilterOption.values().toList())
 
-    private val allTransactions: List<BankAccountTransaction>
+    private val filterItemViewModels = mutableListOf<FilterItemViewModel>()
+
 
     private val filteredTransactions = FXCollections.observableArrayList<BankAccountTransaction>()
 
@@ -49,10 +47,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
         AppComponent.component.inject(this)
 
         // TODO: add event bus listener to get informed when transactions get updated
-        allTransactions = presenter.getAccountTransactions()
-        updateFilteredTransactions(allTransactions)
-
-        initFilterOptions()
+        updateFilteredTransactions(presenter.getAccountTransactions())
     }
 
 
@@ -63,32 +58,111 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
         paddingAll = 4.0
 
 
-        add(StringFilterField("edit.automtic.account.transaction.import.window.other.name", filterOtherName,
-            otherNameEnteredFilter, otherNameFilterOption, otherNameIgnoreCase).apply {
-
-        })
-
-        add(StringFilterField("edit.automtic.account.transaction.import.window.usage", filterUsage,
-            usageEnteredFilter, usageFilterOption, usageIgnoreCase).apply {
-
-            root.vboxConstraints {
-                marginTop = 12.0
-            }
-        })
-
         borderpane {
+            alignment = Pos.CENTER_LEFT
+
+            left {
+                label(messages["edit.automtic.account.transaction.import.window.define.filter"])
+            }
+
             right {
-                hbox {
+                addButton {
+                    action {
+                        appliedFilters.add(createDefaultFilter())
+                        updateFilteredTransactions()
+                    }
+                }
+            }
+        }
 
-                    label(countFilteredTransactions)
+        listview(appliedFilters) {
+            minHeight = 75.0
+            maxHeight = minHeight
+            useMaxWidth = true
 
-                    label(messages["edit.automtic.account.transaction.import.window.count.filter.results"]) {
-                        borderpaneConstraints {
-                            marginLeft = 3.0
+            cellFormat {
+                val itemViewModel = createFilterItemViewModel(it)
+
+                graphic = borderpane {
+                    prefHeight = 36.0
+
+                    left {
+                        hbox {
+                            alignment = Pos.CENTER_LEFT
+
+                            combobox(itemViewModel.entityProperty, entityProperties) {
+                                cellFormat {
+                                    text = messages["account.transaction.property." + it.name]
+                                }
+                            }
+
+                            combobox(itemViewModel.filterOption, filterOptions) {
+                                cellFormat {
+                                    text = messages["string.filter.option." + it.name]
+                                }
+
+                                hboxConstraints {
+                                    marginLeft = 6.0
+                                    marginRight = 6.0
+                                }
+                            }
+
+                            textfield(itemViewModel.filterText)
+
+                            checkbox(messages["ignore.case"], itemViewModel.ignoreCase) {
+                                isVisible = it.filterType == FilterType.String
+
+                                ensureOnlyUsesSpaceIfVisible()
+
+                                hboxConstraints {
+                                    marginLeft = 6.0
+                                }
+                            }
+                        }
+                    }
+
+                    right {
+                        removeButton {
+                            action {
+                                appliedFilters.remove(this@cellFormat.item)
+                                filterItemViewModels.removeIf { it.item == this@cellFormat.item }
+                                updateFilteredTransactions()
+                            }
+
+                            borderpaneConstraints {
+                                marginLeft = 12.0
+                            }
                         }
                     }
                 }
             }
+        }
+
+
+        borderpane {
+            alignment = Pos.CENTER_LEFT
+
+            vboxConstraints {
+                marginTop = 12.0
+            }
+
+            left {
+                label(messages["edit.automtic.account.transaction.import.window.define.filter"])
+            }
+
+            right {
+                hbox {
+
+                    label(countFilteredTransactions) {
+                        hboxConstraints {
+                            marginRight = 4.0
+                        }
+                    }
+
+                    label(messages["edit.automtic.account.transaction.import.window.count.filter.matches"])
+                }
+            }
+
         }
 
         add(BankAccountTransactionsTable(overviewPresenter, filteredTransactions).apply {
@@ -104,11 +178,26 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     }
 
 
-    private fun initFilterOptions() {
-        filterOtherName.addListener { _, _, _ -> updateFilteredTransactions() }
-        otherNameEnteredFilter.addListener { _, _, _ -> updateFilteredTransactions() }
-        otherNameFilterOption.addListener { _, _, _ -> updateFilteredTransactions() }
-        otherNameIgnoreCase.addListener { _, _, _ -> updateFilteredTransactions() }
+    private fun createDefaultFilter(): AccountTransactionFilter {
+        return AccountTransactionFilter(FilterType.String, StringFilterOption.Contains, true,
+            AccountTransactionProperty.SenderOrReceiverName)
+    }
+
+    private fun createFilterItemViewModel(filter: AccountTransactionFilter): FilterItemViewModel {
+        filterItemViewModels.firstOrNull { it.item == filter }?.let {
+            return it
+        }
+
+        val itemViewModel = FilterItemViewModel(filter)
+
+        filterItemViewModels.add(itemViewModel)
+
+        itemViewModel.entityProperty.addListener { _, _, _ -> updateFilteredTransactions() }
+        itemViewModel.filterOption.addListener { _, _, _ -> updateFilteredTransactions() }
+        itemViewModel.ignoreCase.addListener { _, _, _ -> updateFilteredTransactions() }
+        itemViewModel.filterText.addListener { _, _, _ -> updateFilteredTransactions() }
+
+        return itemViewModel
     }
 
 
@@ -123,23 +212,18 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     }
 
     private fun filterTransactions(): List<BankAccountTransaction> {
-        if (filterOtherName.value) {
-            val otherNameIgnoreCase = this.otherNameIgnoreCase.value
-            val otherNameFilterText = this.otherNameEnteredFilter.value
-
-            return allTransactions.filter { transaction ->
-                when (otherNameFilterOption.value) {
-                    StringFilterOption.Is -> transaction.senderOrReceiverName.equals(otherNameFilterText, otherNameIgnoreCase)
-                    StringFilterOption.IsNot -> transaction.senderOrReceiverName.equals(otherNameFilterText, otherNameIgnoreCase) == false
-                    StringFilterOption.Contains -> transaction.senderOrReceiverName.contains(otherNameFilterText, otherNameIgnoreCase)
-                    StringFilterOption.ContainsNot -> transaction.senderOrReceiverName.contains(otherNameFilterText, otherNameIgnoreCase) == false
-                    StringFilterOption.StartsWith -> transaction.senderOrReceiverName.startsWith(otherNameFilterText, otherNameIgnoreCase)
-                    StringFilterOption.EndsWith -> transaction.senderOrReceiverName.endsWith(otherNameFilterText, otherNameIgnoreCase)
-                }
-            }
+        val filters = filterItemViewModels.map { itemViewModel ->
+            StringFilter<BankAccountTransaction>(itemViewModel.filterOption.value, itemViewModel.filterText.value,
+                itemViewModel.ignoreCase.value, { getEntityProperty(it, itemViewModel.entityProperty.value) })
         }
-        else {
-            return allTransactions
+
+        return presenter.filterTransactions(filters)
+    }
+
+    private fun getEntityProperty(transaction: BankAccountTransaction, property: AccountTransactionProperty): String {
+        return when (property) {
+            AccountTransactionProperty.SenderOrReceiverName -> transaction.senderOrReceiverName
+            AccountTransactionProperty.Usage -> transaction.usage
         }
     }
 

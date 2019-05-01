@@ -65,32 +65,40 @@ open class BankAccountService(private val bankingClient: IBankingClient,
 
     override fun updateAccountTransactionsAsync(callback: (List<BankAccountTransaction>) -> Unit) {
         val accounts = getBankAccounts()
+
+        if (accounts.isNotEmpty()) {
+            updateAccountTransactionsForAccountsAsync(accounts) { accountTransactionsSet ->
+                val accountTransactionsList = accountTransactionsSet.toList()
+
+                saveOrUpdateTransactions(accountTransactionsList)
+
+                bankAccountTransactionsProperty = accountTransactionsSet
+
+                callback(accountTransactionsList)
+            }
+        }
+        else {
+            callback(getAccountTransactions())
+        }
+    }
+
+    protected open fun updateAccountTransactionsForAccountsAsync(accounts: List<BankAccount>,
+                                                          callback: (Set<BankAccountTransaction>) -> Unit) {
         val countAccountsToRetrieve = accounts.size
         var retrievedAccounts = 0
         val accountTransactions = getAccountTransactions().toMutableSet()
 
-        if (accounts.isNotEmpty()) {
-            accounts.forEach { account ->
-                getAccountTransactionsAsync(account) { transactions ->
+        accounts.forEach { account ->
+            getAccountTransactionsAsync(account) { transactions ->
 
-                    accountTransactions.addAll(transactions)
+                accountTransactions.addAll(transactions)
 
-                    retrievedAccounts++
+                retrievedAccounts++
 
-                    if (retrievedAccounts == countAccountsToRetrieve) {
-                        val accountTransactionsList = accountTransactions.toList()
-
-                        saveOrUpdateTransactions(accountTransactionsList)
-
-                        bankAccountTransactionsProperty = accountTransactions
-
-                        callback(accountTransactionsList)
-                    }
+                if (retrievedAccounts == countAccountsToRetrieve) {
+                    callback(accountTransactions)
                 }
             }
-        }
-        else {
-            callback(accountTransactions.toList())
         }
     }
 

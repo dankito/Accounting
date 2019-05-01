@@ -1,11 +1,11 @@
-package net.dankito.accounting.javafx.windows.banking.model
+package net.dankito.accounting.data.model.filter
 
 
 enum class StringFilterOption {
 
-    Is,
+    Equals,
 
-    IsNot,
+    EqualsNot,
 
     Contains,
 

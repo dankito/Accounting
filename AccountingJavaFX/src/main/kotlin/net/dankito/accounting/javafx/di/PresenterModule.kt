@@ -8,6 +8,7 @@ import net.dankito.accounting.service.ValueAddedTaxCalculator
 import net.dankito.accounting.service.address.IAddressService
 import net.dankito.accounting.service.banking.IBankAccountService
 import net.dankito.accounting.service.document.IDocumentService
+import net.dankito.accounting.service.filter.ICollectionFilter
 import net.dankito.accounting.service.invoice.IInvoiceService
 import net.dankito.accounting.service.person.IPersonService
 import net.dankito.accounting.service.settings.ISettingsService
@@ -35,9 +36,10 @@ class PresenterModule {
 
     @Provides
     @Singleton
-    fun provideBankAccountsPresenter(accountService: IBankAccountService, router: Router) : BankAccountsPresenter {
+    fun provideBankAccountsPresenter(accountService: IBankAccountService, collectionFilter: ICollectionFilter,
+                                     router: Router) : BankAccountsPresenter {
 
-        return BankAccountsPresenter(accountService, router)
+        return BankAccountsPresenter(accountService, collectionFilter, router)
     }
 
 

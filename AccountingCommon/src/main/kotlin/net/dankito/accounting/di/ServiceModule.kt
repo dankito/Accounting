@@ -18,6 +18,8 @@ import net.dankito.accounting.service.banking.IBankAccountService
 import net.dankito.accounting.service.banking.IBankingClient
 import net.dankito.accounting.service.document.DocumentService
 import net.dankito.accounting.service.document.IDocumentService
+import net.dankito.accounting.service.filter.CollectionFilter
+import net.dankito.accounting.service.filter.ICollectionFilter
 import net.dankito.accounting.service.invoice.IInvoiceService
 import net.dankito.accounting.service.invoice.InvoiceService
 import net.dankito.accounting.service.person.IPersonService
@@ -120,6 +122,13 @@ class ServiceModule {
     @Singleton
     fun provideElsterTaxDeclarationService(dao: IElsterTaxDeclarationSettingsDao) : IElsterTaxDeclarationService {
         return ElsterTaxDeclarationService(dao)
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideCollectionFilter() : ICollectionFilter {
+        return CollectionFilter()
     }
 
 }
