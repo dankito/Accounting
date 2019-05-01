@@ -108,7 +108,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
 
     fun checkUnpaidInvoicesPaymentState() {
-        bankAccountService.updateAccountTransactionsAsync {
+        bankAccountService.updateAccountsTransactionsAsync {
             documentService.getUnpaidCreatedInvoices().forEach { unpaidInvoice ->
                 checkInvoicePaymentState(unpaidInvoice)
             }

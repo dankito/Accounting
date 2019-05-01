@@ -16,12 +16,12 @@ class HbciBankingClientTest {
 
     @Ignore // not an automatic test, set your bank account credentials in getTestBankAccount()
     @Test
-    fun getAccountTurnoversAsync() {
+    fun getAccountTransactionsAsync() {
         val result = AtomicReference<GetAccountTransactionsResult>(null)
         val countDownLatch = CountDownLatch(1)
 
-        underTest.getAccountTransactionsAsync(getTestBankAccount()) { getAccountTurnoversResult ->
-            result.set(getAccountTurnoversResult)
+        underTest.getAccountTransactionsAsync(getTestBankAccount()) { getAccountTransactionsResult ->
+            result.set(getAccountTransactionsResult)
             countDownLatch.countDown()
         }
 

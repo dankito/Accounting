@@ -7,9 +7,11 @@ import net.dankito.accounting.di.DaoModule
 import net.dankito.accounting.di.ServiceModule
 import net.dankito.accounting.javafx.windows.banking.BankAccountTransactionDetailsWindow
 import net.dankito.accounting.javafx.windows.banking.EditAutomaticAccountTransactionImportWindow
+import net.dankito.accounting.javafx.windows.banking.EditBankAccountWindow
 import net.dankito.accounting.javafx.windows.invoice.CreateInvoiceWindow
 import net.dankito.accounting.javafx.windows.mainwindow.MainWindow
 import net.dankito.accounting.javafx.windows.mainwindow.controls.BankAccountsTab
+import net.dankito.accounting.javafx.windows.mainwindow.controls.MainMenuBar
 import net.dankito.accounting.javafx.windows.mainwindow.controls.OverviewTab
 import net.dankito.accounting.javafx.windows.mainwindow.controls.SummaryPane
 import net.dankito.accounting.javafx.windows.person.EditPersonWindow
@@ -32,6 +34,8 @@ interface AppComponent : CommonComponent {
 
     fun inject(mainWindow: MainWindow)
 
+    fun inject(mainMenuBar: MainMenuBar)
+
     fun inject(overviewTab: OverviewTab)
 
     fun inject(summaryPane: SummaryPane)
@@ -45,9 +49,13 @@ interface AppComponent : CommonComponent {
 
     fun inject(editTimeTrackerAccountWindow: EditTimeTrackerAccountWindow)
 
+
+    fun inject(editBankAccountWindow: EditBankAccountWindow)
+
     fun inject(editAutomaticAccountTransactionImportWindow: EditAutomaticAccountTransactionImportWindow)
 
     fun inject(bankAccountTransactionDetailsWindow: BankAccountTransactionDetailsWindow)
+
 
     fun inject(elsterTaxDeclarationWindow: ElsterTaxDeclarationWindow)
 

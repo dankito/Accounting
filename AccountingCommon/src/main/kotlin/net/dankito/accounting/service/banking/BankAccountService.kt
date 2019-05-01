@@ -30,6 +30,10 @@ open class BankAccountService(private val bankingClient: IBankingClient,
         return bankAccounts
     }
 
+    override fun checkAccountCredentialsAsync(account: BankAccount, callback: (CheckBankAccountCredentialsResult) -> Unit) {
+        bankingClient.checkAccountCredentialsAsync(account, callback)
+    }
+
     override fun saveOrUpdateAccount(account: BankAccount) {
         val isNewAccount = account.isPersisted()
 
@@ -63,11 +67,11 @@ open class BankAccountService(private val bankingClient: IBankingClient,
     }
 
 
-    override fun updateAccountTransactionsAsync(callback: (List<BankAccountTransaction>) -> Unit) {
+    override fun updateAccountsTransactionsAsync(callback: (List<BankAccountTransaction>) -> Unit) {
         val accounts = getBankAccounts()
 
         if (accounts.isNotEmpty()) {
-            updateAccountTransactionsForAccountsAsync(accounts) { accountTransactionsSet ->
+            updateAccountsTransactionsAsync(accounts) { accountTransactionsSet ->
                 bankAccountTransactionsProperty = accountTransactionsSet
 
                 callback(accountTransactionsSet.toList())
@@ -78,28 +82,42 @@ open class BankAccountService(private val bankingClient: IBankingClient,
         }
     }
 
-    protected open fun updateAccountTransactionsForAccountsAsync(accounts: List<BankAccount>,
-                                                          callback: (Set<BankAccountTransaction>) -> Unit) {
+    protected open fun updateAccountsTransactionsAsync(accounts: List<BankAccount>,
+                                                       callback: (Set<BankAccountTransaction>) -> Unit) {
         val countAccountsToRetrieve = accounts.size
         var retrievedAccounts = 0
         val allAccountTransactions = getAccountTransactions().toMutableSet()
 
         accounts.forEach { account ->
-            getAccountTransactionsAsync(account) { getAccountTransactionsResult ->
-                getAccountTransactionsResult.transactions?.let { bankAccountTransactions ->
+            updateAccountTransactionsAsync(account) { getAccountTransactionsResult ->
 
-                    updateAccountAndTransactionDataInDb(account, bankAccountTransactions)
+                getAccountTransactionsResult.transactions?.let { bankAccountTransactions ->
 
                     allAccountTransactions.addAll(bankAccountTransactions.transactions)
 
-                    retrievedAccounts++
-
-                    if (retrievedAccounts == countAccountsToRetrieve) {
-                        callback(allAccountTransactions)
-                    }
                 }
 
+                retrievedAccounts++
+
+                if (retrievedAccounts == countAccountsToRetrieve) {
+                    callback(allAccountTransactions)
+                }
             }
+        }
+    }
+
+    override fun updateAccountTransactionsAsync(account: BankAccount, callback: (GetAccountTransactionsResult) -> Unit) {
+        getAccountTransactionsAsync(account) { getAccountTransactionsResult ->
+            getAccountTransactionsResult.transactions?.let { bankAccountTransactions ->
+
+                updateAccountAndTransactionDataInDb(account, bankAccountTransactions)
+
+                (bankAccountTransactionsProperty as? MutableSet)?.addAll(bankAccountTransactions.transactions)
+
+            }
+
+            callback(getAccountTransactionsResult)
+
         }
     }
 

@@ -3,11 +3,13 @@ package net.dankito.accounting.javafx.service
 import javafx.stage.Modality
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.Person
+import net.dankito.accounting.data.model.banking.BankAccount
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.data.model.timetracker.TimeTrackerAccount
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.banking.BankAccountTransactionDetailsWindow
 import net.dankito.accounting.javafx.windows.banking.EditAutomaticAccountTransactionImportWindow
+import net.dankito.accounting.javafx.windows.banking.EditBankAccountWindow
 import net.dankito.accounting.javafx.windows.document.EditDocumentWindow
 import net.dankito.accounting.javafx.windows.invoice.CreateInvoiceWindow
 import net.dankito.accounting.javafx.windows.person.EditPersonWindow
@@ -33,6 +35,11 @@ class Router {
 
     fun showEditPersonWindow(person: Person, didUserSavePersonCallback: ((Boolean) -> Unit)? = null) {
         EditPersonWindow(person, didUserSavePersonCallback).show()
+    }
+
+
+    fun showEditBankAccountWindow(bankAccount: BankAccount) {
+        EditBankAccountWindow(bankAccount).show(messages["edit.bank.account.window.title"])
     }
 
     fun showBankAccountTransactionDetailsWindow(transaction: BankAccountTransaction) {

@@ -1,9 +1,6 @@
 package net.dankito.accounting.service.banking
 
-import net.dankito.accounting.data.model.banking.BankAccount
-import net.dankito.accounting.data.model.banking.BankAccountTransaction
-import net.dankito.accounting.data.model.banking.BankAccountTransactions
-import net.dankito.accounting.data.model.banking.GetAccountTransactionsResult
+import net.dankito.accounting.data.model.banking.*
 import net.dankito.banking.Hbci4JavaBankingClient
 import net.dankito.banking.model.AccountCredentials
 import net.dankito.banking.model.AccountingEntries
@@ -15,19 +12,30 @@ import java.math.BigDecimal
 
 open class HbciBankingClient : IBankingClient {
 
+    override fun checkAccountCredentialsAsync(account: BankAccount, callback: (CheckBankAccountCredentialsResult) -> Unit) {
+        val client = createClient(account)
+
+        client.getAccountsAsync { result ->
+            callback(CheckBankAccountCredentialsResult(result.successful, result.error))
+        }
+    }
+
     override fun getAccountTransactionsAsync(account: BankAccount, callback: (GetAccountTransactionsResult) -> Unit) {
-        val client = Hbci4JavaBankingClient(mapToAccountCredentials(account), FileUtils().getTempDir())
+        val client = createClient(account)
 
         client.getAccountsAsync { getAccountsResult ->
             getAccountsResult.bankInfo?.let { bankInfo ->
-                getAccountTurnoversAsync(client, bankInfo, callback)
+                getAccountTransactionsAsync(client, account, bankInfo, callback)
             }
             ?: callback(GetAccountTransactionsResult(false, null, getAccountsResult.error))
         }
     }
 
-    protected open fun getAccountTurnoversAsync(client: Hbci4JavaBankingClient, bankInfo: BankInfo,
-                                                callback: (GetAccountTransactionsResult) -> Unit) {
+    private fun createClient(account: BankAccount) =
+        Hbci4JavaBankingClient(mapToAccountCredentials(account), FileUtils().getTempDir())
+
+    protected open fun getAccountTransactionsAsync(client: Hbci4JavaBankingClient, account: BankAccount, bankInfo: BankInfo,
+                                                   callback: (GetAccountTransactionsResult) -> Unit) {
 
         if (bankInfo.accounts.isEmpty()) {
             callback(GetAccountTransactionsResult(false, null, null))
@@ -38,7 +46,7 @@ open class HbciBankingClient : IBankingClient {
                 accountingEntries.error?.let {
                     callback(GetAccountTransactionsResult(false, null, accountingEntries.error))
                 }
-                ?: callback(GetAccountTransactionsResult(true, mapToAccountTransactions(accountingEntries), null))
+                ?: callback(GetAccountTransactionsResult(true, mapToAccountTransactions(account, accountingEntries), null))
             }
         }
     }
@@ -48,13 +56,13 @@ open class HbciBankingClient : IBankingClient {
         return AccountCredentials(account.bankCode, account.customerId, account.password)
     }
 
-    protected open fun mapToAccountTransactions(accountingEntries: AccountingEntries): BankAccountTransactions {
+    protected open fun mapToAccountTransactions(account: BankAccount, accountingEntries: AccountingEntries): BankAccountTransactions {
         return BankAccountTransactions(accountingEntries.saldo?.bigDecimalValue ?: BigDecimal.ZERO,
-            accountingEntries.entries.map { mapToTransaction(it) }
+            accountingEntries.entries.map { mapToTransaction(account, it) }
         )
     }
 
-    protected open fun mapToTransaction(entry: AccountingEntry): BankAccountTransaction {
+    protected open fun mapToTransaction(account: BankAccount, entry: AccountingEntry): BankAccountTransaction {
         val usage = entry.sepaVerwendungszweck ?: entry.usageWithNoSpecialType
                     ?: (entry.getUsage1() + (entry.getUsage2()?.let { it } ?: ""))
 
@@ -64,7 +72,7 @@ open class HbciBankingClient : IBankingClient {
 
         return BankAccountTransaction(entry.value.bigDecimalValue, usage,
             entry.showOtherName(), otherName, otherAccountNumber, otherBankCode,
-            entry.valutaDate, entry.type, entry.value.curr, entry.saldo.bigDecimalValue
+            entry.valutaDate, entry.type, entry.value.curr, entry.saldo.bigDecimalValue, account
         )
     }
 

@@ -26,6 +26,13 @@ class PresenterModule {
 
     @Provides
     @Singleton
+    fun provideMainWindowPresenter(router: Router) : MainWindowPresenter {
+
+        return MainWindowPresenter(router)
+    }
+
+    @Provides
+    @Singleton
     fun provideOverviewPresenter(documentService: IDocumentService, settingsService: ISettingsService,
                                  bankAccountService: IBankAccountService, router: Router,
                                  vatCalculator: ValueAddedTaxCalculator

@@ -144,7 +144,7 @@ class BankAccountsTab : View() {
     private fun updateAccountTransactions() {
         isUpdatingTransactions.value = true
 
-        presenter.updateAccountTransactionsAsync { transactions ->
+        presenter.updateAccountsTransactionsAsync { transactions ->
             runLater {
                 retrievedAccountTransactions(transactions)
             }
