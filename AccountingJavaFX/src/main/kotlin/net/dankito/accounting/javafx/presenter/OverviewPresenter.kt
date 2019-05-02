@@ -5,11 +5,13 @@ import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.data.model.PaymentState
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
+import net.dankito.accounting.data.model.filter.EntityFilter
 import net.dankito.accounting.data.model.settings.AppSettings
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.ValueAddedTaxCalculator
 import net.dankito.accounting.service.banking.IBankAccountService
 import net.dankito.accounting.service.document.IDocumentService
+import net.dankito.accounting.service.filter.IFilterService
 import net.dankito.accounting.service.settings.ISettingsService
 import net.dankito.utils.datetime.asUtilDate
 import java.math.BigDecimal
@@ -22,6 +24,7 @@ import java.util.*
 open class OverviewPresenter(private val documentService: IDocumentService,
                              private val settingsService: ISettingsService,
                              private val bankAccountService: IBankAccountService,
+                             private val filterService: IFilterService,
                              private val router: Router,
                              private val vatCalculator: ValueAddedTaxCalculator = ValueAddedTaxCalculator()
 ) {
@@ -119,10 +122,13 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
 
     fun checkUnpaidInvoicesPaymentState() {
-        bankAccountService.updateAccountsTransactionsAsync {
+        bankAccountService.updateAccountsTransactionsAsync { transactions ->
             documentService.getUnpaidCreatedInvoices().forEach { unpaidInvoice ->
                 checkInvoicePaymentState(unpaidInvoice)
             }
+
+            // TODO: implicitly also runs EntityFilters on BankAccountTransactions; no one can see this from method name!
+            runFilterAndCreateNewDocuments(BankAccountTransaction::class.java, transactions)
         }
     }
 
@@ -138,7 +144,24 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     }
 
 
-    fun addToExpendituresAndRevenues(transactions: List<BankAccountTransaction>) {
+    fun saveOrUpdate(entityFilter: EntityFilter) {
+        filterService.saveOrUpdate(entityFilter)
+    }
+
+    fun <T> runFilterAndCreateNewDocuments(entityClass: Class<T>, collection: Collection<T>) {
+        filterService.getEntityFiltersForEntity(entityClass.name).forEach { entityFilter ->
+            val itemsOnWithFilterApplies = filterService.filterCollection(entityFilter, collection)
+
+            // TODO: create ICreateDocumentFromEntity interface and a factory to get actual implementation, e. g. for BankAccountTransation, Email, ...
+            (itemsOnWithFilterApplies as? Collection<BankAccountTransaction>)?.let {
+                addToExpendituresAndRevenues(itemsOnWithFilterApplies)
+            }
+        }
+    }
+
+
+
+    fun addToExpendituresAndRevenues(transactions: Collection<BankAccountTransaction>) {
         val vatRate = getDefaultVatRateForUser()
 
         val documents = createDocumentsForTransactions(transactions, vatRate)
@@ -148,7 +171,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         }
     }
 
-    fun adjustBeforeAddingToExpendituresAndRevenues(transactions: List<BankAccountTransaction>) {
+    fun adjustBeforeAddingToExpendituresAndRevenues(transactions: Collection<BankAccountTransaction>) {
         val vatRate = getDefaultVatRateForUser()
 
         val documents = createDocumentsForTransactions(transactions, vatRate)
@@ -158,7 +181,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         }
     }
 
-    private fun createDocumentsForTransactions(transactions: List<BankAccountTransaction>, valueAddedTaxRate: Float)
+    private fun createDocumentsForTransactions(transactions: Collection<BankAccountTransaction>, valueAddedTaxRate: Float)
             : List<Document> {
 
         // don't create a second document from the same account transaction

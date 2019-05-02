@@ -1,9 +1,9 @@
 package net.dankito.accounting.data.model.filter
 
 
-class AccountTransactionFilter(val filterType: FilterType, // TODO: currently not needed
-                               val filterOption: StringFilterOption, // TODO: make generic
+class AccountTransactionFilter(val filterType: FilterType,
+                               val filterOption: FilterOption,
                                val ignoreCase: Boolean,
-                               val property: AccountTransactionProperty // TODO: make generic
+                               val property: AccountTransactionProperty
 ) {
 }

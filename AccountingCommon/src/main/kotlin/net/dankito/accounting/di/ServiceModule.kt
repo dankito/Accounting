@@ -6,6 +6,8 @@ import net.dankito.accounting.data.dao.*
 import net.dankito.accounting.data.dao.banking.IBankAccountDao
 import net.dankito.accounting.data.dao.banking.IBankAccountTransactionDao
 import net.dankito.accounting.data.dao.banking.IBankAccountTransactionsDao
+import net.dankito.accounting.data.dao.filter.IEntityFilterDao
+import net.dankito.accounting.data.dao.filter.IFilterDao
 import net.dankito.accounting.data.dao.invoice.ICreateInvoiceSettingsDao
 import net.dankito.accounting.data.dao.tax.IFederalStateDao
 import net.dankito.accounting.data.dao.tax.ITaxOfficeDao
@@ -19,7 +21,9 @@ import net.dankito.accounting.service.banking.IBankingClient
 import net.dankito.accounting.service.document.DocumentService
 import net.dankito.accounting.service.document.IDocumentService
 import net.dankito.accounting.service.filter.CollectionFilter
+import net.dankito.accounting.service.filter.FilterService
 import net.dankito.accounting.service.filter.ICollectionFilter
+import net.dankito.accounting.service.filter.IFilterService
 import net.dankito.accounting.service.invoice.IInvoiceService
 import net.dankito.accounting.service.invoice.InvoiceService
 import net.dankito.accounting.service.person.IPersonService
@@ -129,6 +133,15 @@ class ServiceModule {
     @Singleton
     fun provideCollectionFilter() : ICollectionFilter {
         return CollectionFilter()
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideFilterService(collectionFilter: ICollectionFilter, entityFilterDao: IEntityFilterDao,
+                             filterDao: IFilterDao) : IFilterService {
+
+        return FilterService(collectionFilter, entityFilterDao, filterDao)
     }
 
 }

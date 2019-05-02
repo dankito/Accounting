@@ -1,10 +1,10 @@
 package net.dankito.accounting.service.filter
 
-import net.dankito.accounting.data.model.filter.StringFilter
+import net.dankito.accounting.data.model.filter.Filter
 
 
 interface ICollectionFilter {
 
-    fun <T> filterStringField(collection: Collection<T>, filters: List<StringFilter<T>>): Collection<T>
+    fun <T> filter(filters: List<Filter>, collection: Collection<T>): Collection<T>
 
 }

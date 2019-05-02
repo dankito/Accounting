@@ -9,6 +9,7 @@ import net.dankito.accounting.service.address.IAddressService
 import net.dankito.accounting.service.banking.IBankAccountService
 import net.dankito.accounting.service.document.IDocumentService
 import net.dankito.accounting.service.filter.ICollectionFilter
+import net.dankito.accounting.service.filter.IFilterService
 import net.dankito.accounting.service.invoice.IInvoiceService
 import net.dankito.accounting.service.person.IPersonService
 import net.dankito.accounting.service.settings.ISettingsService
@@ -34,11 +35,11 @@ class PresenterModule {
     @Provides
     @Singleton
     fun provideOverviewPresenter(documentService: IDocumentService, settingsService: ISettingsService,
-                                 bankAccountService: IBankAccountService, router: Router,
+                                 bankAccountService: IBankAccountService, filterService: IFilterService, router: Router,
                                  vatCalculator: ValueAddedTaxCalculator
     ) : OverviewPresenter {
 
-        return OverviewPresenter(documentService, settingsService, bankAccountService, router, vatCalculator)
+        return OverviewPresenter(documentService, settingsService, bankAccountService, filterService, router, vatCalculator)
     }
 
     @Provides

@@ -1,10 +1,10 @@
 package net.dankito.accounting.data.model.filter
 
 
-enum class AccountTransactionProperty {
+enum class AccountTransactionProperty(val propertyName: String) {
 
-    SenderOrReceiverName,
+    SenderOrReceiverName("senderOrReceiverName"),
 
-    Usage
+    Usage("usage")
 
 }

@@ -23,6 +23,9 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
     companion object {
         private const val ButtonsWidth = 150.0
+        private const val ButtonsHorizontalMargin = 12.0
+
+        private val ClassToFilter = BankAccountTransaction::class.java.name
     }
 
 
@@ -37,7 +40,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
     private val entityProperties = FXCollections.observableList(AccountTransactionProperty.values().toList())
 
-    private val filterOptions = FXCollections.observableList(StringFilterOption.values().toList())
+    private val filterOptions = FXCollections.observableList(FilterOption.stringFilterOptions)
 
     private val filterItemViewModels = mutableListOf<FilterItemViewModel>()
 
@@ -104,7 +107,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
                             combobox(itemViewModel.filterOption, filterOptions) {
                                 cellFormat {
-                                    text = messages["string.filter.option." + it.name]
+                                    text = messages["filter.option." + it.name]
                                 }
 
                                 hboxConstraints {
@@ -198,15 +201,27 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
                 anchorpaneConstraints {
                     topAnchor = 0.0
-                    rightAnchor = ButtonsWidth + 12.0
+                    rightAnchor = 2 * (ButtonsWidth + ButtonsHorizontalMargin)
                     bottomAnchor = 0.0
                 }
             }
 
-            button(messages["edit.automtic.account.transaction.import.window.apply.filter"]) {
+            button(messages["edit.automtic.account.transaction.import.window.apply.filter.now"]) {
                 prefWidth = ButtonsWidth
 
-                action { applyFilter() }
+                action { runFilterNow() }
+
+                anchorpaneConstraints {
+                    topAnchor = 0.0
+                    rightAnchor = ButtonsWidth + ButtonsHorizontalMargin
+                    bottomAnchor = 0.0
+                }
+            }
+
+            button(messages["edit.automtic.account.transaction.import.window.run.filter.after.receiving.transactions"]) {
+                prefWidth = ButtonsWidth
+
+                action { runFilterEachTimeAfterReceivingTransactions() }
 
                 anchorpaneConstraints {
                     topAnchor = 0.0
@@ -220,7 +235,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
 
     private fun createDefaultFilter(): AccountTransactionFilter {
-        return AccountTransactionFilter(FilterType.String, StringFilterOption.Contains, true,
+        return AccountTransactionFilter(FilterType.String, FilterOption.Contains, true,
             AccountTransactionProperty.SenderOrReceiverName)
     }
 
@@ -253,24 +268,28 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     }
 
     private fun filterTransactions(): List<BankAccountTransaction> {
-        val filters = filterItemViewModels.map { itemViewModel ->
-            StringFilter<BankAccountTransaction>(itemViewModel.filterOption.value, itemViewModel.filterText.value,
-                itemViewModel.ignoreCase.value, { getEntityProperty(it, itemViewModel.entityProperty.value) })
-        }
+        val filters = createFilters()
 
         return presenter.filterTransactions(filters)
     }
 
-    private fun getEntityProperty(transaction: BankAccountTransaction, property: AccountTransactionProperty): String {
-        return when (property) {
-            AccountTransactionProperty.SenderOrReceiverName -> transaction.senderOrReceiverName
-            AccountTransactionProperty.Usage -> transaction.usage
+    private fun createFilters(): List<Filter> {
+        return filterItemViewModels.map { itemViewModel ->
+            Filter(FilterType.String, itemViewModel.filterOption.value, itemViewModel.ignoreCase.value,
+                itemViewModel.filterText.value, ClassToFilter, itemViewModel.entityProperty.value.propertyName
+            )
         }
     }
 
 
-    private fun applyFilter() {
+    private fun runFilterNow() {
         transactionsTable.addToExpendituresAndRevenues(filterTransactions())
+
+        close()
+    }
+
+    private fun runFilterEachTimeAfterReceivingTransactions() {
+        overviewPresenter.saveOrUpdate(EntityFilter(BankAccountTransaction::class.java, createFilters()))
 
         close()
     }

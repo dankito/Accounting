@@ -1,19 +1,29 @@
 package net.dankito.accounting.service.filter
 
-import net.dankito.accounting.data.model.filter.StringFilter
-import net.dankito.accounting.data.model.filter.StringFilterOption
+import net.dankito.accounting.data.model.filter.Filter
+import net.dankito.accounting.data.model.filter.FilterOption
+import net.dankito.accounting.data.model.filter.FilterType
+import org.slf4j.LoggerFactory
 
 
 open class CollectionFilter : ICollectionFilter {
 
-    override fun <T> filterStringField(collection: Collection<T>, filters: List<StringFilter<T>>): Collection<T> {
+    companion object {
+        private val log = LoggerFactory.getLogger(CollectionFilter::class.java)
+    }
+
+
+    override fun <T> filter(
+        filters: List<Filter>,
+        collection: Collection<T>
+    ): Collection<T> {
         if (filters.isEmpty()) {
             return collection
         }
 
         return collection.filter { item ->
             filters.forEach { filter ->
-                if (doesStringFilterMatch(item, filter) == false) {
+                if (doesFilterMatch(item, filter) == false) {
                     return@filter false
                 }
             }
@@ -22,19 +32,45 @@ open class CollectionFilter : ICollectionFilter {
         }
     }
 
-    protected open fun <T> doesStringFilterMatch(item: T, filter: StringFilter<T>): Boolean {
+    protected open fun <T> doesFilterMatch(item: T, filter: Filter): Boolean {
+        val value = extractValue(item, filter)
+
+        if (filter.type == FilterType.String) {
+            (value as? String)?.let { stringValue ->
+                return doesStringFilterMatch(stringValue, filter)
+            }
+            ?: log.error("Filter is of type String, but extracted value '$value' is of type ${value?.javaClass}")
+        }
+
+        return false
+    }
+
+    protected open fun <T> extractValue(item: T, filter: Filter): Any? {
+        try {
+            val type = Class.forName(filter.classToFilter)
+            val field = type.getDeclaredField(filter.propertyToFilter)
+
+            field.isAccessible = true
+
+            return field.get(item)
+        } catch (e: Exception) {
+            log.error("Could not extract value of property ${filter.propertyToFilter} from $item", e)
+        }
+
+        return null
+    }
+
+    protected open fun doesStringFilterMatch(value: String, filter: Filter): Boolean {
         val ignoreCase = filter.ignoreCase
         val filterText = filter.filterText
 
-        val value = filter.valueExtractor(item)
-
-        return when (filter.filterOption) {
-            StringFilterOption.Equals -> value.equals(filterText, ignoreCase)
-            StringFilterOption.EqualsNot -> value.equals(filterText, ignoreCase) == false
-            StringFilterOption.Contains -> value.contains(filterText, ignoreCase)
-            StringFilterOption.ContainsNot -> value.contains(filterText, ignoreCase) == false
-            StringFilterOption.StartsWith -> value.startsWith(filterText, ignoreCase)
-            StringFilterOption.EndsWith -> value.endsWith(filterText, ignoreCase)
+        return when (filter.option) {
+            FilterOption.Equals -> value.equals(filterText, ignoreCase)
+            FilterOption.EqualsNot -> value.equals(filterText, ignoreCase) == false
+            FilterOption.Contains -> value.contains(filterText, ignoreCase)
+            FilterOption.ContainsNot -> value.contains(filterText, ignoreCase) == false
+            FilterOption.StartsWith -> value.startsWith(filterText, ignoreCase)
+            FilterOption.EndsWith -> value.endsWith(filterText, ignoreCase)
         }
     }
 

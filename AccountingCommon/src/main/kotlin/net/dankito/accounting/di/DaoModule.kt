@@ -4,6 +4,10 @@ import dagger.Module
 import dagger.Provides
 import net.dankito.accounting.data.dao.*
 import net.dankito.accounting.data.dao.banking.*
+import net.dankito.accounting.data.dao.filter.EntityFilterDao
+import net.dankito.accounting.data.dao.filter.FilterDao
+import net.dankito.accounting.data.dao.filter.IEntityFilterDao
+import net.dankito.accounting.data.dao.filter.IFilterDao
 import net.dankito.accounting.data.dao.invoice.CreateInvoiceSettingsDao
 import net.dankito.accounting.data.dao.invoice.ICreateInvoiceSettingsDao
 import net.dankito.accounting.data.dao.tax.FederalStateDao
@@ -152,6 +156,19 @@ class DaoModule(private val dataFolder: File = File("data")) {
     @Singleton
     fun provideElsterTaxDeclarationSettingsDao(entityManager: IEntityManager) : IElsterTaxDeclarationSettingsDao {
         return ElsterTaxDeclarationSettingsDao(entityManager)
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideFilterDao(entityManager: IEntityManager) : IFilterDao {
+        return FilterDao(entityManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideEntityFilterDao(entityManager: IEntityManager) : IEntityFilterDao {
+        return EntityFilterDao(entityManager)
     }
 
 }

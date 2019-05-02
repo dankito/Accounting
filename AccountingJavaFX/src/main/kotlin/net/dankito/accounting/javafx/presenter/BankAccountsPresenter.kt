@@ -3,7 +3,7 @@ package net.dankito.accounting.javafx.presenter
 import net.dankito.accounting.data.model.banking.BankAccount
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.data.model.banking.CheckBankAccountCredentialsResult
-import net.dankito.accounting.data.model.filter.StringFilter
+import net.dankito.accounting.data.model.filter.Filter
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.banking.IBankAccountService
 import net.dankito.accounting.service.filter.ICollectionFilter
@@ -34,8 +34,8 @@ class BankAccountsPresenter(private val accountService: IBankAccountService,
     }
 
 
-    fun filterTransactions(filters: List<StringFilter<BankAccountTransaction>>): List<BankAccountTransaction> {
-        return collectionFilter.filterStringField(accountService.getAccountTransactions(), filters).toList()
+    fun filterTransactions(filters: List<Filter>): List<BankAccountTransaction> {
+        return collectionFilter.filter(filters, accountService.getAccountTransactions()).toList()
     }
 
 
