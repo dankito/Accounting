@@ -1,6 +1,7 @@
 package net.dankito.accounting.data.model
 
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
+import net.dankito.accounting.data.model.filter.EntityFilter
 import java.util.*
 import javax.persistence.*
 
@@ -36,6 +37,8 @@ open class Document() : DocumentBase() {
         const val RecipientJoinColumnName = "recipient"
 
         const val CreatedFromDocumentJoinColumnName = "created_from_document"
+
+        const val AutomaticallyCreatedFromFilterJoinColumnName = "automatically_created_from_filter"
 
 
         @JvmOverloads
@@ -134,6 +137,10 @@ open class Document() : DocumentBase() {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = CreatedFromDocumentJoinColumnName)
     var createdFromAccountTransaction: BankAccountTransaction? = null
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = AutomaticallyCreatedFromFilterJoinColumnName)
+    var automaticallyCreatedFromFilter: EntityFilter? = null
 
 
 

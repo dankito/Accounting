@@ -154,17 +154,19 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
             // TODO: create ICreateDocumentFromEntity interface and a factory to get actual implementation, e. g. for BankAccountTransation, Email, ...
             (itemsOnWithFilterApplies as? Collection<BankAccountTransaction>)?.let {
-                addToExpendituresAndRevenues(itemsOnWithFilterApplies)
+                addToExpendituresAndRevenues(itemsOnWithFilterApplies, entityFilter)
             }
         }
     }
 
 
 
-    fun addToExpendituresAndRevenues(transactions: Collection<BankAccountTransaction>) {
+    fun addToExpendituresAndRevenues(transactions: Collection<BankAccountTransaction>,
+                                     automaticallyCreatedFromFilter: EntityFilter? = null) {
+
         val vatRate = getDefaultVatRateForUser()
 
-        val documents = createDocumentsForTransactions(transactions, vatRate)
+        val documents = createDocumentsForTransactions(transactions, vatRate, automaticallyCreatedFromFilter)
 
         documents.forEach {
             saveOrUpdate(it)
@@ -181,18 +183,20 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         }
     }
 
-    private fun createDocumentsForTransactions(transactions: Collection<BankAccountTransaction>, valueAddedTaxRate: Float)
-            : List<Document> {
+    private fun createDocumentsForTransactions(transactions: Collection<BankAccountTransaction>, valueAddedTaxRate: Float,
+                                               automaticallyCreatedFromFilter: EntityFilter? = null): List<Document> {
 
         // don't create a second document from the same account transaction
         val transactionsWithNotYetCreatedDocuments = transactions.filter { it.createdDocument == null }
 
         return transactionsWithNotYetCreatedDocuments.map { transaction ->
-            mapTransactionToDocument(transaction, valueAddedTaxRate)
+            mapTransactionToDocument(transaction, valueAddedTaxRate, automaticallyCreatedFromFilter)
         }
     }
 
-    private fun mapTransactionToDocument(transaction: BankAccountTransaction, valueAddedTaxRate: Float): Document {
+    private fun mapTransactionToDocument(transaction: BankAccountTransaction, valueAddedTaxRate: Float,
+        automaticallyCreatedFromFilter: EntityFilter? = null): Document {
+
         val type = if (transaction.isDebit) DocumentType.Expenditure else DocumentType.Revenue
 
         val document = Document(type, Math.abs(transaction.amount.toDouble()), valueAddedTaxRate)
@@ -202,6 +206,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
         transaction.createdDocument = document
         document.createdFromAccountTransaction = transaction
+        document.automaticallyCreatedFromFilter = automaticallyCreatedFromFilter
 
         return document
     }

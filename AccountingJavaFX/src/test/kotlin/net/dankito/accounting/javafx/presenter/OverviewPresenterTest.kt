@@ -106,8 +106,20 @@ class OverviewPresenterTest : DatabaseBasedTest() {
 
 
         // then
-        assertThat(documentDao.getAll()).hasSize(CountTransactonsStartsWith)
+        val result = documentDao.getAll()
 
+        assertThat(result).hasSize(CountTransactonsStartsWith)
+
+        result.forEach { createdDocument ->
+            assertThat(createdDocument.isPersisted()).isTrue()
+            assertThat(createdDocument.description).contains(StartsWithFilterText)
+
+            assertThat(createdDocument.createdFromAccountTransaction).isNotNull
+
+            assertThat(createdDocument.automaticallyCreatedFromFilter).isNotNull
+            assertThat(createdDocument.automaticallyCreatedFromFilter?.isPersisted()).isTrue()
+            assertThat(createdDocument.automaticallyCreatedFromFilter).isEqualTo(entityFilter)
+        }
     }
 
 
