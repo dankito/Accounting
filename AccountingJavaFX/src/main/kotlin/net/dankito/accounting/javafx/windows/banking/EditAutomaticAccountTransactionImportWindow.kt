@@ -22,7 +22,8 @@ import javax.inject.Inject
 class EditAutomaticAccountTransactionImportWindow : Window() {
 
     companion object {
-        private const val ButtonsWidth = 150.0
+        private const val RunFilterNowButtonWidth = 200.0
+        private const val RunFilterEachTimeTransactionsReceivedButtonWidth = 400.0
         private const val ButtonsHorizontalMargin = 12.0
 
         private val ClassToFilter = BankAccountTransaction::class.java.name
@@ -195,31 +196,31 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
             }
 
             button(messages["cancel"]) {
-                prefWidth = ButtonsWidth
+                prefWidth = 150.0
 
                 action { close() }
 
                 anchorpaneConstraints {
                     topAnchor = 0.0
-                    rightAnchor = 2 * (ButtonsWidth + ButtonsHorizontalMargin)
+                    rightAnchor = RunFilterNowButtonWidth + RunFilterEachTimeTransactionsReceivedButtonWidth + 2 * ButtonsHorizontalMargin
                     bottomAnchor = 0.0
                 }
             }
 
             button(messages["edit.automtic.account.transaction.import.window.apply.filter.now"]) {
-                prefWidth = ButtonsWidth
+                prefWidth = RunFilterNowButtonWidth
 
                 action { runFilterNow() }
 
                 anchorpaneConstraints {
                     topAnchor = 0.0
-                    rightAnchor = ButtonsWidth + ButtonsHorizontalMargin
+                    rightAnchor = RunFilterEachTimeTransactionsReceivedButtonWidth + ButtonsHorizontalMargin
                     bottomAnchor = 0.0
                 }
             }
 
             button(messages["edit.automtic.account.transaction.import.window.run.filter.after.receiving.transactions"]) {
-                prefWidth = ButtonsWidth
+                prefWidth = RunFilterEachTimeTransactionsReceivedButtonWidth
 
                 action { runFilterEachTimeAfterReceivingTransactions() }
 
