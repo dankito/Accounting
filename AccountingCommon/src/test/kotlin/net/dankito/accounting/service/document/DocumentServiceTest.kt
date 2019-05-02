@@ -6,43 +6,15 @@ import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentItem
 import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.data.model.PaymentState
-import net.dankito.accounting.service.util.db.JavaCouchbaseLiteEntityManager
-import net.dankito.jpa.couchbaselite.CouchbaseLiteEntityManagerBase
-import net.dankito.jpa.entitymanager.EntityManagerConfiguration
-import net.dankito.utils.io.FileUtils
+import net.dankito.accounting.service.util.db.DatabaseBasedTest
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.After
 import org.junit.Test
-import java.io.File
 
 
-class DocumentServiceTest {
-
-    private val fileUtils = FileUtils()
+class DocumentServiceTest : DatabaseBasedTest() {
 
 
-    private val dataFolder = File("testData")
-
-    private val entityManagerConfiguration = EntityManagerConfiguration(dataFolder.path, "accounting")
-
-    private val entityManager: CouchbaseLiteEntityManagerBase
-
-
-    private val underTest: DocumentService
-
-
-    init {
-        clearDataFolder()
-
-        entityManager = JavaCouchbaseLiteEntityManager(entityManagerConfiguration)
-
-        underTest = DocumentService(DocumentDao(entityManager), DocumentItemDao(entityManager))
-    }
-
-    @After
-    fun tearDown() {
-        clearDataFolder()
-    }
+    private val underTest: DocumentService = DocumentService(DocumentDao(entityManager), DocumentItemDao(entityManager))
 
 
     @Test
@@ -157,11 +129,6 @@ class DocumentServiceTest {
         val items = listOf(DocumentItem(1000.0, 19f, 190.0, 1190.0, "Webshop for Amazon"))
 
         return Document.createInvoice(items, "1")
-    }
-
-
-    private fun clearDataFolder() {
-        fileUtils.deleteFolderRecursively(dataFolder)
     }
 
 }
