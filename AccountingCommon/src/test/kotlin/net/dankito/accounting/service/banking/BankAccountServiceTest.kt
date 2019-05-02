@@ -5,6 +5,7 @@ import net.dankito.accounting.data.dao.banking.IBankAccountDao
 import net.dankito.accounting.data.dao.banking.IBankAccountTransactionDao
 import net.dankito.accounting.data.dao.banking.IBankAccountTransactionsDao
 import net.dankito.accounting.data.model.*
+import net.dankito.accounting.data.model.banking.BankAccount
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -171,6 +172,7 @@ class BankAccountServiceTest {
 
     private fun createTransaction(amount: Double, usage: String, senderOrReceiver: String): BankAccountTransaction {
         return BankAccountTransaction(BigDecimal.valueOf(amount), usage, true, senderOrReceiver, "", "",
-            Date(), "", "", BigDecimal.ZERO)
+            Date(), "", "", BigDecimal.ZERO, BankAccount()
+        )
     }
 }
