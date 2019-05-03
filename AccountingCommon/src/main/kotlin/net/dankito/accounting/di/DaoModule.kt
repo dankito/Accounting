@@ -18,15 +18,40 @@ import net.dankito.accounting.data.dao.timetracker.*
 import net.dankito.jpa.entitymanager.EntityManagerConfiguration
 import net.dankito.jpa.entitymanager.IEntityManager
 import java.io.File
+import javax.inject.Named
 import javax.inject.Singleton
 
 
 @Module
 class DaoModule(private val dataFolder: File = File("data")) {
 
+    companion object {
+
+        const val DataFolderKey = "data.folder"
+
+        const val LogFilesFolderKey = "log.files.folder"
+
+    }
+
+
     @Provides
     @Singleton
-    fun provideEntityManagerConfiguration() : EntityManagerConfiguration {
+    @Named(DataFolderKey)
+    fun provideDataFolder(): File {
+        return dataFolder
+    }
+
+    @Provides
+    @Singleton
+    @Named(LogFilesFolderKey)
+    fun provideLogFileFolder(@Named(DataFolderKey) dataFolder: File): File {
+        return File(dataFolder, "logs")
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideEntityManagerConfiguration(@Named(DataFolderKey) dataFolder: File) : EntityManagerConfiguration {
         return EntityManagerConfiguration(dataFolder.path, "accounting")
     }
 

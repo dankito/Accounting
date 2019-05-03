@@ -2,6 +2,7 @@ package net.dankito.accounting.javafx.di
 
 import dagger.Module
 import dagger.Provides
+import net.dankito.accounting.di.DaoModule
 import net.dankito.accounting.javafx.presenter.*
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.ValueAddedTaxCalculator
@@ -19,6 +20,8 @@ import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
 import net.dankito.accounting.service.timetracker.ITimeTrackerService
 import net.dankito.utils.IThreadPool
 import net.dankito.utils.javafx.os.JavaFxOsService
+import java.io.File
+import javax.inject.Named
 import javax.inject.Singleton
 
 
@@ -83,11 +86,12 @@ class PresenterModule {
                                   federalStateService: IFederalStateService,
                                   taxOfficeService: ITaxOfficeService,
                                   router: Router,
+                                  @Named(DaoModule.LogFilesFolderKey) logFilesFolder: File,
                                   threadPool: IThreadPool
     ) : ElsterTaxPresenter {
 
         return ElsterTaxPresenter(
-            settingsService, personService, federalStateService, taxOfficeService, router, threadPool)
+            settingsService, personService, federalStateService, taxOfficeService, router, logFilesFolder, threadPool)
     }
 
 }

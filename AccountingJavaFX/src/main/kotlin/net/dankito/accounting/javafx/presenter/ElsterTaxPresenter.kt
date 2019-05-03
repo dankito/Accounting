@@ -13,6 +13,7 @@ import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
 import net.dankito.tax.elster.ElsterClient
 import net.dankito.tax.elster.model.*
 import net.dankito.utils.IThreadPool
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -27,6 +28,7 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
                          private val federalStateService: IFederalStateService,
                          private val taxOfficeService: ITaxOfficeService,
                          private val router: Router,
+                         logFilesFolder: File,
                          private val threadPool: IThreadPool): AutoCloseable {
 
     companion object {
@@ -39,7 +41,7 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
      * Don't create an ElsterClient - and therefore this class - a second time, even not after calling close(), as
      * creating the contained ERiC a second time crashes the JVM (even after thoroughly cleaning it up before).
      */
-    private val client = ElsterClient()
+    private val client = ElsterClient(logFilesFolder)
 
     private var persistedFederalStatesProperty = federalStateService.getAll()
 
