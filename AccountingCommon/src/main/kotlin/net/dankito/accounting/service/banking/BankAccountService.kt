@@ -18,7 +18,7 @@ open class BankAccountService(private val bankingClient: IBankingClient,
 
     protected var bankAccountsProperty: List<BankAccount>? = null
 
-    protected var bankAccountTransactionsProperty: Set<BankAccountTransaction>? = null
+    protected var bankAccountTransactionsProperty: MutableSet<BankAccountTransaction>? = null
 
 
     override fun getBankAccounts(): List<BankAccount> {
@@ -57,7 +57,7 @@ open class BankAccountService(private val bankingClient: IBankingClient,
 
         val transactions = transactionDao.getAll()
 
-        bankAccountTransactionsProperty = transactions.toSet()
+        bankAccountTransactionsProperty = transactions.toMutableSet()
 
         return transactions
     }
@@ -88,7 +88,7 @@ open class BankAccountService(private val bankingClient: IBankingClient,
     }
 
     protected open fun updateAccountsTransactionsAsync(accounts: List<BankAccount>,
-                                                       callback: (Set<BankAccountTransaction>) -> Unit) {
+                                                       callback: (MutableSet<BankAccountTransaction>) -> Unit) {
         val countAccountsToRetrieve = accounts.size
         var retrievedAccounts = 0
         val allAccountTransactions = getAccountTransactions().toMutableSet()
