@@ -115,9 +115,10 @@ open class BankAccountService(private val bankingClient: IBankingClient,
         getAccountTransactionsAsync(account) { getAccountTransactionsResult ->
             getAccountTransactionsResult.transactions?.let { bankAccountTransactions ->
 
-                updateAccountAndTransactionDataInDb(account, bankAccountTransactions)
+                bankAccountTransactionsProperty?.addAll(bankAccountTransactions.transactions)
+                if (bankAccountTransactionsProperty == null) bankAccountTransactionsProperty = bankAccountTransactions.transactions.toMutableSet()
 
-                (bankAccountTransactionsProperty as? MutableSet)?.addAll(bankAccountTransactions.transactions)
+                updateAccountAndTransactionDataInDb(account, bankAccountTransactions)
 
             }
 
