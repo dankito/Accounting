@@ -6,6 +6,7 @@ import net.dankito.accounting.service.ValueAddedTaxCalculator
 import net.dankito.utils.IThreadPool
 import net.dankito.utils.ThreadPool
 import net.dankito.utils.events.IEventBus
+import net.dankito.utils.events.IRxEventBus
 import net.dankito.utils.events.RxEventBus
 import javax.inject.Singleton
 
@@ -15,8 +16,14 @@ class CommonUtilsModule {
 
     @Provides
     @Singleton
-    fun provideEventBus() : IEventBus {
+    fun provideRxEventBus() : IRxEventBus {
         return RxEventBus()
+    }
+
+    @Provides
+    @Singleton
+    fun provideEventBus(rxEventBus: IRxEventBus) : IEventBus {
+        return rxEventBus
     }
 
 
