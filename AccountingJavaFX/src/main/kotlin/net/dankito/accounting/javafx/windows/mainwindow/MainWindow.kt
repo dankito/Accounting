@@ -9,6 +9,7 @@ import net.dankito.accounting.javafx.windows.mainwindow.controls.MainMenuBar
 import net.dankito.accounting.javafx.windows.mainwindow.controls.OverviewTab
 import net.dankito.utils.PackageInfo
 import net.dankito.utils.events.IEventBus
+import net.dankito.utils.events.ISubscribedEvent
 import tornadofx.*
 import javax.inject.Inject
 
@@ -24,6 +25,8 @@ class MainWindow : Fragment(String.format(FX.messages["application.title"], Pack
 
     private lateinit var tabPane: TabPane
 
+    private var subscribedEvent: ISubscribedEvent? = null
+
 
     init {
         AppComponent.component.inject(this)
@@ -33,10 +36,10 @@ class MainWindow : Fragment(String.format(FX.messages["application.title"], Pack
 
     private fun initLogic() {
         if (overviewPresenter.isBankAccountAdded == false) { // only if no BankAccount is added yet as otherwise BankAccountsTab gets displayed directly
-            eventBus.subscribe(BankAccountAddedEvent::class.java) {
-                runLater {
-                    tabPane.addBankAccountsTab()
-                }
+            subscribedEvent = eventBus.subscribe(BankAccountAddedEvent::class.java) {
+                subscribedEvent?.unsubscribe()
+
+                runLater { tabPane.addBankAccountsTab() }
             }
         }
     }
