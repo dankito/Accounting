@@ -4,13 +4,17 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
+import javafx.stage.Stage
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
+import net.dankito.accounting.data.model.event.BankAccountTransactionsUpdatedEvent
 import net.dankito.accounting.data.model.filter.*
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.BankAccountsPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.banking.controls.BankAccountTransactionsTable
 import net.dankito.accounting.javafx.windows.banking.model.FilterItemViewModel
+import net.dankito.utils.events.IEventBus
+import net.dankito.utils.events.ISubscribedEvent
 import net.dankito.utils.javafx.ui.controls.addButton
 import net.dankito.utils.javafx.ui.controls.removeButton
 import net.dankito.utils.javafx.ui.dialogs.Window
@@ -36,6 +40,9 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     @Inject
     lateinit var overviewPresenter: OverviewPresenter
 
+    @Inject
+    lateinit var eventBus: IEventBus
+
 
     private val appliedFilters = FXCollections.observableArrayList<AccountTransactionFilter>(createDefaultFilter())
 
@@ -53,11 +60,25 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     private val countFilteredTransactions = SimpleStringProperty()
 
 
+    private val subscribedEvent: ISubscribedEvent
+
+
     init {
         AppComponent.component.inject(this)
 
-        // TODO: add event bus listener to get informed when transactions get updated
         updateFilteredTransactions(presenter.getAccountTransactions())
+
+        subscribedEvent = eventBus.subscribe(BankAccountTransactionsUpdatedEvent::class.java) {
+            runLater { updateFilteredTransactions(presenter.getAccountTransactions()) }
+        }
+    }
+
+    override fun beforeShow(dialogStage: Stage) {
+        super.beforeShow(dialogStage)
+
+        dialogStage.setOnCloseRequest {
+            subscribedEvent.unsubscribe() // to avoid memory leaks
+        }
     }
 
 

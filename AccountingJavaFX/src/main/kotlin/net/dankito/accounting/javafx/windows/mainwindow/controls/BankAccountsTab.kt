@@ -6,10 +6,12 @@ import javafx.collections.FXCollections
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
+import net.dankito.accounting.data.model.event.BankAccountTransactionsUpdatedEvent
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.BankAccountsPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.banking.controls.BankAccountTransactionsTable
+import net.dankito.utils.events.IEventBus
 import net.dankito.utils.javafx.ui.controls.addButton
 import net.dankito.utils.javafx.ui.controls.searchtextfield
 import tornadofx.*
@@ -32,6 +34,9 @@ class BankAccountsTab : View() {
     @Inject
     lateinit var overviewPresenter: OverviewPresenter
 
+    @Inject
+    lateinit var eventBus: IEventBus
+
 
     private val allTransactions = FXCollections.observableArrayList<BankAccountTransaction>()
 
@@ -51,6 +56,10 @@ class BankAccountsTab : View() {
         searchText.addListener { _, _, newValue -> searchEntries(newValue) }
 
         retrievedAccountTransactions(presenter.getAccountTransactions())
+
+        eventBus.subscribe(BankAccountTransactionsUpdatedEvent::class.java) {
+            runLater { retrievedAccountTransactions(presenter.getAccountTransactions()) }
+        }
     }
 
 

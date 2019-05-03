@@ -6,6 +6,7 @@ import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.data.model.PaymentState
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.data.model.event.AccountingPeriodChangedEvent
+import net.dankito.accounting.data.model.event.BankAccountTransactionsUpdatedEvent
 import net.dankito.accounting.data.model.filter.EntityFilter
 import net.dankito.accounting.data.model.settings.AppSettings
 import net.dankito.accounting.javafx.service.Router
@@ -40,6 +41,10 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
     init {
         checkUnpaidInvoicesPaymentState()
+
+        eventBus.subscribe(BankAccountTransactionsUpdatedEvent::class.java) { event ->
+            runFilterAndCreateNewDocuments(BankAccountTransaction::class.java, event.updatedTransactions)
+        }
     }
 
 
@@ -123,9 +128,6 @@ open class OverviewPresenter(private val documentService: IDocumentService,
             documentService.getUnpaidCreatedInvoices().forEach { unpaidInvoice ->
                 checkInvoicePaymentState(unpaidInvoice)
             }
-
-            // TODO: implicitly also runs EntityFilters on BankAccountTransactions; no one can see this from method name!
-            runFilterAndCreateNewDocuments(BankAccountTransaction::class.java, transactions)
         }
     }
 

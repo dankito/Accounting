@@ -126,7 +126,7 @@ class EditBankAccountWindow(private val account: BankAccount) : Window() {
 
             paddingAll = 8.0
 
-            checkEnteredCredentialsResult.addListener { _, _, newValue ->
+            checkEnteredCredentialsResult.addListener { _, _, _ ->
                 if (didEnteredCredentialsMatch.value) {
                     setBackgroundToColor(Color.TRANSPARENT)
                 }

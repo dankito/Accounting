@@ -6,6 +6,7 @@ import net.dankito.accounting.data.dao.banking.IBankAccountTransactionsDao
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.banking.*
 import net.dankito.accounting.data.model.event.BankAccountAddedEvent
+import net.dankito.accounting.data.model.event.BankAccountTransactionsUpdatedEvent
 import net.dankito.utils.events.IEventBus
 
 
@@ -65,10 +66,22 @@ open class BankAccountService(private val bankingClient: IBankingClient,
     // TODO: update bankAccountTransactionsProperty
     override fun saveOrUpdateTransaction(transaction: BankAccountTransaction) {
         transactionDao.saveOrUpdate(transaction)
+
+        postTransactionUpdatedEvent(transaction)
     }
 
     override fun saveOrUpdateTransactions(transactions: List<BankAccountTransaction>) {
         transactionDao.saveOrUpdate(transactions)
+
+        postTransactionUpdatedEvent(transactions)
+    }
+
+    private fun postTransactionUpdatedEvent(updatedTransaction: BankAccountTransaction) {
+        postTransactionUpdatedEvent(listOf(updatedTransaction))
+    }
+
+    private fun postTransactionUpdatedEvent(updatedTransactions: List<BankAccountTransaction>) {
+        eventBus.post(BankAccountTransactionsUpdatedEvent(updatedTransactions))
     }
 
 
@@ -117,6 +130,7 @@ open class BankAccountService(private val bankingClient: IBankingClient,
 
                 bankAccountTransactionsProperty?.addAll(bankAccountTransactions.transactions)
                 if (bankAccountTransactionsProperty == null) bankAccountTransactionsProperty = bankAccountTransactions.transactions.toMutableSet()
+                bankAccountTransactionsProperty?.let { postTransactionUpdatedEvent(it.toList()) }
 
                 updateAccountAndTransactionDataInDb(account, bankAccountTransactions)
 
