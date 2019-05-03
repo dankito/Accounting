@@ -32,12 +32,20 @@ import net.dankito.utils.javafx.ui.extensions.addStyleToCurrentStyle
 import net.dankito.utils.javafx.util.FXUtils
 import tornadofx.*
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 
 class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresenter) : Window() {
 
     companion object {
+
+        private val UploadedFilesFolder = File("ElsterUpload")
+
+        private val OutputFilesDateTimeFormat = SimpleDateFormat("yyyy.MM.dd_HH:mm:ss")
+
+
         private const val VerticalSpaceBetweenSections = 6.0
 
         private const val HorizontalSpaceAfterLabel = 4.0
@@ -52,6 +60,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
         private const val ElsterButtonsHeight = 34.0
         private const val ElsterButtonsWidth = 200.0
+
     }
 
 
@@ -586,7 +595,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
     private fun makeUmsatzsteuerVoranmeldung() {
         saveSettings()
 
-        val result = presenter.makeUmsatzsteuerVoranmeldung(createUmsatzsteuerVoranmeldungData())
+        val result = presenter.makeUmsatzsteuerVoranmeldung(createUmsatzsteuerVoranmeldungData(true))
 
         if (result.successful) {
             var message = messages["elster.tax.declaration.window.upload.to.elster.success.alert.message"]
@@ -632,7 +641,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
             lastSelectedElsterXmlFile = xmlOutputFile
             saveSettings() // needed here to save lastSelectedElsterXmlFile
 
-            val result = presenter.createUmsatzsteuerVoranmeldungXmlFile(createUmsatzsteuerVoranmeldungData())
+            val result = presenter.createUmsatzsteuerVoranmeldungXmlFile(createUmsatzsteuerVoranmeldungData(false))
 
             if (result.successful) {
                 FileUtils().writeToTextFile(result.xmlString, xmlOutputFile)
@@ -653,7 +662,8 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         }
     }
 
-    private fun createUmsatzsteuerVoranmeldungData(): UmsatzsteuerVoranmeldung {
+    private fun createUmsatzsteuerVoranmeldungData(uploadToElster: Boolean): UmsatzsteuerVoranmeldung {
+        // TODO: remove this test settings and show an error message if HerstellerID isn't set
         val testHerstellerID = TestHerstellerID.T_74931.herstellerID
         val herstellerID = presenter.getHerstellerID() ?: testHerstellerID
 
@@ -662,10 +672,18 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         val taxNumber = if (useTestValues) Teststeuernummern.T_198_113_10010.steuernummer else taxNumberInput.taxNumber.value
         val taxOffice = if (useTestValues) TestFinanzamt.Bayern_9198.finanzamt else Finanzamt(taxOffice.value.name, taxOffice.value.taxOfficeId)
 
+        val isForAMonth = zeitraum.value.ziffer.toInt() <= 12
+        val outputFilename = "UStVA_${jahr.value.jahr}_" +
+                (if (isForAMonth) (zeitraum.value.ziffer + "_" + zeitraum.value.name) else zeitraum.value.name) + "_" +
+                OutputFilesDateTimeFormat.format(Date())
+        val pdfOutputFile = if (uploadToElster) File(UploadedFilesFolder, outputFilename + ".pdf") else null
+        val xmlOutputFile = if (uploadToElster) File(UploadedFilesFolder, outputFilename + ".xml") else null
+
         return UmsatzsteuerVoranmeldung(jahr.value, zeitraum.value, taxOffice, taxNumber,
-            mapPersonToSteuerpflichtiger(taxpayer.value), File(certificateFilePath.value), certificatePassword.value,
+            mapPersonToSteuerpflichtiger(taxpayer.value), File(certificateFilePath.value), certificatePassword.value, // TODO: don't pass certificateFilePath and certificatePassword if only creating XML file
             revenuesWith19PercentVatNetAmount.value, revenuesWith7PercentVatNetAmount.value,
-            spentVatWith19Percent.value + spentWith7Percent.value, vatBalance.value, herstellerID)
+            spentVatWith19Percent.value + spentWith7Percent.value, vatBalance.value, herstellerID,
+            pdfOutputFile, xmlOutputFile)
     }
 
     private fun mapPersonToSteuerpflichtiger(person: Person): Steuerpflichtiger {
