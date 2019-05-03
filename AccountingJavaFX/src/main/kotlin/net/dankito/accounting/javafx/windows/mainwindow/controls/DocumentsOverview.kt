@@ -8,6 +8,7 @@ import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.event.DocumentsUpdatedEvent
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
+import net.dankito.utils.IThreadPool
 import net.dankito.utils.events.IEventBus
 import net.dankito.utils.javafx.ui.controls.AddButton
 import net.dankito.utils.javafx.ui.extensions.currencyColumn
@@ -37,7 +38,10 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
 
     @Inject
-    protected lateinit var eventBus: IEventBus
+    lateinit var eventBus: IEventBus
+
+    @Inject
+    lateinit var threadPool: IThreadPool
 
 
     protected val documents = FXCollections.observableArrayList<Document>()
@@ -128,12 +132,18 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
     private fun keyPressed(event: KeyEvent, selectedItems: List<Document>) {
         if (event.code == KeyCode.DELETE) {
-            deleteDocuments(selectedItems)
+            deleteDocumentsAsync(selectedItems)
+        }
+    }
+
+    private fun deleteDocumentsAsync(documentsToDelete: List<Document>) {
+        // TODO: ask user first
+        threadPool.runAsync {
+            deleteDocuments(documentsToDelete)
         }
     }
 
     private fun deleteDocuments(documentsToDelete: List<Document>) {
-        // TODO: ask user first
         presenter.delete(documentsToDelete)
     }
 
