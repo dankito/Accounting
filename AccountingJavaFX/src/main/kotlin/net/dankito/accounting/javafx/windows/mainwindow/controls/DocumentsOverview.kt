@@ -5,13 +5,17 @@ import javafx.scene.control.SelectionMode
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import net.dankito.accounting.data.model.Document
+import net.dankito.accounting.data.model.event.DocumentsUpdatedEvent
+import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
+import net.dankito.utils.events.IEventBus
 import net.dankito.utils.javafx.ui.controls.AddButton
 import net.dankito.utils.javafx.ui.extensions.currencyColumn
 import net.dankito.utils.javafx.ui.extensions.dateColumn
 import net.dankito.utils.javafx.ui.extensions.initiallyUseRemainingSpace
 import tornadofx.*
 import java.util.*
+import javax.inject.Inject
 import kotlin.concurrent.schedule
 
 
@@ -32,12 +36,18 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
     protected abstract fun showCreateNewDocumentWindow()
 
 
+    @Inject
+    protected lateinit var eventBus: IEventBus
+
+
     protected val documents = FXCollections.observableArrayList<Document>()
 
 
     init {
-        presenter.addDocumentsUpdatedListenerInAMemoryLeakWay { // TODO: find a better event bus
-            loadDocumentsInBackgroundAndUpdateOnUiThread()
+        AppComponent.component.inject(this)
+
+        eventBus.subscribe(DocumentsUpdatedEvent::class.java) {
+            runLater { loadDocumentsInBackgroundAndUpdateOnUiThread() }
         }
 
         loadDocumentsInBackgroundAndUpdateOnUiThreadDelayed() // so that subclasses have time to initialize

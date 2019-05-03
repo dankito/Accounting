@@ -7,8 +7,10 @@ ext {
 
     elsterVersion = '1.0.0-SNAPSHOT'
 
+    
+    rxJavaVersion = '2.2.8'
 
-    javaUtilsVersion = '1.0.5-SNAPSHOT'
+    javaUtilsVersion = '1.0.6-SNAPSHOT'
 
 
     xdocReportVersion = '2.0.2'

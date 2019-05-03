@@ -38,6 +38,7 @@ import net.dankito.accounting.service.tax.elster.ElsterTaxDeclarationService
 import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
 import net.dankito.accounting.service.timetracker.ITimeTrackerService
 import net.dankito.accounting.service.timetracker.TimeTrackerService
+import net.dankito.utils.events.IEventBus
 import javax.inject.Singleton
 
 
@@ -57,8 +58,8 @@ class ServiceModule {
 
     @Provides
     @Singleton
-    fun provideDocumentService(dao: IDocumentDao, documentItemDao: IDocumentItemDao) : IDocumentService {
-        return DocumentService(dao, documentItemDao)
+    fun provideDocumentService(dao: IDocumentDao, documentItemDao: IDocumentItemDao, eventBus: IEventBus) : IDocumentService {
+        return DocumentService(dao, documentItemDao, eventBus)
     }
 
 
@@ -104,9 +105,9 @@ class ServiceModule {
     @Singleton
     fun provideBankAccountService(bankingClient: IBankingClient, accountDao: IBankAccountDao,
                                   transactionsDao: IBankAccountTransactionsDao,
-                                  transactionDao: IBankAccountTransactionDao) : IBankAccountService {
+                                  transactionDao: IBankAccountTransactionDao, eventBus: IEventBus) : IBankAccountService {
 
-        return BankAccountService(bankingClient, accountDao, transactionsDao, transactionDao)
+        return BankAccountService(bankingClient, accountDao, transactionsDao, transactionDao, eventBus)
     }
 
 

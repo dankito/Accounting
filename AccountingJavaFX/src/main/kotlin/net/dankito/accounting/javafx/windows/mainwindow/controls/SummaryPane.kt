@@ -7,9 +7,12 @@ import javafx.scene.layout.Pane
 import javafx.scene.text.Font
 import javafx.scene.text.TextAlignment
 import net.dankito.accounting.data.model.AccountingPeriod
+import net.dankito.accounting.data.model.event.AccountingPeriodChangedEvent
+import net.dankito.accounting.data.model.event.DocumentsUpdatedEvent
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.tax.elster.ElsterTaxDeclarationWindow
+import net.dankito.utils.events.IEventBus
 import net.dankito.utils.javafx.ui.controls.currencyLabel
 import net.dankito.utils.javafx.ui.extensions.setBorder
 import tornadofx.*
@@ -29,6 +32,9 @@ class SummaryPane : View() {
 
     @Inject
     lateinit var presenter: OverviewPresenter
+
+    @Inject
+    lateinit var eventBus: IEventBus
 
 
     private val previousPeriodLabel = SimpleStringProperty()
@@ -69,7 +75,10 @@ class SummaryPane : View() {
 
         updateValues()
 
-        presenter.addDocumentsUpdatedListenerInAMemoryLeakWay {
+        eventBus.subscribe(DocumentsUpdatedEvent::class.java) {
+            runLater { updateValues() }
+        }
+        eventBus.subscribe(AccountingPeriodChangedEvent::class.java) {
             runLater { updateValues() }
         }
     }

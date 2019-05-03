@@ -5,12 +5,15 @@ import net.dankito.accounting.data.dao.banking.IBankAccountTransactionDao
 import net.dankito.accounting.data.dao.banking.IBankAccountTransactionsDao
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.banking.*
+import net.dankito.accounting.data.model.event.BankAccountAddedEvent
+import net.dankito.utils.events.IEventBus
 
 
 open class BankAccountService(private val bankingClient: IBankingClient,
                               private val bankAccountDao: IBankAccountDao,
                               private val transactionsDao: IBankAccountTransactionsDao,
-                              private val transactionDao: IBankAccountTransactionDao
+                              private val transactionDao: IBankAccountTransactionDao,
+                              private val eventBus: IEventBus
 ) : IBankAccountService {
 
     protected var bankAccountsProperty: List<BankAccount>? = null
@@ -41,6 +44,8 @@ open class BankAccountService(private val bankingClient: IBankingClient,
 
         if (isNewAccount) {
             (bankAccountsProperty as? MutableList)?.add(account)
+
+            eventBus.post(BankAccountAddedEvent(account))
         }
     }
 

@@ -5,9 +5,12 @@ import net.dankito.accounting.data.dao.IDocumentItemDao
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.data.model.PaymentState
+import net.dankito.accounting.data.model.event.DocumentsUpdatedEvent
+import net.dankito.utils.events.IEventBus
 
 
-open class DocumentService(protected val dao: IDocumentDao, protected val documentItemDao: IDocumentItemDao) : IDocumentService {
+open class DocumentService(protected val dao: IDocumentDao, protected val documentItemDao: IDocumentItemDao,
+                           private val eventBus: IEventBus) : IDocumentService {
 
 
     override fun saveOrUpdate(document: Document) {
@@ -17,6 +20,8 @@ open class DocumentService(protected val dao: IDocumentDao, protected val docume
         }
 
         dao.saveOrUpdate(document)
+
+        postDocumentsUpdated()
     }
 
     override fun delete(document: Document) {
@@ -25,6 +30,8 @@ open class DocumentService(protected val dao: IDocumentDao, protected val docume
         }
 
         dao.delete(document)
+
+        postDocumentsUpdated()
     }
 
 
@@ -46,5 +53,10 @@ open class DocumentService(protected val dao: IDocumentDao, protected val docume
 
 
     protected open fun getAll() = dao.getAll().toMutableList()
+
+
+    protected open fun postDocumentsUpdated() {
+        eventBus.post(DocumentsUpdatedEvent())
+    }
 
 }

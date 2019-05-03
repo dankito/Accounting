@@ -5,6 +5,7 @@ import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.data.model.PaymentState
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
+import net.dankito.accounting.data.model.event.AccountingPeriodChangedEvent
 import net.dankito.accounting.data.model.filter.EntityFilter
 import net.dankito.accounting.data.model.settings.AppSettings
 import net.dankito.accounting.javafx.service.Router
@@ -14,6 +15,7 @@ import net.dankito.accounting.service.document.IDocumentService
 import net.dankito.accounting.service.filter.IFilterService
 import net.dankito.accounting.service.settings.ISettingsService
 import net.dankito.utils.datetime.asUtilDate
+import net.dankito.utils.events.IEventBus
 import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.NumberFormat
@@ -25,6 +27,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
                              private val settingsService: ISettingsService,
                              private val bankAccountService: IBankAccountService,
                              private val filterService: IFilterService,
+                             private val eventBus: IEventBus,
                              private val router: Router,
                              private val vatCalculator: ValueAddedTaxCalculator = ValueAddedTaxCalculator()
 ) {
@@ -51,8 +54,6 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
     val settings: AppSettings = settingsService.appSettings
 
-    private val documentsUpdatedListeners = mutableListOf<() -> Unit>() // TODO: find a better event bus
-
 
     val isBankAccountAdded: Boolean
         get() {
@@ -61,7 +62,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
 
     private fun accountingPeriodChanged(newAccountingPeriod: AccountingPeriod) {
-        callDocumentsUpdatedListeners()
+        eventBus.post(AccountingPeriodChangedEvent())
 
         settingsService.appSettings.accountingPeriod = newAccountingPeriod
         saveAppSettings()
@@ -80,8 +81,6 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         document.createdFromAccountTransaction?.let {
             bankAccountService.saveOrUpdateTransaction(it)
         }
-
-        callDocumentsUpdatedListeners()
 
         if (document.isSelfCreatedInvoice && document.paymentState != PaymentState.Paid) {
             checkInvoicePaymentState(document)
@@ -116,8 +115,6 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         }
 
         documentService.delete(document)
-
-        callDocumentsUpdatedListeners()
     }
 
 
@@ -478,15 +475,6 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
     fun showEditDocumentWindow(document: Document) {
         router.showEditDocumentWindow(document, this)
-    }
-
-
-    fun addDocumentsUpdatedListenerInAMemoryLeakWay(documentsUpdated: () -> Unit) {
-        documentsUpdatedListeners.add(documentsUpdated)
-    }
-
-    private fun callDocumentsUpdatedListeners() {
-        ArrayList(documentsUpdatedListeners).forEach { it() }
     }
 
 }
