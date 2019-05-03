@@ -38,7 +38,7 @@ open class BankAccountService(private val bankingClient: IBankingClient,
     }
 
     override fun saveOrUpdateAccount(account: BankAccount) {
-        val isNewAccount = account.isPersisted()
+        val isNewAccount = account.isPersisted() == false
 
         bankAccountDao.saveOrUpdate(account)
 
