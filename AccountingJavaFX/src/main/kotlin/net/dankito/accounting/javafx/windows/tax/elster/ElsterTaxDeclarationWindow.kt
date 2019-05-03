@@ -12,6 +12,7 @@ import javafx.stage.FileChooser
 import javafx.stage.Screen
 import javafx.stage.Stage
 import net.dankito.accounting.data.model.Person
+import net.dankito.accounting.data.model.event.DocumentsUpdatedEvent
 import net.dankito.accounting.data.model.tax.FederalState
 import net.dankito.accounting.data.model.tax.TaxOffice
 import net.dankito.accounting.javafx.di.AppComponent
@@ -23,6 +24,8 @@ import net.dankito.tax.elster.test.TestFinanzamt
 import net.dankito.tax.elster.test.TestHerstellerID
 import net.dankito.tax.elster.test.Teststeuernummern
 import net.dankito.utils.datetime.asLocalDate
+import net.dankito.utils.events.IEventBus
+import net.dankito.utils.events.ISubscribedEvent
 import net.dankito.utils.io.FileUtils
 import net.dankito.utils.javafx.ui.controls.currencyLabel
 import net.dankito.utils.javafx.ui.controls.doubleTextfield
@@ -66,6 +69,9 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
     @Inject
     lateinit var presenter: ElsterTaxPresenter
+
+    @Inject
+    lateinit var eventBus: IEventBus
 
 
     private val jahr = SimpleObjectProperty<Steuerjahr>()
@@ -119,8 +125,23 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
     private val areRequiredFieldsForElsterUploadProvided = SimpleBooleanProperty(false)
 
 
+    private val subscribedEvent: ISubscribedEvent
+
+
     init {
         AppComponent.component.inject(this)
+
+        subscribedEvent = eventBus.subscribe(DocumentsUpdatedEvent::class.java) {
+            showVatAmountsForPeriod()
+        }
+    }
+
+    override fun beforeShow(dialogStage: Stage) {
+        super.beforeShow(dialogStage)
+
+        dialogStage.setOnCloseRequest {
+            subscribedEvent.unsubscribe() // to avoid memory leaks
+        }
     }
 
 
