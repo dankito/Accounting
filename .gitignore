@@ -14,7 +14,8 @@ out/
 .DS_Store
 .externalNativeBuild
 
-/data/
+data/
+test_data/
 /lib/
 **/lib
 /logs/
