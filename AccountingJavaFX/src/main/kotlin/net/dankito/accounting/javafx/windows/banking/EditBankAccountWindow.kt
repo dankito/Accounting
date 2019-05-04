@@ -12,7 +12,7 @@ import net.dankito.accounting.data.model.banking.BankAccount
 import net.dankito.accounting.data.model.banking.CheckBankAccountCredentialsResult
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.BankAccountsPresenter
-import net.dankito.banking.util.ExceptionHelper
+import net.dankito.utils.exception.ExceptionHelper
 import net.dankito.utils.javafx.ui.dialogs.Window
 import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
 import net.dankito.utils.javafx.ui.extensions.setBackgroundToColor
