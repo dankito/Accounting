@@ -166,7 +166,7 @@ class BankAccountsTab : View() {
         searchEntries()
 
         if (allTransactions.isNotEmpty()) { // latest transaction holds current balance // TODO: this isn't correct under all circumstances, e.g. if there is more than one transaction at this day
-            balance.value = overviewPresenter.getCurrencyString(allTransactions[0].balance)
+            balance.value = overviewPresenter.getCurrencyString(allTransactions[0].account.balance)
         }
 
         isUpdatingTransactions.value = false
