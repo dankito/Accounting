@@ -2,13 +2,14 @@ package net.dankito.accounting.data.model.banking
 
 import net.dankito.accounting.data.model.BaseEntity
 import java.math.BigDecimal
+import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.OneToMany
 
 
 @Entity
-class BankAccount(
+class BankAccount @JvmOverloads constructor(
 
     @Column(name = "bank_code")
     var bankCode: String,
@@ -19,11 +20,14 @@ class BankAccount(
     @Column(name = "password")
     var password: String,
 
-    @Column
+    @Column(name = "balance")
     var balance: BigDecimal = BigDecimal.ZERO,
 
     @OneToMany
-    var transactions: MutableSet<BankAccountTransaction> = mutableSetOf()
+    var transactions: MutableSet<BankAccountTransaction> = mutableSetOf(),
+
+    @Column(name = "last_updated")
+    var lastUpdated: Date? = null
 
 ) : BaseEntity() {
 

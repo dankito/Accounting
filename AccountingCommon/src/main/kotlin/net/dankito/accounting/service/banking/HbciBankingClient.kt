@@ -8,6 +8,7 @@ import net.dankito.banking.model.AccountingEntry
 import net.dankito.banking.model.BankInfo
 import net.dankito.utils.io.FileUtils
 import java.math.BigDecimal
+import java.util.*
 
 
 open class HbciBankingClient : IBankingClient {
@@ -42,11 +43,16 @@ open class HbciBankingClient : IBankingClient {
         }
         else {
             // TODO: get transactions for all accounts not only for first one
-            client.getAccountingEntriesAsync(bankInfo.accounts.first()) { accountingEntries ->
+            val updateTime = Date()
+
+            client.getAccountingEntriesAsync(bankInfo.accounts.first(), account.lastUpdated) { accountingEntries ->
                 accountingEntries.error?.let {
                     callback(GetAccountTransactionsResult(false, null, accountingEntries.error))
                 }
-                ?: callback(GetAccountTransactionsResult(true, mapToAccountTransactions(account, accountingEntries), null))
+                ?: run {
+                    account.lastUpdated = updateTime
+                    callback(GetAccountTransactionsResult(true, mapToAccountTransactions(account, accountingEntries), null))
+                }
             }
         }
     }
