@@ -7,6 +7,7 @@ import net.dankito.accounting.data.model.DocumentItem
 import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.data.model.PaymentState
 import net.dankito.accounting.service.util.db.DatabaseBasedTest
+import net.dankito.utils.events.RxEventBus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -14,7 +15,7 @@ import org.junit.Test
 class DocumentServiceTest : DatabaseBasedTest() {
 
 
-    private val underTest: DocumentService = DocumentService(DocumentDao(entityManager), DocumentItemDao(entityManager))
+    private val underTest: DocumentService = DocumentService(DocumentDao(entityManager), DocumentItemDao(entityManager), RxEventBus())
 
 
     @Test

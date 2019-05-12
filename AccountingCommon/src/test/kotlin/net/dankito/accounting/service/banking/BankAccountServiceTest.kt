@@ -7,6 +7,7 @@ import net.dankito.accounting.data.dao.banking.IBankAccountTransactionsDao
 import net.dankito.accounting.data.model.*
 import net.dankito.accounting.data.model.banking.BankAccount
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
+import net.dankito.utils.events.RxEventBus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -37,7 +38,7 @@ class BankAccountServiceTest {
     private val transactionDaoMock = mock(IBankAccountTransactionDao::class.java)
 
 
-    private val underTest = BankAccountService(bankingClientMock, bankAccountDaoMock, transactionsDaoMock, transactionDaoMock)
+    private val underTest = BankAccountService(bankingClientMock, bankAccountDaoMock, transactionsDaoMock, transactionDaoMock, RxEventBus())
 
 
     @Test
