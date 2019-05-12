@@ -6,6 +6,8 @@ import net.dankito.banking.model.AccountCredentials
 import net.dankito.banking.model.AccountingEntries
 import net.dankito.banking.model.AccountingEntry
 import net.dankito.banking.model.BankInfo
+import net.dankito.utils.datetime.asLocalDate
+import net.dankito.utils.datetime.asUtilDate
 import net.dankito.utils.io.FileUtils
 import java.math.BigDecimal
 import java.util.*
@@ -44,8 +46,9 @@ open class HbciBankingClient : IBankingClient {
         else {
             // TODO: get transactions for all accounts not only for first one
             val updateTime = Date()
+            val startTime = account.lastUpdated?.asLocalDate()?.minusMonths(1)?.asUtilDate() // to be on the safe side also fetch transactions one month before lastUpdated
 
-            client.getAccountingEntriesAsync(bankInfo.accounts.first(), account.lastUpdated) { accountingEntries ->
+            client.getAccountingEntriesAsync(bankInfo.accounts.first(), startTime) { accountingEntries ->
                 accountingEntries.error?.let {
                     callback(GetAccountTransactionsResult(false, null, accountingEntries.error))
                 }
