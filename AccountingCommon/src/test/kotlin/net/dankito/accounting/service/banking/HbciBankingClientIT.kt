@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 
 @Ignore // not an automatic test, set your bank account credentials in getTestBankAccount()
-class HbciBankingClientTest {
+class HbciBankingClientIT {
 
     private val underTest = HbciBankingClient()
 
