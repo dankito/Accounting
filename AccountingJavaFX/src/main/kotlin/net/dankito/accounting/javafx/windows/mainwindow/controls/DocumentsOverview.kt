@@ -4,6 +4,8 @@ import javafx.collections.FXCollections
 import javafx.scene.control.SelectionMode
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import javafx.scene.text.Font
+import javafx.scene.text.FontWeight
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.event.DocumentsUpdatedEvent
 import net.dankito.accounting.javafx.di.AppComponent
@@ -64,6 +66,8 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
             maxHeight = ControlBarHeight
 
             label(FX.messages[titleResourceKey]) {
+                font = Font.font(font.family, FontWeight.BLACK, font.size + 1)
+
                 anchorpaneConstraints {
                     leftAnchor = TitleLabelLeftMargin
                     topAnchor = TitleLabelTopBottomMargin
