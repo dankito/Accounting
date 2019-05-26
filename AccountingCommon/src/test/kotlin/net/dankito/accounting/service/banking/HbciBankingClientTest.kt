@@ -9,12 +9,13 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
+
+@Ignore // not an automatic test, set your bank account credentials in getTestBankAccount()
 class HbciBankingClientTest {
 
     private val underTest = HbciBankingClient()
 
 
-    @Ignore // not an automatic test, set your bank account credentials in getTestBankAccount()
     @Test
     fun getAccountTransactionsAsync() {
         val result = AtomicReference<GetAccountTransactionsResult>(null)
