@@ -22,6 +22,7 @@ import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.util.*
+import kotlin.concurrent.schedule
 
 
 open class OverviewPresenter(private val documentService: IDocumentService,
@@ -40,7 +41,9 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
 
     init {
-        checkUnpaidInvoicesPaymentState()
+        Timer().schedule(1 * 1000) {
+            checkUnpaidInvoicesPaymentState()
+        }
 
         eventBus.subscribe(BankAccountTransactionsUpdatedEvent::class.java) { event ->
             runFilterAndCreateNewDocuments(BankAccountTransaction::class.java, event.updatedTransactions)
