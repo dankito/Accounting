@@ -7,6 +7,7 @@ import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.banking.*
 import net.dankito.accounting.data.model.event.BankAccountAddedEvent
 import net.dankito.accounting.data.model.event.BankAccountTransactionsUpdatedEvent
+import net.dankito.accounting.data.model.event.UpdatingBankAccountTransactionsEvent
 import net.dankito.utils.events.IEventBus
 
 
@@ -125,6 +126,8 @@ open class BankAccountService(private val bankingClient: IBankingClient,
     }
 
     override fun updateAccountTransactionsAsync(account: BankAccount, callback: (GetAccountTransactionsResult) -> Unit) {
+        eventBus.post(UpdatingBankAccountTransactionsEvent(account))
+
         getAccountTransactionsAsync(account) { getAccountTransactionsResult ->
             getAccountTransactionsResult.transactions?.let { bankAccountTransactions ->
 

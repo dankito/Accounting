@@ -6,6 +6,7 @@ import javafx.geometry.Insets
 import javafx.geometry.Pos
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.data.model.event.BankAccountTransactionsUpdatedEvent
+import net.dankito.accounting.data.model.event.UpdatingBankAccountTransactionsEvent
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.BankAccountsPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
@@ -57,6 +58,10 @@ class BankAccountsTab : View() {
         searchText.addListener { _, _, newValue -> searchEntries(newValue) }
 
         retrievedAccountTransactions(presenter.getAccountTransactions())
+
+        eventBus.subscribe(UpdatingBankAccountTransactionsEvent::class.java) {
+            runLater { updateButton.setIsUpdating() }
+        }
 
         eventBus.subscribe(BankAccountTransactionsUpdatedEvent::class.java) {
             runLater { retrievedAccountTransactions(presenter.getAccountTransactions()) }
