@@ -24,7 +24,7 @@ open class TrackedTimes(
     val projects: List<Project>,
 
     @OneToMany(cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
-    val task: List<Task>,
+    val tasks: List<Task>,
 
     @Column
     val retrieved: Date = Date()
