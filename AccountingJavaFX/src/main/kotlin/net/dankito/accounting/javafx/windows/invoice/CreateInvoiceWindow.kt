@@ -1,6 +1,5 @@
 package net.dankito.accounting.javafx.windows.invoice
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
@@ -25,6 +24,7 @@ import net.dankito.accounting.javafx.windows.invoice.model.InvoiceViewModel
 import net.dankito.accounting.javafx.windows.invoice.model.SelectFileType
 import net.dankito.accounting.javafx.windows.invoice.model.TrackedMonthItemViewModel
 import net.dankito.utils.datetime.asUtilDate
+import net.dankito.utils.javafx.ui.controls.UpdateButton
 import net.dankito.utils.javafx.ui.controls.doubleTextfield
 import net.dankito.utils.javafx.ui.dialogs.Window
 import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
@@ -82,8 +82,6 @@ class CreateInvoiceWindow : Window() {
 
     private val timeTrackerAccounts = FXCollections.observableArrayList<TimeTrackerAccount>()
 
-    private val isUpdatingTrackedTimes = SimpleBooleanProperty(false)
-
     private val trackedTimesLastUpdated = SimpleStringProperty()
 
     private val trackedMonths = FXCollections.observableArrayList<TrackedMonth>()
@@ -96,6 +94,8 @@ class CreateInvoiceWindow : Window() {
     private var selectInvoiceTemplateFileView: SelectFileView by singleAssign()
 
     private var selectInvoiceOutputFileView: SelectFileView by singleAssign()
+
+    private val updateButton = UpdateButton(messages["update..."], { importTimeTrackerData() })
 
 
     init {
@@ -185,24 +185,7 @@ class CreateInvoiceWindow : Window() {
                         }
                     }
                     right {
-                        hbox {
-                            progressindicator {
-                                visibleWhen(isUpdatingTrackedTimes)
-
-                                hboxConstraints {
-                                    marginRight = 6.0
-                                }
-                            }
-
-                            button(messages["update..."]) {
-                                useMaxHeight = true
-                                prefWidth = 120.0
-
-                                disableWhen(isUpdatingTrackedTimes)
-
-                                action { importTimeTrackerData() }
-                            }
-                        }
+                        add(updateButton)
                     }
                 }
 
@@ -393,13 +376,11 @@ class CreateInvoiceWindow : Window() {
     }
 
     private fun importTimeTrackerData() {
-        isUpdatingTrackedTimes.value = true
-
         timeTrackerAccountPresenter.importTimeTrackerDataAsync(settingsViewModel.timeTrackerAccount.value) { trackedTimes ->
             runLater {
                 showTrackedMonths(trackedTimes)
 
-                isUpdatingTrackedTimes.value = false
+                updateButton.resetIsUpdating()
             }
         }
     }
