@@ -4,6 +4,7 @@ import net.dankito.accounting.data.dao.invoice.ICreateInvoiceSettingsDao
 import net.dankito.accounting.data.model.*
 import net.dankito.accounting.data.model.invoice.CreateInvoiceJob
 import net.dankito.accounting.service.person.IPersonService
+import org.junit.Ignore
 import org.junit.Test
 import org.mockito.Mockito.mock
 import java.awt.Desktop
@@ -30,6 +31,7 @@ class InvoiceServiceTest {
     private val underTest = InvoiceService(createInvoiceSettingsDaoMock, personServiceMock)
 
 
+    @Ignore // not an automatic test, creates and displays a PDF file
     @Test
     fun createInvoice() {
         val documentNumber = "190327"
