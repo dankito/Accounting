@@ -27,7 +27,7 @@ ext {
     jpaAptVersion = '1.0-alpha4-SNAPSHOT'
 
 
-    javaFxUtilsVersion = '1.0.1'
+    javaFxUtilsVersion = '1.0.2'
 
     daggerVersion = '2.22.1'
 
