@@ -6,7 +6,6 @@ import javafx.collections.FXCollections
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.stage.FileChooser
-import javafx.util.converter.PercentageStringConverter
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.invoice.CreateInvoiceSettings
 import net.dankito.accounting.data.model.timetracker.TimeTrackerAccount
@@ -28,6 +27,7 @@ import net.dankito.utils.javafx.ui.controls.UpdateButton
 import net.dankito.utils.javafx.ui.controls.doubleTextfield
 import net.dankito.utils.javafx.ui.dialogs.Window
 import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
+import net.dankito.utils.javafx.util.converter.MultiplierlessPercentageStringConverter
 import org.slf4j.LoggerFactory
 import tornadofx.*
 import java.io.File
@@ -268,7 +268,7 @@ class CreateInvoiceWindow : Window() {
             }
 
             field(messages["create.invoice.window.invoice.value.added.tax"]) {
-                textfield().bind(settingsViewModel.valueAddedTax, false, PercentageStringConverter())
+                textfield().bind(settingsViewModel.valueAddedTax, false, MultiplierlessPercentageStringConverter())
             }
         }
 
