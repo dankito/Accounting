@@ -388,7 +388,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
                 }
             }
             else {
-                doubleTextfield(value, 2, allowNegativeNumbers) {
+                doubleTextfield(value, allowNegativeNumbers, 2) {
                     alignment = Pos.CENTER_RIGHT
 
                     prefWidth = 100.0

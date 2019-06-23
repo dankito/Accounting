@@ -104,7 +104,7 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
 
             label("edit.document.window.total.amount.label")
 
-            doubleTextfield(totalAmount, 2, false) {
+            doubleTextfield(totalAmount, false, 2) {
                 minWidth = AmountTextFieldsWidth
                 maxWidth = AmountTextFieldsWidth
 
