@@ -14,6 +14,7 @@ import net.dankito.utils.datetime.asLocalDate
 import net.dankito.utils.datetime.asUtilDate
 import net.dankito.utils.javafx.ui.controls.doubleTextfield
 import net.dankito.utils.javafx.ui.dialogs.Window
+import net.dankito.utils.javafx.util.converter.MultiplierlessPercentageStringConverter
 import tornadofx.*
 import java.time.LocalDate
 
@@ -84,7 +85,7 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
             label("edit.document.window.vat.rate.label")
 
             combobox(vatRate, presenter.getVatRatesForUser()) {
-                cellFormat { text = "$it %" }
+                converter = MultiplierlessPercentageStringConverter()
 
                 anchorpaneConstraints {
                     topAnchor = 0.0
