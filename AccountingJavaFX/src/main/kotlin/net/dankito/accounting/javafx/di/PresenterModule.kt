@@ -66,9 +66,10 @@ class PresenterModule {
 
     @Provides
     @Singleton
-    fun provideCreateInvoicePresenter(invoiceService: IInvoiceService, osService: JavaFxOsService) : CreateInvoicePresenter {
+    fun provideCreateInvoicePresenter(invoiceService: IInvoiceService, vatCalculator: ValueAddedTaxCalculator,
+                                      osService: JavaFxOsService) : CreateInvoicePresenter {
 
-        return CreateInvoicePresenter(invoiceService, osService)
+        return CreateInvoicePresenter(invoiceService, vatCalculator, osService)
     }
 
 
