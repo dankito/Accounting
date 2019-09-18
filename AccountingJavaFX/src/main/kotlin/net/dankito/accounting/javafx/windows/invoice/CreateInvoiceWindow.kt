@@ -27,7 +27,7 @@ import net.dankito.utils.javafx.ui.controls.UpdateButton
 import net.dankito.utils.javafx.ui.controls.doubleTextfield
 import net.dankito.utils.javafx.ui.dialogs.Window
 import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
-import net.dankito.utils.javafx.util.converter.MultiplierlessPercentageStringConverter
+import net.dankito.utils.javafx.util.converter.ZeroTo100PercentageStringConverter
 import org.slf4j.LoggerFactory
 import tornadofx.*
 import java.io.File
@@ -268,7 +268,7 @@ class CreateInvoiceWindow : Window() {
             }
 
             field(messages["create.invoice.window.invoice.value.added.tax"]) {
-                textfield().bind(settingsViewModel.valueAddedTax, false, MultiplierlessPercentageStringConverter())
+                textfield().bind(settingsViewModel.valueAddedTax, false, ZeroTo100PercentageStringConverter())
             }
         }
 
