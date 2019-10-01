@@ -2,11 +2,14 @@ package net.dankito.accounting.javafx.windows.mainwindow.controls
 
 import javafx.collections.FXCollections
 import javafx.scene.control.SelectionMode
+import javafx.scene.control.TableRow
+import javafx.scene.control.TableView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import net.dankito.accounting.data.model.Document
+import net.dankito.accounting.data.model.event.AccountingPeriodChangedEvent
 import net.dankito.accounting.data.model.event.DocumentsUpdatedEvent
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
@@ -46,6 +49,8 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
     lateinit var threadPool: IThreadPool
 
 
+    protected var tableView: TableView<Document> by singleAssign()
+
     protected val documents = FXCollections.observableArrayList<Document>()
 
 
@@ -54,6 +59,10 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
         eventBus.subscribe(DocumentsUpdatedEvent::class.java) {
             runLater { loadDocumentsInBackgroundAndUpdateOnUiThread() }
+        }
+
+        eventBus.subscribe(AccountingPeriodChangedEvent::class.java) {
+            runLater { updateTableView() }
         }
 
         loadDocumentsInBackgroundAndUpdateOnUiThreadDelayed() // so that subclasses have time to initialize
@@ -89,7 +98,7 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
         }
 
 
-        tableview<Document>(documents) {
+        tableView = tableview<Document>(documents) {
             column(messages["main.window.documents.table.description.column.header"], Document::description) {
                 this.initiallyUseRemainingSpace(this@tableview)
             }
@@ -113,6 +122,10 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
             setOnKeyReleased { event -> keyPressed(event, selectionModel.selectedItems) }
         }
 
+    }
+
+    protected open fun updateTableView() {
+        tableView.refresh()
     }
 
 
