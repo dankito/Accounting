@@ -39,6 +39,8 @@ import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
 import net.dankito.accounting.service.timetracker.ITimeTrackerService
 import net.dankito.accounting.service.timetracker.TimeTrackerService
 import net.dankito.utils.events.IEventBus
+import java.io.File
+import javax.inject.Named
 import javax.inject.Singleton
 
 
@@ -96,9 +98,9 @@ class ServiceModule {
 
     @Provides
     @Singleton
-    fun provideBankingClient() : IBankingClient {
+    fun provideBankingClient(@Named(DaoModule.DataFolderKey) dataFolder: File) : IBankingClient {
 
-        return HbciBankingClient()
+        return HbciBankingClient(dataFolder)
     }
 
     @Provides

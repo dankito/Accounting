@@ -8,12 +8,12 @@ import net.dankito.banking.model.AccountingEntry
 import net.dankito.banking.model.BankInfo
 import net.dankito.utils.datetime.asLocalDate
 import net.dankito.utils.datetime.asUtilDate
-import net.dankito.utils.io.FileUtils
+import java.io.File
 import java.math.BigDecimal
 import java.util.*
 
 
-open class HbciBankingClient : IBankingClient {
+open class HbciBankingClient(protected val dataFolder: File) : IBankingClient {
 
     override fun checkAccountCredentialsAsync(account: BankAccount, callback: (CheckBankAccountCredentialsResult) -> Unit) {
         val client = createClient(account)
@@ -34,8 +34,12 @@ open class HbciBankingClient : IBankingClient {
         }
     }
 
-    private fun createClient(account: BankAccount) =
-        Hbci4JavaBankingClient(mapToAccountCredentials(account), FileUtils().getTempDir())
+    private fun createClient(account: BankAccount): Hbci4JavaBankingClient {
+        val accountsFolder = File(dataFolder, "accounts")
+        val accountFile = File(File(accountsFolder, account.bankCode), account.customerId)
+
+        return Hbci4JavaBankingClient(mapToAccountCredentials(account), accountFile)
+    }
 
     protected open fun getAccountTransactionsAsync(client: Hbci4JavaBankingClient, account: BankAccount, bankInfo: BankInfo,
                                                    callback: (GetAccountTransactionsResult) -> Unit) {
