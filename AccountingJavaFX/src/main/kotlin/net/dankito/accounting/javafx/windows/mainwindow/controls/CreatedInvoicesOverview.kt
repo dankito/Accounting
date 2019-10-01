@@ -1,6 +1,5 @@
 package net.dankito.accounting.javafx.windows.mainwindow.controls
 
-import javafx.scene.control.TableRow
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 
@@ -17,8 +16,9 @@ class CreatedInvoicesOverview(overviewPresenter: OverviewPresenter)
         return retrievedDocuments.sortedByDescending { it.issueDate }
     }
 
-    override fun TableRow<Document>.setRowBackground(item: Document?) {
+    override fun getRowStyle(item: Document?): String {
         // for created invoices current / previous accounting period logic is not applied
+        return styleService.defaultStyle
     }
 
     override fun showCreateNewDocumentWindow() {

@@ -13,6 +13,7 @@ import net.dankito.accounting.data.model.event.AccountingPeriodChangedEvent
 import net.dankito.accounting.data.model.event.DocumentsUpdatedEvent
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
+import net.dankito.accounting.javafx.service.StyleService
 import net.dankito.utils.IThreadPool
 import net.dankito.utils.events.IEventBus
 import net.dankito.utils.javafx.ui.controls.AddButton
@@ -41,6 +42,9 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
     protected abstract fun showCreateNewDocumentWindow()
 
+
+    @Inject
+    protected lateinit var styleService: StyleService
 
     @Inject
     protected lateinit var eventBus: IEventBus
@@ -126,7 +130,7 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
                 override fun updateItem(item: Document?, empty: Boolean) {
                     super.updateItem(item, empty)
 
-                    setRowBackground(item)
+                    style = getRowStyle(item)
                 }
             } }
         }
@@ -156,17 +160,17 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
         tableView.refresh()
     }
 
-    protected open fun TableRow<Document>.setRowBackground(item: Document?) {
-        style = ""
-
+    protected open fun getRowStyle(item: Document?): String {
         item?.let { document ->
             if (presenter.isInCurrentAccountingPeriod(document)) {
-                style = "-fx-background-color: linear-gradient( from 0% 0% to 0% 100%, white, cornflowerblue );"
+                return styleService.currentAccountingPeriodStyle
             }
             else if (presenter.isInPreviousAccountingPeriod(document)) {
-                style = "-fx-background-color: linear-gradient( from 0% 0% to 0% 100%, white, orange );"
+                return styleService.previousAccountingPeriodStyle
             }
         }
+
+        return styleService.defaultStyle
     }
 
 
