@@ -140,6 +140,10 @@ open class OverviewPresenter(private val documentService: IDocumentService,
                 invoice.paymentState = PaymentState.Paid
                 invoice.paymentDate = transaction.valueDate
 
+                invoice.createdFromAccountTransaction = transaction
+
+                transaction.createdDocument = invoice
+
                 saveOrUpdate(invoice)
             }
         }
