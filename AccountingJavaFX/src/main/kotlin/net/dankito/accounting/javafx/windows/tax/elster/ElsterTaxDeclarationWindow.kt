@@ -11,6 +11,7 @@ import javafx.scene.layout.*
 import javafx.stage.FileChooser
 import javafx.stage.Screen
 import javafx.stage.Stage
+import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.Person
 import net.dankito.accounting.data.model.event.DocumentsUpdatedEvent
 import net.dankito.accounting.data.model.tax.FederalState
@@ -24,6 +25,7 @@ import net.dankito.tax.elster.test.TestFinanzamt
 import net.dankito.tax.elster.test.TestHerstellerID
 import net.dankito.tax.elster.test.Teststeuernummern
 import net.dankito.utils.datetime.asLocalDate
+import net.dankito.utils.datetime.asUtilDate
 import net.dankito.utils.events.IEventBus
 import net.dankito.utils.events.ISubscribedEvent
 import net.dankito.utils.io.FileUtils
@@ -36,6 +38,7 @@ import net.dankito.utils.javafx.util.FXUtils
 import tornadofx.*
 import java.io.File
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.*
 import javax.inject.Inject
 
@@ -474,13 +477,21 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
     }
 
     private fun initYearAndPeriod() {
-        val previousPeriodEndDate = overviewPresenter.getPreviousAccountingPeriodEndDate()
+        var accountingPeriod = overviewPresenter.accountingPeriod
+        var previousPeriodEndDate = overviewPresenter.getPreviousAccountingPeriodEndDate()
+
+        // annually is not supported by Elster for Umsatzsteuervoranmeldung
+        if (overviewPresenter.accountingPeriod == AccountingPeriod.Annually) {
+            accountingPeriod = AccountingPeriod.Monthly
+
+            previousPeriodEndDate = LocalDate.now().withDayOfMonth(1).minusDays(1).asUtilDate()
+        }
 
         presenter.getYearFromPeriod(previousPeriodEndDate)?.let { year ->
             jahr.value = year
         }
 
-        presenter.getVoranmeldungszeitrumFromPeriod(previousPeriodEndDate, overviewPresenter.accountingPeriod)?.let {
+        presenter.getVoranmeldungszeitrumFromPeriod(previousPeriodEndDate, accountingPeriod)?.let {
             zeitraum.value = it
         }
 

@@ -9,17 +9,18 @@ import net.dankito.accounting.data.dao.filter.FilterDao
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.banking.BankAccount
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
+import net.dankito.accounting.data.model.event.BankAccountTransactionsUpdatedEvent
 import net.dankito.accounting.data.model.filter.*
 import net.dankito.accounting.data.model.settings.AppSettings
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.banking.IBankAccountService
-import net.dankito.accounting.service.banking.IBankingClient
 import net.dankito.accounting.service.document.DocumentService
 import net.dankito.accounting.service.filter.CollectionFilter
 import net.dankito.accounting.service.filter.FilterService
 import net.dankito.accounting.service.settings.ISettingsService
 import net.dankito.accounting.util.db.DatabaseBasedTest
 import net.dankito.utils.datetime.asUtilDate
+import net.dankito.utils.events.RxEventBus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.Mockito.doAnswer
@@ -45,19 +46,20 @@ class OverviewPresenterTest : DatabaseBasedTest() {
 
     private val appSettingsMock = mock(AppSettings::class.java)
 
+    private val routerMock = mock(Router::class.java)
+
+
+    private val eventBus = RxEventBus()
+
     private val documentDao = DocumentDao(entityManager)
 
-    private val documentService = DocumentService(documentDao, DocumentItemDao(entityManager))
+    private val documentService = DocumentService(documentDao, DocumentItemDao(entityManager), eventBus)
 
     private val settingsServiceMock = mock(ISettingsService::class.java)
-
-    private val bankingClientMock = mock(IBankingClient::class.java)
 
     private val bankAccountServiceMock = mock(IBankAccountService::class.java)
 
     private val filterService = FilterService(CollectionFilter(), EntityFilterDao(entityManager), FilterDao(entityManager))
-
-    private val routerMock = mock(Router::class.java)
 
 
     private val underTest :OverviewPresenter
@@ -68,7 +70,7 @@ class OverviewPresenterTest : DatabaseBasedTest() {
 
         doReturn(appSettingsMock).`when`(settingsServiceMock).appSettings
 
-        underTest = object : OverviewPresenter(documentService, settingsServiceMock, bankAccountServiceMock, filterService, routerMock) {
+        underTest = object : OverviewPresenter(documentService, settingsServiceMock, bankAccountServiceMock, filterService, eventBus, routerMock) {
 
             override fun getToday(): LocalDate {
                 return mockedTodayValue.get()
@@ -102,7 +104,7 @@ class OverviewPresenterTest : DatabaseBasedTest() {
 
 
         // when
-        underTest.checkUnpaidInvoicesPaymentState()
+        eventBus.post(BankAccountTransactionsUpdatedEvent(accountTransactions))
 
 
         // then
@@ -165,6 +167,7 @@ class OverviewPresenterTest : DatabaseBasedTest() {
         assertThat(result).isEqualTo(LocalDate.of(2020, 2, 1).asUtilDate())
     }
 
+
     @Test
     fun getCurrentAccountingPeriodStartDate_Quarterly_EndOfJune() {
 
@@ -191,6 +194,49 @@ class OverviewPresenterTest : DatabaseBasedTest() {
 
         // then
         assertThat(result).isEqualTo(LocalDate.of(2019, 4, 1).asUtilDate())
+    }
+
+
+    @Test
+    fun getCurrentAccountingPeriodStartDate_Annually_EndOfJune() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2019, 6, 30))
+
+        // when
+        val result = underTest.getCurrentAccountingPeriodStartDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2019, 1, 1).asUtilDate())
+    }
+
+    @Test
+    fun getCurrentAccountingPeriodStartDate_Annually_StartOfApril() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2019, 4, 1))
+
+        // when
+        val result = underTest.getCurrentAccountingPeriodStartDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2019, 1, 1).asUtilDate())
+    }
+
+    @Test
+    fun getCurrentAccountingPeriodStartDate_Annually_LeapYear() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2020, 2, 29))
+
+        // when
+        val result = underTest.getCurrentAccountingPeriodStartDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2020, 1, 1).asUtilDate())
     }
 
 
@@ -236,6 +282,7 @@ class OverviewPresenterTest : DatabaseBasedTest() {
         assertThat(result).isEqualTo(LocalDate.of(2020, 2, 29).asUtilDate())
     }
 
+
     @Test
     fun getCurrentAccountingPeriodEndDate_Quarterly_EndOfJune() {
 
@@ -262,6 +309,49 @@ class OverviewPresenterTest : DatabaseBasedTest() {
 
         // then
         assertThat(result).isEqualTo(LocalDate.of(2019, 6, 30).asUtilDate())
+    }
+
+
+    @Test
+    fun getCurrentAccountingPeriodEndDate_Annually_EndOfJune() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2019, 6, 30))
+
+        // when
+        val result = underTest.getCurrentAccountingPeriodEndDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2019, 12, 31).asUtilDate())
+    }
+
+    @Test
+    fun getCurrentAccountingPeriodEndDate_Annually_StartOfApril() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2019, 4, 1))
+
+        // when
+        val result = underTest.getCurrentAccountingPeriodEndDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2019, 12, 31).asUtilDate())
+    }
+
+    @Test
+    fun getCurrentAccountingPeriodEndDate_Annually_LeapYear() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2020, 2, 1))
+
+        // when
+        val result = underTest.getCurrentAccountingPeriodEndDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2020, 12, 31).asUtilDate())
     }
 
 
@@ -394,6 +484,77 @@ class OverviewPresenterTest : DatabaseBasedTest() {
 
 
     @Test
+    fun getPreviousAccountingPeriodStartDate_Annually_EndOfJune() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2019, 6, 30))
+
+        // when
+        val result = underTest.getPreviousAccountingPeriodStartDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2018, 1, 1).asUtilDate())
+    }
+
+    @Test
+    fun getPreviousAccountingPeriodStartDate_Annually_StartOfApril() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2019, 4, 1))
+
+        // when
+        val result = underTest.getPreviousAccountingPeriodStartDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2018, 1, 1).asUtilDate())
+    }
+
+    @Test
+    fun getPreviousAccountingPeriodStartDate_Annually_EndOfJanuary() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2019, 1, 31))
+
+        // when
+        val result = underTest.getPreviousAccountingPeriodStartDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2018, 1, 1).asUtilDate())
+    }
+
+    @Test
+    fun getPreviousAccountingPeriodStartDate_Annually_StartOfJanuary() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2019, 1, 1))
+
+        // when
+        val result = underTest.getPreviousAccountingPeriodStartDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2018, 1, 1).asUtilDate())
+    }
+
+    @Test
+    fun getPreviousAccountingPeriodStartDate_Annually_LeapYear() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2020, 2, 29))
+
+        // when
+        val result = underTest.getPreviousAccountingPeriodStartDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2019, 1, 1).asUtilDate())
+    }
+
+
+    @Test
     fun getPreviousAccountingPeriodEndDate_Monthly_StartOfApril() {
 
         // given
@@ -504,6 +665,63 @@ class OverviewPresenterTest : DatabaseBasedTest() {
 
         // then
         assertThat(result).isEqualTo(LocalDate.of(2018, 12, 31).asUtilDate())
+    }
+
+
+    @Test
+    fun getPreviousAccountingPeriodEndDate_Annually_StartOfApril() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2019, 4, 1))
+
+        // when
+        val result = underTest.getPreviousAccountingPeriodEndDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2018, 12, 31).asUtilDate())
+    }
+
+    @Test
+    fun getPreviousAccountingPeriodEndDate_Annually_EndOfJanuary() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2019, 1, 31))
+
+        // when
+        val result = underTest.getPreviousAccountingPeriodEndDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2018, 12, 31).asUtilDate())
+    }
+
+    @Test
+    fun getPreviousAccountingPeriodEndDate_Annually_StartOfJanuary() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2019, 1, 1))
+
+        // when
+        val result = underTest.getPreviousAccountingPeriodEndDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2018, 12, 31).asUtilDate())
+    }
+
+    @Test
+    fun getPreviousAccountingPeriodEndDate_Annually_LeapYear() {
+
+        // given
+        underTest.accountingPeriod = AccountingPeriod.Annually
+        mockedTodayValue.set(LocalDate.of(2020, 3, 31))
+
+        // when
+        val result = underTest.getPreviousAccountingPeriodEndDate()
+
+        // then
+        assertThat(result).isEqualTo(LocalDate.of(2019, 12, 31).asUtilDate())
     }
 
 

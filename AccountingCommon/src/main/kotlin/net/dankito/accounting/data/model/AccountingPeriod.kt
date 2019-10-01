@@ -5,6 +5,8 @@ enum class AccountingPeriod {
 
     Monthly,
 
-    Quarterly
+    Quarterly,
+
+    Annually
 
 }

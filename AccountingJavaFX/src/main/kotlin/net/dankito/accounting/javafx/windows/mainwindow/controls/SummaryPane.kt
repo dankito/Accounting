@@ -103,8 +103,11 @@ class SummaryPane : View() {
                 value = presenter.accountingPeriod
 
                 cellFormat {
-                    text = if (it == AccountingPeriod.Quarterly) messages["accounting.period.quarterly"]
-                    else messages["accounting.period.monthly"]
+                    text = when (it) {
+                        AccountingPeriod.Monthly -> messages["accounting.period.monthly"]
+                        AccountingPeriod.Quarterly -> messages["accounting.period.quarterly"]
+                        AccountingPeriod.Annually -> messages["accounting.period.annually"]
+                    }
                 }
 
                 valueProperty().addListener { _, _, newValue -> presenter.accountingPeriod = newValue }
@@ -301,13 +304,17 @@ class SummaryPane : View() {
 
 
     private fun updateValues() {
-        previousPeriodLabel.value = if (presenter.accountingPeriod == AccountingPeriod.Quarterly)
-            messages["main.window.tab.overview.summary.pane.previous.quarter"]
-        else messages["main.window.tab.overview.summary.pane.previous.month"]
+        previousPeriodLabel.value = when (presenter.accountingPeriod) {
+            AccountingPeriod.Monthly -> messages["main.window.tab.overview.summary.pane.previous.month"]
+            AccountingPeriod.Quarterly -> messages["main.window.tab.overview.summary.pane.previous.quarter"]
+            AccountingPeriod.Annually -> messages["main.window.tab.overview.summary.pane.previous.year"]
+        }
 
-        currentPeriodLabel.value = if (presenter.accountingPeriod == AccountingPeriod.Quarterly)
-            messages["main.window.tab.overview.summary.pane.current.quarter"]
-        else messages["main.window.tab.overview.summary.pane.current.month"]
+        currentPeriodLabel.value = when (presenter.accountingPeriod) {
+            AccountingPeriod.Monthly -> messages["main.window.tab.overview.summary.pane.current.month"]
+            AccountingPeriod.Quarterly -> messages["main.window.tab.overview.summary.pane.current.quarter"]
+            AccountingPeriod.Annually -> messages["main.window.tab.overview.summary.pane.current.year"]
+        }
 
         updateTurnoverValues()
 

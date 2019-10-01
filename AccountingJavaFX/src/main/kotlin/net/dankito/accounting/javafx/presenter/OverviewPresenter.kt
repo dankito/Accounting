@@ -413,12 +413,13 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
     @JvmOverloads
     fun getAccountingPeriodEndDate(periodStart: LocalDate, accountingPeriod: AccountingPeriod = this.accountingPeriod): Date {
-        val periodEnd = if (accountingPeriod == AccountingPeriod.Monthly) {
-            periodStart.plusMonths(1)
-        } else {
-            periodStart.plusMonths(3)
+        val nextPeriodStart = when (accountingPeriod) {
+            AccountingPeriod.Monthly -> periodStart.plusMonths(1)
+            AccountingPeriod.Quarterly -> periodStart.plusMonths(3)
+            AccountingPeriod.Annually -> periodStart.plusMonths(12)
         }
-            .minusDays(1)
+
+        val periodEnd = nextPeriodStart.minusDays(1)
 
         return periodEnd.asUtilDate()
     }
@@ -427,10 +428,10 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     private fun getPreviousAccountingPeriodStartLocalDate(): LocalDate {
         val currentAccountingPeriodStartDate = getCurrentAccountingPeriodStartLocalDate()
 
-        return if (accountingPeriod == AccountingPeriod.Monthly) {
-            currentAccountingPeriodStartDate.minusMonths(1)
-        } else {
-            currentAccountingPeriodStartDate.minusMonths(3)
+        return when (accountingPeriod) {
+            AccountingPeriod.Monthly -> currentAccountingPeriodStartDate.minusMonths(1)
+            AccountingPeriod.Quarterly -> currentAccountingPeriodStartDate.minusMonths(3)
+            AccountingPeriod.Annually -> currentAccountingPeriodStartDate.minusMonths(12)
         }
     }
 
@@ -446,6 +447,9 @@ open class OverviewPresenter(private val documentService: IDocumentService,
                 periodStart.monthValue > 3 -> periodStart.withMonth(4)
                 else -> periodStart.withMonth(1)
             }
+        }
+        else if (accountingPeriod == AccountingPeriod.Annually) {
+            periodStart = periodStart.withDayOfYear(1)
         }
 
         return periodStart
