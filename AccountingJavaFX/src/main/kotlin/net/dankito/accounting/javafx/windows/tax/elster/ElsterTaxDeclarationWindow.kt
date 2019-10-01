@@ -49,7 +49,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
         private val UploadedFilesFolder = File("ElsterUpload")
 
-        private val OutputFilesDateTimeFormat = SimpleDateFormat("yyyy.MM.dd_HH:mm:ss")
+        private val OutputFilesDateTimeFormat = SimpleDateFormat("yyyy.MM.dd_HH-mm-ss")
 
 
         private const val VerticalSpaceBetweenSections = 6.0
