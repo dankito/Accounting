@@ -2,20 +2,13 @@ package net.dankito.accounting.javafx.windows.banking.controls
 
 import javafx.beans.binding.ObjectBinding
 import javafx.collections.ObservableList
-import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.input.ContextMenuEvent
 import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
-import javafx.scene.layout.Background
-import javafx.scene.layout.BackgroundFill
-import javafx.scene.layout.CornerRadii
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
-import javafx.scene.paint.CycleMethod
-import javafx.scene.paint.LinearGradient
-import javafx.scene.paint.Stop
 import javafx.util.Callback
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
@@ -34,13 +27,7 @@ class BankAccountTransactionsTable(private val presenter: BankAccountsPresenter,
 
 
     companion object {
-
         private val ValueDateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM)
-
-        private val BackgroundStops = listOf(Stop(0.0, Color.WHITE), Stop(1.0, Color.web("#21b121")))
-        private val BackgroudIfAlreadyCreatedDocumentFromTransaction = Background(BackgroundFill(
-            LinearGradient(0.0, 0.0, 0.0, 1.0, true, CycleMethod.NO_CYCLE, BackgroundStops), CornerRadii.EMPTY, Insets.EMPTY))
-
     }
 
 
@@ -96,19 +83,16 @@ class BankAccountTransactionsTable(private val presenter: BankAccountsPresenter,
 
         setRowFactory { object : TableRow<BankAccountTransaction>() {
 
-            private var cellDefaultBackground: Background? = null
-
             override fun updateItem(item: BankAccountTransaction?, empty: Boolean) {
                 super.updateItem(item, empty)
 
                 item?.createdDocument?.let { document ->
-                    cellDefaultBackground = this.background // backup background to restore it when row gets reused for other transaction
-                    this.background = BackgroudIfAlreadyCreatedDocumentFromTransaction
                     this.tooltip = createTooltipForCreatedDocument(document)
+                    style = "-fx-background-color: linear-gradient( from 0% 0% to 0% 100%, white, #21b121 );"
                 }
                 ?: run {
                     this.tooltip = null
-                    cellDefaultBackground?.let { this.background = cellDefaultBackground }
+                    style = ""
                 }
             }
 
