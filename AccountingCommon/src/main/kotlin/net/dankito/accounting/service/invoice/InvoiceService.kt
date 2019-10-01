@@ -100,6 +100,8 @@ open class InvoiceService(protected val dao: ICreateInvoiceSettingsDao, protecte
         report.fieldsMetadata = metadata
         context.put("invoiceItem", invoice.items)
 
+        job.pdfOutputFile.parentFile?.mkdirs()
+
         val pdfOutputStream = FileOutputStream(job.pdfOutputFile)
 
         val options = Options.getFrom(DocumentKind.ODT).to(ConverterTypeTo.PDF)
