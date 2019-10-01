@@ -1,18 +1,17 @@
 package net.dankito.accounting.javafx.windows.mainwindow.controls
 
+import javafx.geometry.Orientation
 import javafx.scene.layout.Priority
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
-import tornadofx.*
+import tornadofx.View
+import tornadofx.hbox
+import tornadofx.hboxConstraints
+import tornadofx.splitpane
 import javax.inject.Inject
 
 
 class OverviewTab : View() {
-
-    companion object {
-        private const val DocumentsOverviewSpace = 12.0
-    }
-
 
     @Inject
     protected lateinit var presenter: OverviewPresenter
@@ -25,23 +24,18 @@ class OverviewTab : View() {
 
     override val root = hbox {
 
-        vbox {
+        splitpane(Orientation.VERTICAL) {
             hboxConstraints {
                 hGrow = Priority.ALWAYS
             }
 
-            add(CreatedInvoicesOverview(presenter).apply {
-                root.minHeight = 80.0
-
-            })
+            add(CreatedInvoicesOverview(presenter))
 
             add(RevenuesOverview(presenter))
 
-            add(ExpendituresOverview(presenter).apply {
-                root.vboxConstraints {
-                    marginTop = DocumentsOverviewSpace
-                }
-            })
+            add(ExpendituresOverview(presenter))
+
+            setDividerPositions(0.33, 0.66)
         }
 
 
