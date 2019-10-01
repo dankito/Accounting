@@ -5,6 +5,8 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.geometry.Insets
 import javafx.geometry.Pos
+import javafx.scene.Node
+import javafx.scene.control.ListView
 import javafx.stage.FileChooser
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.invoice.CreateInvoiceSettings
@@ -17,11 +19,9 @@ import net.dankito.accounting.javafx.presenter.CreateInvoicePresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.presenter.TimeTrackerAccountPresenter
 import net.dankito.accounting.javafx.windows.invoice.controls.SelectFileView
-import net.dankito.accounting.javafx.windows.invoice.controls.TrackedMonthListCellFragment
 import net.dankito.accounting.javafx.windows.invoice.model.CreateInvoiceSettingsViewModel
 import net.dankito.accounting.javafx.windows.invoice.model.InvoiceViewModel
 import net.dankito.accounting.javafx.windows.invoice.model.SelectFileType
-import net.dankito.accounting.javafx.windows.invoice.model.TrackedMonthItemViewModel
 import net.dankito.utils.datetime.asUtilDate
 import net.dankito.utils.javafx.ui.controls.UpdateButton
 import net.dankito.utils.javafx.ui.controls.doubleTextfield
@@ -86,7 +86,7 @@ class CreateInvoiceWindow : Window() {
 
     private val trackedMonths = FXCollections.observableArrayList<TrackedMonth>()
 
-    private val selectedTrackedMonth = TrackedMonthItemViewModel()
+    private var selectedTrackedMonth: TrackedMonth? = null
 
     private val invoiceItemQuantity = SimpleDoubleProperty()
 
@@ -194,12 +194,9 @@ class CreateInvoiceWindow : Window() {
                     maxHeight = minHeight
                     useMaxWidth = true
 
-                    bindSelected(selectedTrackedMonth)
-
-                    cellFragment(TrackedMonthListCellFragment::class)
-
-                    onDoubleClick { selectedItem?.let { selectedTrackedMonthChanged(it) } }
-
+                    cellFormat {
+                        graphic = createMonthCell(it)
+                    }
                 }
             }
         }
@@ -323,6 +320,49 @@ class CreateInvoiceWindow : Window() {
         }
     }
 
+    private fun ListView<TrackedMonth>.createMonthCell(month: TrackedMonth): Node {
+        return borderpane {
+            prefHeight = 32.0
+            useMaxWidth = true
+
+            left {
+                label(MonthDateFormatter.format(month.month.asLocalDate())) {
+                    useMaxHeight = true
+                }
+            }
+
+            right {
+                hbox {
+                    useMaxHeight = true
+
+                    label(month.decimalHoursString) {
+                        useMaxHeight = true
+                    }
+
+                    label(messages["create.invoice.window.time.tracker.hours.label"]) {
+                        useMaxHeight = true
+
+                        hboxConstraints {
+                            marginLeft = 2.0
+                            marginRight = 18.0
+                        }
+                    }
+
+                    button(messages["create.invoice.window.time.tracker.use.month"]) {
+                        useMaxHeight = true
+                        prefWidth = 125.0
+
+                        action {
+                            selectionModel.select(month)
+
+                            selectedTrackedMonthChanged(month)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     private fun setupSelectFileViews() {
         selectInvoiceTemplateFileView = SelectFileView(messages["create.invoice.window.invoice.template.file"],
@@ -396,13 +436,15 @@ class CreateInvoiceWindow : Window() {
         invoiceViewModel.invoiceStartDate.value = trackedMonth.firstTrackedDay?.asLocalDate()
         invoiceViewModel.invoiceEndDate.value = trackedMonth.lastTrackedDay?.asLocalDate()
 
+        selectedTrackedMonth = trackedMonth
+
         updateInvoiceDescription()
     }
 
     private fun updateInvoiceDescription() {
         // TODO: check if user already set this value
         invoiceViewModel.invoiceDescription.value = settingsViewModel.clientName.value +
-                (selectedTrackedMonth.item?.let { " " + MonthDateFormatter.format(it.month.asLocalDate()) } ?: "")
+                (selectedTrackedMonth?.let { " " + MonthDateFormatter.format(it.month.asLocalDate()) } ?: "")
     }
 
     private fun updateInvoiceNumber() {
