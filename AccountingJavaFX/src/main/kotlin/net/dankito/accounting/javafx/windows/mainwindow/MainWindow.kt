@@ -17,10 +17,10 @@ import javax.inject.Inject
 class MainWindow : Fragment(String.format(FX.messages["application.title"], PackageInfo.getAppVersionFromManifest())) {
 
     @Inject
-    lateinit var overviewPresenter: OverviewPresenter
+    protected lateinit var overviewPresenter: OverviewPresenter
 
     @Inject
-    lateinit var eventBus: IEventBus
+    protected lateinit var eventBus: IEventBus
 
 
     private lateinit var tabPane: TabPane

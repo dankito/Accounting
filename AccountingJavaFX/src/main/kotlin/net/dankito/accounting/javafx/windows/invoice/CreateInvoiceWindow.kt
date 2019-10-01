@@ -64,13 +64,13 @@ class CreateInvoiceWindow : Window() {
 
 
     @Inject
-    lateinit var presenter: CreateInvoicePresenter
+    protected lateinit var presenter: CreateInvoicePresenter
 
     @Inject
-    lateinit var timeTrackerAccountPresenter: TimeTrackerAccountPresenter
+    protected lateinit var timeTrackerAccountPresenter: TimeTrackerAccountPresenter
 
     @Inject
-    lateinit var overviewPresenter: OverviewPresenter
+    protected lateinit var overviewPresenter: OverviewPresenter
 
 
     private val settings: CreateInvoiceSettings

@@ -31,13 +31,13 @@ class BankAccountsTab : View() {
 
 
     @Inject
-    lateinit var presenter: BankAccountsPresenter
+    protected lateinit var presenter: BankAccountsPresenter
 
     @Inject
-    lateinit var overviewPresenter: OverviewPresenter
+    protected lateinit var overviewPresenter: OverviewPresenter
 
     @Inject
-    lateinit var eventBus: IEventBus
+    protected lateinit var eventBus: IEventBus
 
 
     private val allTransactions = FXCollections.observableArrayList<BankAccountTransaction>()

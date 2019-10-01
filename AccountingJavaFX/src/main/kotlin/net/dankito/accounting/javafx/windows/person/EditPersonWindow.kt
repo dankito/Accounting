@@ -30,7 +30,7 @@ class EditPersonWindow(private val person: Person, private val didUserSavePerson
 
 
     @Inject
-    lateinit var presenter: EditPersonPresenter
+    protected lateinit var presenter: EditPersonPresenter
 
 
     private val firstName = SimpleStringProperty(person.firstName)

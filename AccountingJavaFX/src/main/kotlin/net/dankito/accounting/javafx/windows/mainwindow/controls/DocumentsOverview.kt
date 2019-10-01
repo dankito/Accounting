@@ -43,10 +43,10 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
 
     @Inject
-    lateinit var eventBus: IEventBus
+    protected lateinit var eventBus: IEventBus
 
     @Inject
-    lateinit var threadPool: IThreadPool
+    protected lateinit var threadPool: IThreadPool
 
 
     protected var tableView: TableView<Document> by singleAssign()

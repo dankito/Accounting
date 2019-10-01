@@ -34,7 +34,7 @@ class EditBankAccountWindow(private val account: BankAccount) : Window() {
 
 
     @Inject
-    lateinit var presenter: BankAccountsPresenter
+    protected lateinit var presenter: BankAccountsPresenter
 
 
     private val bankCode = SimpleStringProperty(account.bankCode)

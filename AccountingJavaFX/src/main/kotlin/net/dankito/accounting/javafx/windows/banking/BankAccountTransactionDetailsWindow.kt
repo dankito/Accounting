@@ -14,7 +14,7 @@ class BankAccountTransactionDetailsWindow(private val transaction: BankAccountTr
 
 
     @Inject
-    lateinit var presenter: OverviewPresenter
+    protected lateinit var presenter: OverviewPresenter
 
 
     init {

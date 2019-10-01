@@ -31,10 +31,10 @@ class SummaryPane : View() {
 
 
     @Inject
-    lateinit var presenter: OverviewPresenter
+    protected lateinit var presenter: OverviewPresenter
 
     @Inject
-    lateinit var eventBus: IEventBus
+    protected lateinit var eventBus: IEventBus
 
 
     private val previousPeriodLabel = SimpleStringProperty()

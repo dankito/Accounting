@@ -26,7 +26,7 @@ class EditTimeTrackerAccountWindow(private val account: TimeTrackerAccount,
 
 
     @Inject
-    lateinit var presenter: TimeTrackerAccountPresenter
+    protected lateinit var presenter: TimeTrackerAccountPresenter
 
 
     private val selectedTimeTrackerType = SimpleObjectProperty<TimeTrackerType>(account.type)

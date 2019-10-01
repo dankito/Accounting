@@ -68,10 +68,10 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
 
     @Inject
-    lateinit var presenter: ElsterTaxPresenter
+    protected lateinit var presenter: ElsterTaxPresenter
 
     @Inject
-    lateinit var eventBus: IEventBus
+    protected lateinit var eventBus: IEventBus
 
 
     private val jahr = SimpleObjectProperty<Steuerjahr>()

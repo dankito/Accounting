@@ -12,7 +12,7 @@ import javax.inject.Inject
 class MainMenuBar : View() {
 
     @Inject
-    lateinit var presenter: MainWindowPresenter
+    protected lateinit var presenter: MainWindowPresenter
 
 
     init {

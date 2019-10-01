@@ -15,7 +15,7 @@ class OverviewTab : View() {
 
 
     @Inject
-    lateinit var presenter: OverviewPresenter
+    protected lateinit var presenter: OverviewPresenter
 
 
     init {

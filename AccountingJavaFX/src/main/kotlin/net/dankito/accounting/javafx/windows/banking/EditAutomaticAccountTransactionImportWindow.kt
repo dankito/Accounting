@@ -35,13 +35,13 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
 
     @Inject
-    lateinit var presenter: BankAccountsPresenter
+    protected lateinit var presenter: BankAccountsPresenter
 
     @Inject
-    lateinit var overviewPresenter: OverviewPresenter
+    protected lateinit var overviewPresenter: OverviewPresenter
 
     @Inject
-    lateinit var eventBus: IEventBus
+    protected lateinit var eventBus: IEventBus
 
 
     private val appliedFilters = FXCollections.observableArrayList<AccountTransactionFilter>(createDefaultFilter())
