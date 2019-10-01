@@ -11,6 +11,7 @@ import net.dankito.accounting.data.model.event.AccountingPeriodChangedEvent
 import net.dankito.accounting.data.model.event.DocumentsUpdatedEvent
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
+import net.dankito.accounting.javafx.service.StyleService
 import net.dankito.accounting.javafx.windows.tax.elster.ElsterTaxDeclarationWindow
 import net.dankito.utils.events.IEventBus
 import net.dankito.utils.javafx.ui.controls.currencyLabel
@@ -32,6 +33,9 @@ class SummaryPane : View() {
 
     @Inject
     protected lateinit var presenter: OverviewPresenter
+
+    @Inject
+    protected lateinit var styleService: StyleService
 
     @Inject
     protected lateinit var eventBus: IEventBus
@@ -222,14 +226,16 @@ class SummaryPane : View() {
                 previousPeriodLabel,
                 previousReceivedAmount, previousReceivedLabelResourceKey,
                 previousSpentAmount, previousSpentLabelResourceKey,
-                previousBalanceAmount, previousBalanceLabelResourceKey
+                previousBalanceAmount, previousBalanceLabelResourceKey,
+                styleService.previousAccountingPeriodStyle
             )
 
             periodSummary(
                 currentPeriodLabel,
                 currentReceivedAmount, currentReceivedLabelResourceKey,
                 currentSpentAmount, currentSpentLabelResourceKey,
-                currentBalanceAmount, currentBalanceLabelResourceKey
+                currentBalanceAmount, currentBalanceLabelResourceKey,
+                styleService.currentAccountingPeriodStyle
             )
 
 
@@ -243,7 +249,8 @@ class SummaryPane : View() {
     private fun EventTarget.periodSummary(periodLabel: SimpleStringProperty,
                                           receivedAmount: SimpleDoubleProperty, receivedLabelResourceKey: String,
                                           spentAmount: SimpleDoubleProperty, spentLabelResourceKey: String,
-                                          balanceAmount: SimpleDoubleProperty, balanceLabelResourceKey: String): Pane {
+                                          balanceAmount: SimpleDoubleProperty, balanceLabelResourceKey: String,
+                                          style: String): Pane {
 
         return vbox {
             label(periodLabel) {
@@ -259,6 +266,8 @@ class SummaryPane : View() {
             amountWithLabel(spentAmount, spentLabelResourceKey)
 
             amountWithLabel(balanceAmount, balanceLabelResourceKey)
+
+            this.style = style
         }
     }
 
