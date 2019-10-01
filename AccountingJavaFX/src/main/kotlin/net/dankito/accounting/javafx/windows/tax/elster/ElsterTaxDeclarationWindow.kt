@@ -705,9 +705,8 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         val taxOffice = if (useTestValues) TestFinanzamt.Bayern_9198.finanzamt else Finanzamt(taxOffice.value.name, taxOffice.value.taxOfficeId)
 
         val isForAMonth = zeitraum.value.ziffer.toInt() <= 12
-        val outputFilename = "UStVA_${jahr.value.jahr}_" +
-                (if (isForAMonth) (zeitraum.value.ziffer + "_" + zeitraum.value.name) else zeitraum.value.name) + "_" +
-                OutputFilesDateTimeFormat.format(Date())
+        val outputFilename = OutputFilesDateTimeFormat.format(Date()) + "_UStVA_${jahr.value.jahr}_" +
+                (if (isForAMonth) (zeitraum.value.ziffer + "_" + zeitraum.value.name) else zeitraum.value.name)
         val pdfOutputFile = if (uploadToElster) File(UploadedFilesFolder, outputFilename + ".pdf") else null
         val xmlOutputFile = if (uploadToElster) File(UploadedFilesFolder, outputFilename + ".xml") else null
 
