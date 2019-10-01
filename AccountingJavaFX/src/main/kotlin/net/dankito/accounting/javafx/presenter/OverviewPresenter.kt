@@ -262,13 +262,6 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     }
 
 
-    fun getDocumentsInCurrentAndPreviousAccountingPeriod(documents: List<Document>): List<Document> {
-        val periodStart = getPreviousAccountingPeriodStartDate()
-        val periodEnd = getCurrentAccountingPeriodEndDate()
-
-        return getDocumentsInPeriod(documents, periodStart, periodEnd)
-    }
-
     fun getDocumentsInCurrentAccountingPeriod(documents: List<Document>): List<Document> {
         val periodStart = getCurrentAccountingPeriodStartDate()
         val periodEnd = getCurrentAccountingPeriodEndDate()
@@ -285,21 +278,21 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
     fun getDocumentsInPeriod(documents: List<Document>, periodStart: Date, periodEnd: Date): List<Document> {
         return documents.filter {
-            isDateInPeriod(it.paymentDate, periodStart, periodEnd)
+            isDocumentInPeriod(it, periodStart, periodEnd)
         }
     }
 
-    fun getUnpaidInvoicesAndInvoicesInCurrentAndPreviousAccountingPeriod(documents: List<Document>): List<Document> {
-        val periodStart = getPreviousAccountingPeriodStartDate()
-        val periodEnd = getCurrentAccountingPeriodEndDate()
-
-        return documents.filter {
-            isCreatedInvoice(it) &&
-               (it.paymentState == PaymentState.Outstanding || isDateInPeriod(it.issueDate, periodStart, periodEnd))
-        }
+    fun isInCurrentAccountingPeriod(document: Document): Boolean {
+        return isDocumentInPeriod(document, getCurrentAccountingPeriodStartDate(), getCurrentAccountingPeriodEndDate())
     }
 
-    private fun isCreatedInvoice(it: Document) = it.isSelfCreatedInvoice
+    fun isInPreviousAccountingPeriod(document: Document): Boolean {
+        return isDocumentInPeriod(document, getPreviousAccountingPeriodStartDate(), getPreviousAccountingPeriodEndDate())
+    }
+
+    private fun isDocumentInPeriod(document: Document, periodStart: Date, periodEnd: Date): Boolean {
+        return isDateInPeriod(document.paymentDate, periodStart, periodEnd)
+    }
 
     private fun isDateInPeriod(date: Date?, periodStart: Date, periodEnd: Date): Boolean {
         return date?.let { date in periodStart..periodEnd }

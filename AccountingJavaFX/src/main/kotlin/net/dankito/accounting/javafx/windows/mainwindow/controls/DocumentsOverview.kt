@@ -120,12 +120,17 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
             }
 
             setOnKeyReleased { event -> keyPressed(event, selectionModel.selectedItems) }
+
+            setRowFactory { object : TableRow<Document>() {
+
+                override fun updateItem(item: Document?, empty: Boolean) {
+                    super.updateItem(item, empty)
+
+                    setRowBackground(item)
+                }
+            } }
         }
 
-    }
-
-    protected open fun updateTableView() {
-        tableView.refresh()
     }
 
 
@@ -136,15 +141,33 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
     }
 
     protected open fun loadDocumentsInBackgroundAndUpdateOnUiThread() {
-        val retrievedDocuments = retrieveDocuments().sortedBy { it.paymentDate }
+        val retrievedDocuments = retrieveDocuments()
 
-        val documentsInCurrentAccountingPeriod = getDocumentsInCurrentAndPreviousAccountingPeriod(retrievedDocuments)
+        val documentsSorted = sortDocuments(retrievedDocuments)
 
-        runLater { documents.setAll(documentsInCurrentAccountingPeriod) }
+        runLater { documents.setAll(documentsSorted) }
     }
 
-    protected open fun getDocumentsInCurrentAndPreviousAccountingPeriod(retrievedDocuments: List<Document>) =
-        presenter.getDocumentsInCurrentAndPreviousAccountingPeriod(retrievedDocuments)
+    protected open fun sortDocuments(retrievedDocuments: List<Document>): List<Document> {
+        return retrievedDocuments.sortedByDescending { it.paymentDate }
+    }
+
+    protected open fun updateTableView() {
+        tableView.refresh()
+    }
+
+    protected open fun TableRow<Document>.setRowBackground(item: Document?) {
+        style = ""
+
+        item?.let { document ->
+            if (presenter.isInCurrentAccountingPeriod(document)) {
+                style = "-fx-background-color: linear-gradient( from 0% 0% to 0% 100%, white, cornflowerblue );"
+            }
+            else if (presenter.isInPreviousAccountingPeriod(document)) {
+                style = "-fx-background-color: linear-gradient( from 0% 0% to 0% 100%, white, orange );"
+            }
+        }
+    }
 
 
     private fun keyPressed(event: KeyEvent, selectedItems: List<Document>) {
