@@ -88,13 +88,16 @@ class PresenterModule {
                                   personService: IPersonService,
                                   federalStateService: IFederalStateService,
                                   taxOfficeService: ITaxOfficeService,
+                                  eventBus: IEventBus,
                                   router: Router,
-                                  @Named(DaoModule.LogFilesFolderKey) logFilesFolder: File,
-                                  threadPool: IThreadPool
+                                  threadPool: IThreadPool,
+                                  @Named(DaoModule.LogFilesFolderKey) logFilesFolder: File
     ) : ElsterTaxPresenter {
 
         return ElsterTaxPresenter(
-            settingsService, personService, federalStateService, taxOfficeService, router, logFilesFolder, threadPool)
+            settingsService, personService, federalStateService, taxOfficeService, eventBus,
+            router, threadPool, logFilesFolder
+        )
     }
 
 }

@@ -5,6 +5,7 @@ import net.dankito.accounting.di.CommonComponent
 import net.dankito.accounting.di.CommonUtilsModule
 import net.dankito.accounting.di.DaoModule
 import net.dankito.accounting.di.ServiceModule
+import net.dankito.accounting.javafx.AccountingJavaFXApp
 import net.dankito.accounting.javafx.windows.banking.BankAccountTransactionDetailsWindow
 import net.dankito.accounting.javafx.windows.banking.EditAutomaticAccountTransactionImportWindow
 import net.dankito.accounting.javafx.windows.banking.EditBankAccountWindow
@@ -28,6 +29,8 @@ interface AppComponent : CommonComponent {
         lateinit var component: AppComponent
     }
 
+
+    fun inject(app: AccountingJavaFXApp)
 
     fun inject(mainWindow: MainWindow)
 

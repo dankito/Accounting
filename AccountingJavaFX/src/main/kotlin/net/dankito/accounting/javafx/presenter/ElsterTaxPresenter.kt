@@ -2,6 +2,7 @@ package net.dankito.accounting.javafx.presenter
 
 import net.dankito.accounting.data.model.AccountingPeriod
 import net.dankito.accounting.data.model.Person
+import net.dankito.accounting.data.model.event.ApplicationClosingEvent
 import net.dankito.accounting.data.model.tax.FederalState
 import net.dankito.accounting.data.model.tax.TaxOffice
 import net.dankito.accounting.data.model.tax.elster.ElsterTaxDeclarationSettings
@@ -13,6 +14,7 @@ import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
 import net.dankito.tax.elster.ElsterClient
 import net.dankito.tax.elster.model.*
 import net.dankito.utils.IThreadPool
+import net.dankito.utils.events.IEventBus
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -27,9 +29,10 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
                          private val personService: IPersonService,
                          private val federalStateService: IFederalStateService,
                          private val taxOfficeService: ITaxOfficeService,
+                         eventBus: IEventBus,
                          private val router: Router,
-                         logFilesFolder: File,
-                         private val threadPool: IThreadPool): AutoCloseable {
+                         private val threadPool: IThreadPool,
+                         logFilesFolder: File): AutoCloseable {
 
     companion object {
         private val DateToYearFormatter = SimpleDateFormat("yyyy")
@@ -51,6 +54,12 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
     val persistedFederalStates: List<FederalState>
         get() = ArrayList(persistedFederalStatesProperty)
 
+
+    init {
+        eventBus.subscribe(ApplicationClosingEvent::class.java) {
+            close()
+        }
+    }
 
     override fun close() {
         client.close()
