@@ -31,7 +31,7 @@ class CreateInvoiceSettings(
     var invoiceItemDescription: String = "",
 
     @Column(name = ValueAddedTaxRateColumnName)
-    var valueAddedTaxRate: Double = 0.19,
+    var valueAddedTaxRate: Double = 19.0,
 
     @OneToOne
     @JoinColumn(name = LastSelectedRecipientJoinColumnName)
