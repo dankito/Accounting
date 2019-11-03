@@ -170,19 +170,13 @@ open class BankAccountService(private val bankingClient: IBankingClient,
             if (doAmountsMatch(document, transaction)) {
 
                 // then if either usage contains document number ...
-                document.documentNumber?.let { documentNumber ->
-                    if (transaction.usage.contains(documentNumber, true)) {
-                        return transaction
-                    }
+                if (transactionUsageContainsDocumentNumber(document, transaction)) {
+                    return transaction
                 }
 
                 // or sender matches recipient
-                document.recipient?.name?.let { recipientName ->
-                    if (transaction.showSenderOrReceiver &&
-                        (transaction.senderOrReceiverName.contains(recipientName, true) ||
-                                recipientName.contains(transaction.senderOrReceiverName))) {
-                        return transaction
-                    }
+                if (transactionSenderIsDocumentRecipient(document, transaction)) {
+                    return transaction
                 }
             }
         }
@@ -195,6 +189,29 @@ open class BankAccountService(private val bankingClient: IBankingClient,
         val diff = invoice.totalAmount - transactionAmount
 
         return Math.abs(diff) < 0.01 && Math.signum(invoice.totalAmount) == Math.signum(transactionAmount)
+    }
+
+    protected open fun transactionUsageContainsDocumentNumber(document: Document, transaction: BankAccountTransaction): Boolean {
+        document.documentNumber?.let { documentNumber ->
+            if (transaction.usage.contains(documentNumber, true)) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    protected open fun transactionSenderIsDocumentRecipient(document: Document, transaction: BankAccountTransaction): Boolean {
+        document.recipient?.name?.let { recipientName ->
+            if (transaction.showSenderOrReceiver &&
+                (transaction.senderOrReceiverName.contains(recipientName, true) ||
+                        recipientName.contains(transaction.senderOrReceiverName))
+            ) {
+                return true
+            }
+        }
+
+        return false
     }
 
 }
