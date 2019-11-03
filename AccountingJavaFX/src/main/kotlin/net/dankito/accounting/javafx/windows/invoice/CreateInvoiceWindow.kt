@@ -407,8 +407,6 @@ class CreateInvoiceWindow : Window() {
         trackedTimesLastUpdated.value = ""
 
         account.trackedTimes?.let { trackedTimes ->
-            trackedTimesLastUpdated.value = TrackedTimesLastUpdateDateTimeFormat.format(trackedTimes.retrieved)
-
             showTrackedMonths(trackedTimes)
         }
 
@@ -426,6 +424,8 @@ class CreateInvoiceWindow : Window() {
     }
 
     private fun showTrackedMonths(trackedTimes: TrackedTimes) {
+        trackedTimesLastUpdated.value = TrackedTimesLastUpdateDateTimeFormat.format(trackedTimes.retrieved)
+
         trackedMonths.setAll(trackedTimes.months.sortedByDescending { it.month })
     }
 
