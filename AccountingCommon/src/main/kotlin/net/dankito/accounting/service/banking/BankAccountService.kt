@@ -16,6 +16,11 @@ open class BankAccountService(private val bankingClient: IBankingClient,
                               private val eventBus: IEventBus
 ) : IBankAccountService {
 
+    companion object {
+        const val AllowedAmountDifferenceInPercent = 0.001
+    }
+
+
     protected var bankAccountsProperty: List<BankAccount>? = null
 
     protected var bankAccountTransactionsProperty: MutableSet<BankAccountTransaction>? = null
@@ -166,14 +171,12 @@ open class BankAccountService(private val bankingClient: IBankingClient,
 
             // first check if amounts match
             if (doAmountsMatch(document, transaction)) {
-
-                // then if either usage contains document number ...
-                if (transactionUsageContainsDocumentNumber(document, transaction)) {
+                if (accountTransactionsMatchesDocument(document, transaction)) {
                     return transaction
                 }
-
-                // or sender matches recipient
-                if (transactionSenderIsDocumentRecipient(document, transaction)) {
+            }
+            else if (amountDifferOnlyByPercent(document, transaction, AllowedAmountDifferenceInPercent)) {
+                if (accountTransactionsMatchesDocument(document, transaction)) {
                     return transaction
                 }
             }
@@ -182,11 +185,25 @@ open class BankAccountService(private val bankingClient: IBankingClient,
         return null
     }
 
-    protected open fun doAmountsMatch(invoice: Document, transaction: BankAccountTransaction): Boolean {
+    protected open fun doAmountsMatch(document: Document, transaction: BankAccountTransaction): Boolean {
         val transactionAmount = transaction.amount.toDouble()
-        val diff = invoice.totalAmount - transactionAmount
+        val diff = document.totalAmount - transactionAmount
 
-        return Math.abs(diff) < 0.01 && Math.signum(invoice.totalAmount) == Math.signum(transactionAmount)
+        return Math.abs(diff) < 0.01 && Math.signum(document.totalAmount) == Math.signum(transactionAmount)
+    }
+
+    protected open fun amountDifferOnlyByPercent(document: Document, transaction: BankAccountTransaction,
+                                                 allowedAmountDifferenceInPercent: Double): Boolean {
+
+        val transactionAmount = transaction.amount.toDouble()
+        val percent = document.totalAmount / transactionAmount
+
+        return percent in (1 - allowedAmountDifferenceInPercent)..(1 + allowedAmountDifferenceInPercent)
+    }
+
+    protected open fun accountTransactionsMatchesDocument(document: Document, transaction: BankAccountTransaction): Boolean {
+        return transactionUsageContainsDocumentNumber(document, transaction)
+                || transactionSenderIsDocumentRecipient(document, transaction)
     }
 
     protected open fun transactionUsageContainsDocumentNumber(document: Document, transaction: BankAccountTransaction): Boolean {

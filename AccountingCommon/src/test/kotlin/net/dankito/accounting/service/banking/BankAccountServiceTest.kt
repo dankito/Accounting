@@ -57,6 +57,24 @@ class BankAccountServiceTest {
     }
 
     @Test
+    fun isInvoicePaid_AmountDiffersByLessThan1PerThousandAndInvoiceNumberMatches() {
+
+        // given
+        val invoice = createInvoice()
+
+        doReturn(createTransactionsIncluding(createTransaction(InvoiceTotalAmount - 1, "noise $InvoiceNumber noise", "")))
+            .`when`(transactionDaoMock).getAll()
+
+
+        // when
+        val result = underTest.findAccountTransactionThatMatchesDocument(invoice)
+
+
+        // then
+        assertThat(result).isNotNull
+    }
+
+    @Test
     fun isInvoicePaid_AmountAndRecipientMatches() {
 
         // given
