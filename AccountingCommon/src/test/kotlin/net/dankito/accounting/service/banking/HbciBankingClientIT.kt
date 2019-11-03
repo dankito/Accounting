@@ -2,9 +2,12 @@ package net.dankito.accounting.service.banking
 
 import net.dankito.accounting.data.model.banking.BankAccount
 import net.dankito.accounting.data.model.banking.GetAccountTransactionsResult
+import net.dankito.utils.io.FileUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Ignore
 import org.junit.Test
+import java.io.File
+import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -13,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference
 @Ignore // not an automatic test, set your bank account credentials in getTestBankAccount()
 class HbciBankingClientIT {
 
-    private val underTest = HbciBankingClient()
+    private val underTest = HbciBankingClient(File(File(FileUtils().getTempDir(), "accounting_test"), UUID.randomUUID().toString()))
 
 
     @Test
