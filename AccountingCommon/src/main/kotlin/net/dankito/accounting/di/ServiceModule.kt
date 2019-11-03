@@ -5,7 +5,6 @@ import dagger.Provides
 import net.dankito.accounting.data.dao.*
 import net.dankito.accounting.data.dao.banking.IBankAccountDao
 import net.dankito.accounting.data.dao.banking.IBankAccountTransactionDao
-import net.dankito.accounting.data.dao.banking.IBankAccountTransactionsDao
 import net.dankito.accounting.data.dao.filter.IEntityFilterDao
 import net.dankito.accounting.data.dao.filter.IFilterDao
 import net.dankito.accounting.data.dao.invoice.ICreateInvoiceSettingsDao
@@ -106,10 +105,9 @@ class ServiceModule {
     @Provides
     @Singleton
     fun provideBankAccountService(bankingClient: IBankingClient, accountDao: IBankAccountDao,
-                                  transactionsDao: IBankAccountTransactionsDao,
                                   transactionDao: IBankAccountTransactionDao, eventBus: IEventBus) : IBankAccountService {
 
-        return BankAccountService(bankingClient, accountDao, transactionsDao, transactionDao, eventBus)
+        return BankAccountService(bankingClient, accountDao, transactionDao, eventBus)
     }
 
 

@@ -3,7 +3,6 @@ package net.dankito.accounting.service.banking
 import com.nhaarman.mockito_kotlin.doReturn
 import net.dankito.accounting.data.dao.banking.IBankAccountDao
 import net.dankito.accounting.data.dao.banking.IBankAccountTransactionDao
-import net.dankito.accounting.data.dao.banking.IBankAccountTransactionsDao
 import net.dankito.accounting.data.model.*
 import net.dankito.accounting.data.model.banking.BankAccount
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
@@ -33,12 +32,10 @@ class BankAccountServiceTest {
 
     private val bankAccountDaoMock = mock(IBankAccountDao::class.java)
 
-    private val transactionsDaoMock = mock(IBankAccountTransactionsDao::class.java)
-
     private val transactionDaoMock = mock(IBankAccountTransactionDao::class.java)
 
 
-    private val underTest = BankAccountService(bankingClientMock, bankAccountDaoMock, transactionsDaoMock, transactionDaoMock, RxEventBus())
+    private val underTest = BankAccountService(bankingClientMock, bankAccountDaoMock, transactionDaoMock, RxEventBus())
 
 
     @Test
