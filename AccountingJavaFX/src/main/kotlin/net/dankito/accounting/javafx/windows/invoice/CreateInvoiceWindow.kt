@@ -414,6 +414,8 @@ class CreateInvoiceWindow : Window() {
     }
 
     private fun importTimeTrackerData() {
+        updateButton.setIsUpdating()
+
         timeTrackerAccountPresenter.importTimeTrackerDataAsync(settingsViewModel.timeTrackerAccount.value) { trackedTimes ->
             runLater {
                 showTrackedMonths(trackedTimes)
