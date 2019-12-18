@@ -29,6 +29,8 @@ dependencies {
 
     compile "com.couchbase.lite:couchbase-lite-java:$couchbaseLiteVersion"
 
+    compile "org.apache.commons:commons-csv:$apacheCommonsCsvVersion"
+
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
 

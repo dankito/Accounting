@@ -144,9 +144,17 @@ open class Document() : DocumentBase() {
 
 
 
+    fun getVatForVatRate(vatRate: Float): Double? {
+        if (this.valueAddedTaxRate == vatRate) {
+            return valueAddedTax
+        }
+
+        return null
+    }
+
+
     override fun toString(): String {
         return "$type of $totalAmount ($paymentState) for $description)"
     }
-
 
 }

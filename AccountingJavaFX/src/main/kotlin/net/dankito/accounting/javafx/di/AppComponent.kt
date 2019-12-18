@@ -14,6 +14,7 @@ import net.dankito.accounting.javafx.windows.mainwindow.MainWindow
 import net.dankito.accounting.javafx.windows.mainwindow.controls.*
 import net.dankito.accounting.javafx.windows.person.EditPersonWindow
 import net.dankito.accounting.javafx.windows.tax.elster.ElsterTaxDeclarationWindow
+import net.dankito.accounting.javafx.windows.tax.taxreturn.ExportTaxReturnDataWindow
 import net.dankito.accounting.javafx.windows.timetracker.EditTimeTrackerAccountWindow
 import javax.inject.Singleton
 
@@ -60,5 +61,7 @@ interface AppComponent : CommonComponent {
 
 
     fun inject(elsterTaxDeclarationWindow: ElsterTaxDeclarationWindow)
+
+    fun inject(exportTaxReturnDataWindow: ExportTaxReturnDataWindow)
 
 }

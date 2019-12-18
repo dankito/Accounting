@@ -13,6 +13,7 @@ import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.service.StyleService
 import net.dankito.accounting.javafx.windows.tax.elster.ElsterTaxDeclarationWindow
+import net.dankito.accounting.javafx.windows.tax.taxreturn.ExportTaxReturnDataWindow
 import net.dankito.utils.events.IEventBus
 import net.dankito.utils.javafx.ui.controls.currencyLabel
 import net.dankito.utils.javafx.ui.extensions.setBorder
@@ -181,6 +182,30 @@ class SummaryPane : View() {
                     }
                 }
             }
+
+            anchorpane {
+                minHeight = ElsterButtonsHeight
+                maxHeight = ElsterButtonsHeight
+
+                vboxConstraints {
+                    marginTop = 4.0
+                }
+
+                button(messages["main.window.tab.overview.summary.pane.export.tax.return.data.label"]) {
+                    minWidth = ElsterButtonsWidth
+                    maxWidth = ElsterButtonsWidth
+
+                    font = Font.font(ElsterButtonsFontSize)
+
+                    action { showExportTaxReturnDataWindow() }
+
+                    anchorpaneConstraints {
+                        topAnchor = 0.0
+                        rightAnchor = 0.0
+                        bottomAnchor = 0.0
+                    }
+                }
+            }
         }
     }
 
@@ -325,6 +350,10 @@ class SummaryPane : View() {
 
     private fun showAdvanceTurnoverTaxReturnWindow() {
         ElsterTaxDeclarationWindow(presenter).show()
+    }
+
+    private fun showExportTaxReturnDataWindow() {
+        ExportTaxReturnDataWindow(presenter).show()
     }
 
 }
