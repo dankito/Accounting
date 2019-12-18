@@ -197,6 +197,8 @@ class CreateInvoiceWindow : Window() {
                     cellFormat {
                         graphic = createMonthCell(it)
                     }
+
+                    onDoubleClick { selectedItem?.let { selectedTrackedMonthChanged(it) } }
                 }
             }
         }
