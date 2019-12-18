@@ -50,7 +50,7 @@ open class HbciBankingClient(protected val dataFolder: File) : IBankingClient {
         else {
             // TODO: get transactions for all accounts not only for first one
             val updateTime = Date()
-            val startTime = account.lastUpdated?.asLocalDate()?.minusMonths(1)?.asUtilDate() // to be on the safe side also fetch transactions one month before lastUpdated
+            val startTime = account.lastUpdated?.asLocalDate()?.minusDays(1)?.asUtilDate() // to be on the safe side also fetch transactions one day before lastUpdated
 
             client.getAccountingEntriesAsync(bankInfo.accounts.first(), startTime) { accountingEntries ->
                 accountingEntries.error?.let {
