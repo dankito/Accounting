@@ -26,7 +26,7 @@ class SummaryPane : View() {
         private const val SummaryAmountLabelWidth = 90.0
 
         private const val ElsterButtonsHeight = 30.0
-        private const val ElsterButtonsWidth = 180.0
+        private const val ElsterButtonsWidth = 200.0
         private const val ElsterButtonsFontSize = 12.0
     }
 
@@ -156,7 +156,7 @@ class SummaryPane : View() {
             }
 
 
-            label(messages["main.window.tab.overview.summary.pane.spent.advance.return.for.sales.tax.label"])
+            label(messages["main.window.tab.overview.summary.pane.tax.return.label"])
 
             anchorpane {
                 minHeight = ElsterButtonsHeight
@@ -166,37 +166,13 @@ class SummaryPane : View() {
                     marginTop = 4.0
                 }
 
-                button(messages["main.window.tab.overview.summary.pane.spent.advance.return.for.sales.tax.create.elster.xml"]) {
+                button(messages["main.window.tab.overview.summary.pane.advance.turnover.tax.return.label"]) {
                     minWidth = ElsterButtonsWidth
                     maxWidth = ElsterButtonsWidth
 
                     font = Font.font(ElsterButtonsFontSize)
 
-                    action { createElsterXml() }
-
-                    anchorpaneConstraints {
-                        topAnchor = 0.0
-                        rightAnchor = 0.0
-                        bottomAnchor = 0.0
-                    }
-                }
-            }
-
-            anchorpane {
-                minHeight = ElsterButtonsHeight
-                maxHeight = ElsterButtonsHeight
-
-                vboxConstraints {
-                    marginTop = 4.0
-                }
-
-                button(messages["main.window.tab.overview.summary.pane.spent.advance.return.for.sales.tax.upload.to.elster"]) {
-                    minWidth = ElsterButtonsWidth
-                    maxWidth = ElsterButtonsWidth
-
-                    font = Font.font(ElsterButtonsFontSize)
-
-                    action { uploadToElster() }
+                    action { showAdvanceTurnoverTaxReturnWindow() }
 
                     anchorpaneConstraints {
                         topAnchor = 0.0
@@ -347,11 +323,7 @@ class SummaryPane : View() {
     }
 
 
-    private fun createElsterXml() {
-        ElsterTaxDeclarationWindow(presenter).show()
-    }
-
-    private fun uploadToElster() {
+    private fun showAdvanceTurnoverTaxReturnWindow() {
         ElsterTaxDeclarationWindow(presenter).show()
     }
 
