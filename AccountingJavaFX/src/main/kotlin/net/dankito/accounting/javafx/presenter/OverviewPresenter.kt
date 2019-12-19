@@ -463,6 +463,15 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     protected open fun getToday(): LocalDate = LocalDate.now()
 
 
+    fun filterDocuments(allDocuments: List<Document>, filterTerm: String): List<Document> {
+        if (filterTerm.isEmpty()) {
+            return allDocuments
+        }
+        else {
+            return allDocuments.filter { doesDocumentsFilterApply(it, filterTerm) }
+        }
+    }
+
     fun doesDocumentsFilterApply(document: Document, filterTerm: String): Boolean {
         val lowerCaseFilter = filterTerm.toLowerCase()
 

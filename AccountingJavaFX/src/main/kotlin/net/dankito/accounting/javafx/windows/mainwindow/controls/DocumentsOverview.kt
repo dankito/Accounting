@@ -106,7 +106,7 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
                 promptText = String.format(messages["main.window.documents.overview.search.documents.prompt"], title)
 
-                textProperty().addListener { _, _, newValue -> searchDocuments(newValue) }
+                textProperty().addListener { _, _, newValue -> filterDocuments(newValue) }
 
                 anchorpaneConstraints {
                     topAnchor = SearchFieldTopBottomMargin
@@ -191,18 +191,13 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
 
     protected open fun reapplyLastSearch() {
-        searchDocuments(currentDocumentsFilterTerm)
+        filterDocuments(currentDocumentsFilterTerm)
     }
 
-    protected open fun searchDocuments(filterTerm: String) {
+    protected open fun filterDocuments(filterTerm: String) {
         currentDocumentsFilterTerm = filterTerm
 
-        if (filterTerm.isEmpty()) {
-            displayedDocuments.setAll(allDocumentsOfType)
-        }
-        else {
-            displayedDocuments.setAll(allDocumentsOfType.filter { presenter.doesDocumentsFilterApply(it, filterTerm) })
-        }
+        displayedDocuments.setAll(presenter.filterDocuments(allDocumentsOfType, filterTerm))
     }
 
 
