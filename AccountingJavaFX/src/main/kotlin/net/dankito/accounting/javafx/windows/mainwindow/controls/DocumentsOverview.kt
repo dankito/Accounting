@@ -17,6 +17,7 @@ import net.dankito.accounting.javafx.service.StyleService
 import net.dankito.utils.IThreadPool
 import net.dankito.utils.events.IEventBus
 import net.dankito.utils.javafx.ui.controls.addButton
+import net.dankito.utils.javafx.ui.controls.searchtextfield
 import net.dankito.utils.javafx.ui.extensions.currencyColumn
 import net.dankito.utils.javafx.ui.extensions.dateColumn
 import net.dankito.utils.javafx.ui.extensions.initiallyUseRemainingSpace
@@ -33,6 +34,9 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
         protected const val TitleLabelLeftMargin = 2.0
         protected const val TitleLabelTopBottomMargin = 5.0
+
+        protected const val SearchFieldWidth = 200.0
+        protected const val SearchFieldTopBottomMargin = 3.0
 
         protected const val AddDocumentButtonWidth = ControlBarHeight
         protected const val AddDocumentButtonTopBottomMargin = 1.0
@@ -56,7 +60,11 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
     protected var tableView: TableView<Document> by singleAssign()
 
-    protected val documents = FXCollections.observableArrayList<Document>()
+    protected var allDocumentsOfType = listOf<Document>()
+
+    protected val displayedDocuments = FXCollections.observableArrayList<Document>()
+
+    protected var currentDocumentsFilterTerm = ""
 
 
     init {
@@ -75,17 +83,37 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
 
     override val root = vbox {
+        val title = messages[titleResourceKey]
+
         anchorpane {
             minHeight = ControlBarHeight
             maxHeight = ControlBarHeight
 
-            label(FX.messages[titleResourceKey]) {
+            label(title) {
                 font = Font.font(font.family, FontWeight.BLACK, font.size + 1)
 
                 anchorpaneConstraints {
                     leftAnchor = TitleLabelLeftMargin
                     topAnchor = TitleLabelTopBottomMargin
                     bottomAnchor = TitleLabelTopBottomMargin
+                }
+            }
+
+            // TODO: may add icon (Lupe) before search field
+            searchtextfield {
+                minWidth = SearchFieldWidth
+                maxWidth = SearchFieldWidth
+
+                promptText = String.format(messages["main.window.documents.overview.search.documents.prompt"], title)
+
+                textProperty().addListener { _, _, newValue ->
+                    searchDocuments(newValue)
+                }
+
+                anchorpaneConstraints {
+                    topAnchor = SearchFieldTopBottomMargin
+                    rightAnchor = AddDocumentButtonWidth + 18.0
+                    bottomAnchor = SearchFieldTopBottomMargin
                 }
             }
 
@@ -103,7 +131,7 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
         }
 
 
-        tableView = tableview<Document>(documents) {
+        tableView = tableview<Document>(displayedDocuments) {
             column(messages["main.window.documents.table.description.column.header"], Document::description) {
                 this.initiallyUseRemainingSpace(this@tableview)
             }
@@ -148,14 +176,43 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
     protected open fun loadDocumentsInBackgroundAndUpdateOnUiThread() {
         val retrievedDocuments = retrieveDocuments()
 
-        val documentsSorted = sortDocuments(retrievedDocuments)
+        retrievedDocumentsOffUiThread(retrievedDocuments)
+    }
 
-        runLater { documents.setAll(documentsSorted) }
+    protected open fun retrievedDocumentsOffUiThread(retrievedDocuments: List<Document>) {
+        allDocumentsOfType = sortDocuments(retrievedDocuments)
+
+        runLater {
+            reapplyLastSearch()
+        }
     }
 
     protected open fun sortDocuments(retrievedDocuments: List<Document>): List<Document> {
         return retrievedDocuments.sortedByDescending { it.paymentDate }
     }
+
+
+    protected open fun reapplyLastSearch() {
+        searchDocuments(currentDocumentsFilterTerm)
+    }
+
+    protected open fun searchDocuments(filterTerm: String) {
+        currentDocumentsFilterTerm = filterTerm
+
+        if (filterTerm.isEmpty()) {
+            displayedDocuments.setAll(allDocumentsOfType)
+        }
+        else {
+            displayedDocuments.setAll(allDocumentsOfType.filter { doesDocumentsFilterApply(it, filterTerm) })
+        }
+    }
+
+    protected open fun doesDocumentsFilterApply(document: Document, filterTerm: String): Boolean {
+        val lowerCaseFilter = filterTerm.toLowerCase()
+
+        return document.description?.toLowerCase()?.contains(lowerCaseFilter) == true
+    }
+
 
     protected open fun updateTableView() {
         tableView.refresh()
