@@ -106,9 +106,7 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
 
                 promptText = String.format(messages["main.window.documents.overview.search.documents.prompt"], title)
 
-                textProperty().addListener { _, _, newValue ->
-                    searchDocuments(newValue)
-                }
+                textProperty().addListener { _, _, newValue -> searchDocuments(newValue) }
 
                 anchorpaneConstraints {
                     topAnchor = SearchFieldTopBottomMargin
@@ -203,14 +201,8 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
             displayedDocuments.setAll(allDocumentsOfType)
         }
         else {
-            displayedDocuments.setAll(allDocumentsOfType.filter { doesDocumentsFilterApply(it, filterTerm) })
+            displayedDocuments.setAll(allDocumentsOfType.filter { presenter.doesDocumentsFilterApply(it, filterTerm) })
         }
-    }
-
-    protected open fun doesDocumentsFilterApply(document: Document, filterTerm: String): Boolean {
-        val lowerCaseFilter = filterTerm.toLowerCase()
-
-        return document.description?.toLowerCase()?.contains(lowerCaseFilter) == true
     }
 
 

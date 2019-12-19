@@ -463,6 +463,13 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     protected open fun getToday(): LocalDate = LocalDate.now()
 
 
+    fun doesDocumentsFilterApply(document: Document, filterTerm: String): Boolean {
+        val lowerCaseFilter = filterTerm.toLowerCase()
+
+        return document.description?.toLowerCase()?.contains(lowerCaseFilter) == true
+    }
+
+
     fun showCreateInvoiceWindow() {
         router.showCreateInvoiceWindow()
     }
