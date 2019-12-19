@@ -16,7 +16,7 @@ import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.service.StyleService
 import net.dankito.utils.IThreadPool
 import net.dankito.utils.events.IEventBus
-import net.dankito.utils.javafx.ui.controls.AddButton
+import net.dankito.utils.javafx.ui.controls.addButton
 import net.dankito.utils.javafx.ui.extensions.currencyColumn
 import net.dankito.utils.javafx.ui.extensions.dateColumn
 import net.dankito.utils.javafx.ui.extensions.initiallyUseRemainingSpace
@@ -34,6 +34,7 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
         protected const val TitleLabelLeftMargin = 2.0
         protected const val TitleLabelTopBottomMargin = 5.0
 
+        protected const val AddDocumentButtonWidth = ControlBarHeight
         protected const val AddDocumentButtonTopBottomMargin = 1.0
     }
 
@@ -88,8 +89,8 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
                 }
             }
 
-            add(AddButton().apply {
-                minWidth = ControlBarHeight
+            addButton {
+                minWidth = AddDocumentButtonWidth
 
                 action { showCreateNewDocumentWindow() }
 
@@ -98,7 +99,7 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
                     rightAnchor = 0.0
                     bottomAnchor = AddDocumentButtonTopBottomMargin
                 }
-            })
+            }
         }
 
 
