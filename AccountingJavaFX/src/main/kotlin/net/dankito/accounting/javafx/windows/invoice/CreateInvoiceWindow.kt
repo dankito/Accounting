@@ -420,7 +420,7 @@ class CreateInvoiceWindow : Window() {
 
         timeTrackerAccountPresenter.importTimeTrackerDataAsync(settingsViewModel.timeTrackerAccount.value) { trackedTimes ->
             runLater {
-                showTrackedMonths(trackedTimes)
+                trackedTimes?.let { showTrackedMonths(it) }
 
                 updateButton.resetIsUpdating()
             }

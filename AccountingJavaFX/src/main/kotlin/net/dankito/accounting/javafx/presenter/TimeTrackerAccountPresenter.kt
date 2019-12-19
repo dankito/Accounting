@@ -36,7 +36,7 @@ class TimeTrackerAccountPresenter(private val timeTrackerService: ITimeTrackerSe
     }
 
 
-    fun importTimeTrackerDataAsync(account: TimeTrackerAccount, callback: (trackedTimes: TrackedTimes) -> Unit) {
+    fun importTimeTrackerDataAsync(account: TimeTrackerAccount, callback: (TrackedTimes?) -> Unit) {
         val importer: ITimeTrackerImporter = when (account.type) {
             TimeTrackerType.Harvest -> HarvestTimeTrackerImporter()
         }
@@ -44,9 +44,9 @@ class TimeTrackerAccountPresenter(private val timeTrackerService: ITimeTrackerSe
         importer.retrieveTrackedTimesAsync(account) { trackedTimes ->
             trackedTimes?.let {
                 saveTrackedTimes(account, trackedTimes)
-
-                callback(trackedTimes)
             }
+
+            callback(trackedTimes)
         }
     }
 
