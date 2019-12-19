@@ -17,9 +17,11 @@ import net.dankito.accounting.service.filter.IFilterService
 import net.dankito.accounting.service.settings.ISettingsService
 import net.dankito.utils.datetime.asUtilDate
 import net.dankito.utils.events.IEventBus
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.*
 import kotlin.concurrent.schedule
@@ -37,6 +39,11 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
     companion object {
         val CurrencyFormat = NumberFormat.getCurrencyInstance()
+
+        val ShortDateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT)
+        val MediumDateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM)
+
+        private val log = LoggerFactory.getLogger(OverviewPresenter::class.java)
     }
 
 
@@ -476,6 +483,34 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         val lowerCaseFilter = filterTerm.toLowerCase()
 
         return document.description?.toLowerCase()?.contains(lowerCaseFilter) == true
+                || doesDateFilterApply(document.paymentDate, lowerCaseFilter)
+                || doesCurrencyFilterApply(document.netAmount, lowerCaseFilter)
+                || doesCurrencyFilterApply(document.totalAmount, lowerCaseFilter)
+    }
+
+    private fun doesDateFilterApply(date: Date?, lowerCaseFilter: String): Boolean {
+        if (date != null) {
+            try {
+                return ShortDateFormat.format(date).toLowerCase().contains(lowerCaseFilter)
+                        || MediumDateFormat.format(date).toLowerCase().contains(lowerCaseFilter)
+            } catch (e: Exception) {
+                log.warn("Could not test if filter '$lowerCaseFilter' applies to date '$date'", e)
+            }
+        }
+
+        return false
+    }
+
+    private fun doesCurrencyFilterApply(amount: Double, lowerCaseFilter: String): Boolean {
+        try {
+            val amountString = String.format("%.2f", amount)
+
+            return amountString.contains(lowerCaseFilter)
+        } catch (e: Exception) {
+            log.warn("Could not test if amount '$amount' contains filter '$lowerCaseFilter'", e)
+        }
+
+        return false
     }
 
 
