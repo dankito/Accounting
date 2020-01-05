@@ -35,7 +35,7 @@ open class DocumentsTable(
 
 
     private fun initUi() {
-        column(messages["main.window.documents.table.description.column.header"], Document::description) {
+        column(messages["description"], Document::description) {
             this.initiallyUseRemainingSpace(this@DocumentsTable)
         }
 

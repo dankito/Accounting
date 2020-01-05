@@ -40,6 +40,10 @@ class OverviewPresenterTest : DatabaseBasedTest() {
 
         private const val CountTransactionsStartsWith = 3
 
+
+        init {
+            Locale.setDefault(Locale.ENGLISH) // so that month name gets formatted in English
+        }
     }
 
 
@@ -89,7 +93,7 @@ class OverviewPresenterTest : DatabaseBasedTest() {
         // given
         val startsWithFilter = Filter(FilterType.String, FilterOption.StartsWith, true, StartsWithFilterText,
             BankAccountTransaction::class.java, AccountTransactionProperty.Usage.propertyName)
-        val entityFilter = EntityFilter(FilterName, BankAccountTransaction::class.java, listOf(startsWithFilter))
+        val entityFilter = EntityFilter(FilterName, BankAccountTransaction::class.java, 0f, OverviewPresenter.DefaultDescriptionForCreatedDocuments, listOf(startsWithFilter))
         underTest.saveOrUpdate(entityFilter)
 
         val accountTransactions = createTransactions(countTransactonsStartsWith = CountTransactionsStartsWith)
@@ -726,6 +730,106 @@ class OverviewPresenterTest : DatabaseBasedTest() {
     }
 
 
+    @Test
+    fun createDocumentDescription_Sender() {
+
+        // given
+        val usage = "A shitload of money"
+        val sender = "Your employer"
+        val transaction = createTransaction(1.0, usage, sender)
+        val entityFilter = createEntityFilter(OverviewPresenter.SenderOrReceiverFormatDescriptor)
+
+        // when
+        val result = underTest.createDocumentDescription(transaction, entityFilter)
+
+        // then
+        assertThat(result).isEqualTo(sender)
+    }
+
+    @Test
+    fun createDocumentDescription_Usage() {
+
+        // given
+        val usage = "A shitload of money"
+        val sender = "Your employer"
+        val transaction = createTransaction(1.0, usage, sender)
+        val entityFilter = createEntityFilter(OverviewPresenter.UsageFormatDescriptor)
+
+        // when
+        val result = underTest.createDocumentDescription(transaction, entityFilter)
+
+        // then
+        assertThat(result).isEqualTo(usage)
+    }
+
+    @Test
+    fun createDocumentDescription_SenderAndUsage() {
+
+        // given
+        val usage = "A shitload of money"
+        val sender = "Your employer"
+        val transaction = createTransaction(1.0, usage, sender)
+        val entityFilter = createEntityFilter(OverviewPresenter.SenderOrReceiverFormatDescriptor + " - " + OverviewPresenter.UsageFormatDescriptor)
+
+        // when
+        val result = underTest.createDocumentDescription(transaction, entityFilter)
+
+        // then
+        assertThat(result).isEqualTo(sender + " - " + usage)
+    }
+
+    @Test
+    fun createDocumentDescription_ShortMonthAndShortYear() {
+
+        // given
+        val year = 2020
+        val month = 1
+        val valueDate = LocalDate.of(year, month, 31).asUtilDate()
+        val transaction = createTransaction(1.0, "", "", valueDate)
+        val entityFilter = createEntityFilter("Pay " + OverviewPresenter.MonthSingleDigitFormatDescriptor + " " + OverviewPresenter.YearTwoDigitFormatDescriptor)
+
+        // when
+        val result = underTest.createDocumentDescription(transaction, entityFilter)
+
+        // then
+        assertThat(result).isEqualTo("Pay " + month + " 20")
+    }
+
+    @Test
+    fun createDocumentDescription_LongMonthAndLongYear() {
+
+        // given
+        val year = 2020
+        val month = 1
+        val valueDate = LocalDate.of(year, month, 31).asUtilDate()
+        val transaction = createTransaction(1.0, "", "", valueDate)
+        val entityFilter = createEntityFilter("Pay " + OverviewPresenter.MonthTwoDigitFormatDescriptor + " " + OverviewPresenter.YearFourDigitFormatDescriptor)
+
+        // when
+        val result = underTest.createDocumentDescription(transaction, entityFilter)
+
+        // then
+        assertThat(result).isEqualTo("Pay 0" + month + " " + year)
+    }
+
+    @Test
+    fun createDocumentDescription_MonthNameAndLongYear() {
+
+        // given
+        val year = 2020
+        val month = 1
+        val valueDate = LocalDate.of(year, month, 31).asUtilDate()
+        val transaction = createTransaction(1.0, "", "", valueDate)
+        val entityFilter = createEntityFilter("Pay " + OverviewPresenter.MonthNameFormatDescriptor + " " + OverviewPresenter.YearFourDigitFormatDescriptor)
+
+        // when
+        val result = underTest.createDocumentDescription(transaction, entityFilter)
+
+        // then
+        assertThat(result).isEqualTo("Pay January " + year)
+    }
+
+
     private fun createTransactions(countTransactonsStartsWith: Int = CountTransactionsStartsWith): List<BankAccountTransaction> {
         val collectionToFilter = mutableListOf<BankAccountTransaction>()
 
@@ -740,11 +844,15 @@ class OverviewPresenterTest : DatabaseBasedTest() {
         return collectionToFilter
     }
 
-    private fun createTransaction(amount: Double, usage: String, senderOrReceiverName: String = ""): BankAccountTransaction {
+    private fun createTransaction(amount: Double, usage: String, senderOrReceiverName: String = "", valueDate: Date = Date()): BankAccountTransaction {
         return BankAccountTransaction(
             BigDecimal.valueOf(amount), usage, true, senderOrReceiverName,
-            "", "", Date(), "", "", BigDecimal.ZERO, BankAccount("", "", "")
+            "", "", valueDate, "", "", BigDecimal.ZERO, BankAccount("", "", "")
         )
+    }
+
+    private fun createEntityFilter(descriptionForCreatedDocuments: String): EntityFilter {
+        return EntityFilter("", BankAccountTransaction::class.java, 0f, descriptionForCreatedDocuments, listOf())
     }
 
 }

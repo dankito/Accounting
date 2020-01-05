@@ -88,6 +88,8 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
     private val valueAddedTaxRateForCreatedDocumentsComboBox: ComboBox<Number>
 
+    private val descriptionForCreatedDocumentsTextField = TextField()
+
     private val previewCreatedDocumentsForEntityFilter = FXCollections.observableArrayList<Document>()
 
     private val isSelectedEntityFilterPersisted = SimpleBooleanProperty(false)
@@ -347,6 +349,21 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
                                 selectionModel.selectedItemProperty().addListener { _, _, _ -> updateCreatedDocumentsPreview() }
                             })
                         }
+
+                        field(messages["description"]) {
+                            add(descriptionForCreatedDocumentsTextField.apply {
+                                // don't know why but changed text doesn't get applied immediately to selectedEntityFilter.descriptionForCreatedDocuments so i have to use runLater { }
+                                textProperty().addListener { _, _, _ -> runLater { updateCreatedDocumentsPreview() } }
+                            })
+                        }
+
+                        field("") {
+                            label(messages["edit.automatic.account.transaction.import.window.format.specifier.explanation"]) {
+                                prefHeight = 80.0
+                                isWrapText = true
+                                tooltip(text)
+                            }
+                        }
                     }
                 }
 
@@ -434,6 +451,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
         entityFilter?.let { // TODO: necessary?
             entityFilterNameTextField.textProperty().unbindBidirectional(selectedEntityFilter.name)
             valueAddedTaxRateForCreatedDocumentsComboBox.valueProperty().unbindBidirectional(selectedEntityFilter.valueAddedTaxRateForCreatedDocuments)
+            descriptionForCreatedDocumentsTextField.textProperty().unbindBidirectional(selectedEntityFilter.descriptionForCreatedDocuments)
 
             selectedEntityFilter = entityFilter
 
@@ -446,6 +464,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
             entityFilterNameTextField.textProperty().bindBidirectional(selectedEntityFilter.name)
             valueAddedTaxRateForCreatedDocumentsComboBox.valueProperty().bindBidirectional(entityFilter.valueAddedTaxRateForCreatedDocuments)
+            descriptionForCreatedDocumentsTextField.textProperty().bindBidirectional(entityFilter.descriptionForCreatedDocuments)
 
             updateFilteredTransactionsAndCreatedDocumentsPreview()
         }
@@ -461,7 +480,8 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     }
 
     private fun createNewEntityFilter(): EntityFilter {
-        return EntityFilter(defaultEntityFilterName, BankAccountTransaction::class.java, overviewPresenter.getDefaultVatRateForUser(), listOf(createDefaultFilter()))
+        return EntityFilter(defaultEntityFilterName, BankAccountTransaction::class.java, overviewPresenter.getDefaultVatRateForUser(),
+            OverviewPresenter.DefaultDescriptionForCreatedDocuments, listOf(createDefaultFilter()))
     }
 
     private fun equalsCurrentOrDefaultEntityFilterName(oldValue: String?): Boolean {
@@ -526,7 +546,8 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
 
     private fun updateCreatedDocumentsPreview() {
-        val entityFilter = EntityFilter("", "", selectedEntityFilter.valueAddedTaxRateForCreatedDocuments.value, listOf())
+        val entityFilter = EntityFilter("", "", selectedEntityFilter.valueAddedTaxRateForCreatedDocuments.value,
+            selectedEntityFilter.descriptionForCreatedDocuments.value, listOf())
 
         previewCreatedDocumentsForEntityFilter.setAll(
             filteredTransactions.map { overviewPresenter.mapTransactionToDocument(it, entityFilter) }
@@ -548,6 +569,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
         entityFilter.name = entityFilterViewModel.name.value
         entityFilter.valueAddedTaxRateForCreatedDocuments = entityFilterViewModel.valueAddedTaxRateForCreatedDocuments.value
+        entityFilter.descriptionForCreatedDocuments = entityFilterViewModel.descriptionForCreatedDocuments.value
 
         if (entityFilterViewModel.didFiltersChange) {
             entityFilter.updateFilterDefinitions(mapFiltersFromViewModel())
@@ -561,7 +583,8 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
     private fun runFilterEachTimeAfterReceivingTransactions() { // TODO: also run filter now
         overviewPresenter.saveOrUpdate(EntityFilter(selectedEntityFilter.name.value, BankAccountTransaction::class.java,
-            selectedEntityFilter.valueAddedTaxRateForCreatedDocuments.value, mapFiltersFromViewModel()))
+            selectedEntityFilter.valueAddedTaxRateForCreatedDocuments.value,
+            selectedEntityFilter.descriptionForCreatedDocuments.value, mapFiltersFromViewModel()))
 
         close()
     }

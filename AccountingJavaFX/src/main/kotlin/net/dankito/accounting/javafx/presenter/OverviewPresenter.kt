@@ -43,6 +43,25 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         val ShortDateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT)
         val MediumDateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM)
 
+        const val SenderOrReceiverFormatDescriptor = "%sender"
+        const val UsageFormatDescriptor = "%usage"
+
+        const val MonthSingleDigitFormatDescriptor = "%m"
+        private val MonthSingleDigitDateFormat = SimpleDateFormat(MonthSingleDigitFormatDescriptor.replace("%", "").toUpperCase())
+        const val MonthTwoDigitFormatDescriptor = "%mm"
+        private val MonthTwoDigitDateFormat = SimpleDateFormat(MonthTwoDigitFormatDescriptor.replace("%", "").toUpperCase())
+        const val MonthAbbreviatedNameFormatDescriptor = "%mmm"
+        private val MonthAbbreviatedNameDateFormat = SimpleDateFormat(MonthAbbreviatedNameFormatDescriptor.replace("%", "").toUpperCase())
+        const val MonthNameFormatDescriptor = "%mmmm"
+        private val MonthNameDateFormat = SimpleDateFormat(MonthNameFormatDescriptor.replace("%", "").toUpperCase())
+
+        const val YearTwoDigitFormatDescriptor = "%yy"
+        private val YearTwoDigitDateFormat = SimpleDateFormat(YearTwoDigitFormatDescriptor.replace("%", ""))
+        const val YearFourDigitFormatDescriptor = "%yyyy"
+        private val YearFourDigitDateFormat = SimpleDateFormat(YearFourDigitFormatDescriptor.replace("%", ""))
+
+        const val DefaultDescriptionForCreatedDocuments = "$SenderOrReceiverFormatDescriptor - $UsageFormatDescriptor"
+
         private val log = LoggerFactory.getLogger(OverviewPresenter::class.java)
     }
 
@@ -235,11 +254,28 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         val document = Document(type, Math.abs(transaction.amount.toDouble()), valueAddedTaxRate)
 
         document.paymentDate = transaction.valueDate
-        document.description = transaction.senderOrReceiverName + " - " + transaction.usage
+        document.description = createDocumentDescription(transaction, automaticallyCreatedFromFilter)
 
         updateVat(document)
 
         return document
+    }
+
+    // visible for testing
+    internal fun createDocumentDescription(transaction: BankAccountTransaction, automaticallyCreatedFromFilter: EntityFilter? = null): String {
+        automaticallyCreatedFromFilter?.descriptionForCreatedDocuments?.let { descriptionFormat ->
+            return descriptionFormat
+                .replace(SenderOrReceiverFormatDescriptor, transaction.senderOrReceiverName)
+                .replace(UsageFormatDescriptor, transaction.usage)
+                .replace(MonthNameFormatDescriptor, MonthNameDateFormat.format(transaction.valueDate))
+                .replace(MonthAbbreviatedNameFormatDescriptor, MonthAbbreviatedNameDateFormat.format(transaction.valueDate))
+                .replace(MonthTwoDigitFormatDescriptor, MonthTwoDigitDateFormat.format(transaction.valueDate))
+                .replace(MonthSingleDigitFormatDescriptor, MonthSingleDigitDateFormat.format(transaction.valueDate))
+                .replace(YearFourDigitFormatDescriptor, YearFourDigitDateFormat.format(transaction.valueDate))
+                .replace(YearTwoDigitFormatDescriptor, YearTwoDigitDateFormat.format(transaction.valueDate))
+        }
+
+        return transaction.senderOrReceiverName + " - " + transaction.usage
     }
 
 

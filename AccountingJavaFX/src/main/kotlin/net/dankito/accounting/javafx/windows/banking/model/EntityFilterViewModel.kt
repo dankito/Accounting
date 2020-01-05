@@ -3,6 +3,7 @@ package net.dankito.accounting.javafx.windows.banking.model
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleFloatProperty
 import javafx.beans.property.SimpleListProperty
+import javafx.beans.property.SimpleStringProperty
 import net.dankito.accounting.data.model.filter.AccountTransactionFilter
 import net.dankito.accounting.data.model.filter.AccountTransactionProperty
 import net.dankito.accounting.data.model.filter.EntityFilter
@@ -19,6 +20,8 @@ class EntityFilterViewModel(entityFilter: EntityFilter? = null) : ItemViewModel<
 
     val valueAddedTaxRateForCreatedDocuments = bind(EntityFilter::valueAddedTaxRateForCreatedDocuments) as SimpleFloatProperty
 
+    val descriptionForCreatedDocuments = bind(EntityFilter::descriptionForCreatedDocuments) as SimpleStringProperty
+
     val filters = SimpleListProperty<FilterViewModel>(entityFilter?.filterDefinitions?.map { FilterViewModel(
         AccountTransactionFilter(it.type, it.option, it.ignoreCase, it.filterText, AccountTransactionProperty.fromPropertyName(it.propertyToFilter))
     ) }?.observable())
@@ -32,12 +35,15 @@ class EntityFilterViewModel(entityFilter: EntityFilter? = null) : ItemViewModel<
 
         valueAddedTaxRateForCreatedDocuments.addListener { _, _, _ -> reevaluateHasUnsavedChanges() }
 
+        descriptionForCreatedDocuments.addListener { _, _, _ -> reevaluateHasUnsavedChanges() }
+
         filters.addListener { _, _, _ -> reevaluateHasUnsavedChanges() }
     }
 
 
     fun reevaluateHasUnsavedChanges() {
-        hasUnsavedChanges.value = name.isDirty || valueAddedTaxRateForCreatedDocuments.isDirty || didFiltersChange
+        hasUnsavedChanges.value = name.isDirty || valueAddedTaxRateForCreatedDocuments.isDirty ||
+                descriptionForCreatedDocuments.isDirty || didFiltersChange
     }
 
 }
