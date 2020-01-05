@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.geometry.Pos
 import javafx.scene.control.ListView
+import javafx.scene.control.SplitPane
 import javafx.scene.control.TextField
 import javafx.scene.layout.Priority
 import javafx.stage.Stage
@@ -116,6 +117,8 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
             setDividerPositions(FilterListViewWidth / this@vbox.prefWidth)
 
             vbox {
+                SplitPane.setResizableWithParent(this, false)
+
                 anchorpane {
                     label(messages["edit.automtic.account.transaction.import.window.filter.label"]) {
                         anchorpaneConstraints {
