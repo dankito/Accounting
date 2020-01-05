@@ -50,16 +50,18 @@ class BankAccountTransactionsTable(private val presenter: BankAccountsPresenter,
             }
         }
 
-        val usageColumn = TableColumn<BankAccountTransaction, BankAccountTransaction>(messages["main.window.tab.bank.accounts.column.header.usage"])
-        usageColumn.cellFragment(DefaultScope, UsageCellFragment::class)
-        usageColumn.cellValueFactory = Callback { object : ObjectBinding<BankAccountTransaction>() {
-            override fun computeValue(): BankAccountTransaction {
-                return it.value
-            }
+        columns.add(TableColumn<BankAccountTransaction, BankAccountTransaction>(messages["main.window.tab.bank.accounts.column.header.usage"]).apply {
+            cellFragment(DefaultScope, UsageCellFragment::class)
 
-        } }
-        usageColumn.weightedWidth(4.0)
-        columns.add(usageColumn)
+            cellValueFactory = Callback { object : ObjectBinding<BankAccountTransaction>() {
+                override fun computeValue(): BankAccountTransaction {
+                    return it.value
+                }
+
+            } }
+
+            weightedWidth(4.0)
+        })
 
         column(messages["main.window.tab.bank.accounts.column.header.amount"], BankAccountTransaction::amount) {
             prefWidth = 85.0
@@ -73,11 +75,6 @@ class BankAccountTransactionsTable(private val presenter: BankAccountsPresenter,
                     textFill = if (it.toLong() < 0)  Color.RED else Color.GREEN
                 }
             }
-
-
-            columnResizePolicy = SmartResize.POLICY
-
-            vgrow = Priority.ALWAYS
         }
 
 
@@ -97,6 +94,11 @@ class BankAccountTransactionsTable(private val presenter: BankAccountsPresenter,
             }
 
         }}
+
+
+        columnResizePolicy = SmartResize.POLICY
+
+        vgrow = Priority.ALWAYS
 
 
         selectionModel.selectionMode = SelectionMode.MULTIPLE
