@@ -50,6 +50,8 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     protected lateinit var eventBus: IEventBus
 
 
+    private val defaultEntityFilterName = messages["new"]
+
     private val entityFilters = FXCollections.observableArrayList<EntityFilterViewModel>()
 
     private var selectedEntityFilter = EntityFilterViewModel(createNewEntityFilter()) // initialize with a dummy value (will be discarded soon)
@@ -230,7 +232,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
                                             filterSettingChanged()
 
-                                            if (selectedEntityFilter.name.value == oldValue || selectedEntityFilter.name.value == messages["new"]) {
+                                            if (equalsCurrentOrDefaultEntityFilterName(oldValue)) {
                                                 selectedEntityFilter.name.value = newValue
                                             }
                                         }
@@ -414,8 +416,13 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     }
 
     private fun createNewEntityFilter(): EntityFilter {
-        return EntityFilter(messages["new"], BankAccountTransaction::class.java, listOf(createDefaultFilter()))
+        return EntityFilter(defaultEntityFilterName, BankAccountTransaction::class.java, listOf(createDefaultFilter()))
     }
+
+    private fun equalsCurrentOrDefaultEntityFilterName(oldValue: String?): Boolean {
+        return selectedEntityFilter.name.value == oldValue || selectedEntityFilter.name.value == defaultEntityFilterName
+    }
+
 
     private fun addFilter() {
         val newFilter = FilterViewModel(mapToAccountTransactionFilter(createDefaultFilter()))
