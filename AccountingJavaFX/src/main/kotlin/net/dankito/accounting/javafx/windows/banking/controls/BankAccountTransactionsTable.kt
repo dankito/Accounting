@@ -41,7 +41,7 @@ class BankAccountTransactionsTable(private val presenter: BankAccountsPresenter,
 
     private fun initUi() {
         column(messages["main.window.tab.bank.accounts.column.header.value.date"], BankAccountTransaction::valueDate) {
-            prefWidth = 150.0
+            prefWidth = 115.0
 
             cellFormat {
                 text = ValueDateFormat.format(it)
@@ -62,7 +62,7 @@ class BankAccountTransactionsTable(private val presenter: BankAccountsPresenter,
         columns.add(usageColumn)
 
         column(messages["main.window.tab.bank.accounts.column.header.amount"], BankAccountTransaction::amount) {
-            prefWidth = 100.0
+            prefWidth = 85.0
 
             cellFormat {
                 text = overviewPresenter.getCurrencyString(it)

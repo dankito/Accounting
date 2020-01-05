@@ -111,7 +111,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     override val root = vbox {
 
         prefHeight = 550.0
-        prefWidth = 850.0
+        prefWidth = 700.0
 
         splitpane {
             setDividerPositions(FilterListViewWidth / this@vbox.prefWidth)
