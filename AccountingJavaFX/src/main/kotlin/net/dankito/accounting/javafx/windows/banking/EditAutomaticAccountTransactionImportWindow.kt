@@ -202,70 +202,76 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
                     useMaxWidth = true
 
                     cellFormat {
-                        graphic = borderpane {
+                        graphic = hbox {
                             prefHeight = 36.0
 
-                            left {
-                                hbox {
-                                    alignment = Pos.CENTER_LEFT
+                            alignment = Pos.CENTER_LEFT
 
-                                    combobox(it.entityProperty, entityProperties) {
-                                        cellFormat {
-                                            text = messages["account.transaction.property." + it.name]
-                                        }
+                            removeButton(fontSize = 14.0) {
+                                val buttonSize = 26.0
+                                minHeight = buttonSize
+                                maxHeight = buttonSize
+                                minWidth = buttonSize
+                                maxWidth = buttonSize
 
-                                        selectionModel.selectedItemProperty().addListener { _, _, _ -> filterSettingChanged() }
-                                    }
+                                action {
+                                    selectedEntityFilter.filters.remove(this@cellFormat.item)
 
-                                    combobox(it.filterOption, filterOptions) {
-                                        cellFormat {
-                                            text = messages["filter.option." + it.name]
-                                        }
+                                    updateFilteredTransactions()
+                                }
 
-                                        selectionModel.selectedItemProperty().addListener { _, _, _ -> filterSettingChanged() }
+                                hboxConstraints {
+                                    marginRight = 12.0
+                                }
+                            }
 
-                                        hboxConstraints {
-                                            marginLeft = 6.0
-                                            marginRight = 6.0
-                                        }
-                                    }
+                            combobox(it.entityProperty, entityProperties) {
+                                prefWidth = 140.0
 
-                                    textfield(it.filterText) {
-                                        textProperty().addListener { _, oldValue, newValue ->
+                                cellFormat {
+                                    text = messages["account.transaction.property." + it.name]
+                                }
 
-                                            filterSettingChanged()
+                                selectionModel.selectedItemProperty().addListener { _, _, _ -> filterSettingChanged() }
+                            }
 
-                                            if (equalsCurrentOrDefaultEntityFilterName(oldValue)) {
-                                                selectedEntityFilter.name.value = newValue
-                                            }
-                                        }
-                                    }
+                            combobox(it.filterOption, filterOptions) {
+                                prefWidth = 130.0
 
-                                    checkbox(messages["ignore.case"], it.ignoreCase) {
-                                        isVisible = it.filterType.value == FilterType.String
+                                cellFormat {
+                                    text = messages["filter.option." + it.name]
+                                }
 
-                                        ensureOnlyUsesSpaceIfVisible()
+                                selectionModel.selectedItemProperty().addListener { _, _, _ -> filterSettingChanged() }
 
-                                        selectedProperty().addListener { _, _, _ -> filterSettingChanged() }
+                                hboxConstraints {
+                                    marginLeft = 6.0
+                                    marginRight = 6.0
+                                }
+                            }
 
-                                        hboxConstraints {
-                                            marginLeft = 6.0
-                                        }
+                            textfield(it.filterText) {
+                                prefWidth = 120.0
+
+                                textProperty().addListener { _, oldValue, newValue ->
+
+                                    filterSettingChanged()
+
+                                    if (equalsCurrentOrDefaultEntityFilterName(oldValue)) {
+                                        selectedEntityFilter.name.value = newValue
                                     }
                                 }
                             }
 
-                            right {
-                                removeButton {
-                                    action {
-                                        selectedEntityFilter.filters.remove(this@cellFormat.item)
+                            checkbox(messages["ignore.case"], it.ignoreCase) {
+                                isVisible = it.filterType.value == FilterType.String
 
-                                        updateFilteredTransactions()
-                                    }
+                                ensureOnlyUsesSpaceIfVisible()
 
-                                    borderpaneConstraints {
-                                        marginLeft = 12.0
-                                    }
+                                selectedProperty().addListener { _, _, _ -> filterSettingChanged() }
+
+                                hboxConstraints {
+                                    marginLeft = 6.0
                                 }
                             }
                         }
