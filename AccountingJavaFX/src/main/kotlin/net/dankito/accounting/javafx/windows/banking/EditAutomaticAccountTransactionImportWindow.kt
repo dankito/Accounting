@@ -4,7 +4,6 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.geometry.Pos
-import javafx.scene.control.ComboBox
 import javafx.scene.control.ListView
 import javafx.scene.control.SplitPane
 import javafx.scene.control.TextField
@@ -14,6 +13,7 @@ import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.data.model.event.BankAccountTransactionsUpdatedEvent
 import net.dankito.accounting.data.model.filter.*
+import net.dankito.accounting.javafx.controls.VatRateComboBox
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.BankAccountsPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
@@ -29,7 +29,6 @@ import net.dankito.utils.javafx.ui.controls.addButton
 import net.dankito.utils.javafx.ui.controls.removeButton
 import net.dankito.utils.javafx.ui.dialogs.Window
 import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
-import net.dankito.utils.javafx.util.converter.ZeroTo100PercentageStringConverter
 import tornadofx.*
 import javax.inject.Inject
 
@@ -86,7 +85,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
     private val countFilteredTransactions = SimpleStringProperty()
 
-    private val valueAddedTaxRateForCreatedDocumentsComboBox: ComboBox<Number>
+    private val valueAddedTaxRateForCreatedDocumentsComboBox: VatRateComboBox
 
     private val descriptionForCreatedDocumentsTextField = TextField()
 
@@ -103,7 +102,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     init {
         AppComponent.component.inject(this)
 
-        valueAddedTaxRateForCreatedDocumentsComboBox = ComboBox<Number>(overviewPresenter.getVatRatesForUser().observable())
+        valueAddedTaxRateForCreatedDocumentsComboBox = VatRateComboBox(null, overviewPresenter.getVatRatesForUser().observable())
 
         entityFilters.addAll(overviewPresenter.getAccountTransactionsEntityFilters().map { EntityFilterViewModel(it) })
         addNewEntityFilter()
@@ -342,10 +341,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
                 form {
                     fieldset(messages["edit.automatic.account.transaction.import.window.created.documents.label"]) {
                         field(messages["value.added.tax.rate"]) {
-                            // TODO: create VatRateComboBox
                             add(valueAddedTaxRateForCreatedDocumentsComboBox.apply {
-                                converter = ZeroTo100PercentageStringConverter()
-
                                 selectionModel.selectedItemProperty().addListener { _, _, _ -> updateCreatedDocumentsPreview() }
                             })
                         }

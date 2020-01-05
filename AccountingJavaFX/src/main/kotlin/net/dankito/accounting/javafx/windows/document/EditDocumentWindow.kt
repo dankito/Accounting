@@ -9,12 +9,12 @@ import javafx.scene.control.Label
 import javafx.scene.layout.Priority
 import javafx.scene.text.TextAlignment
 import net.dankito.accounting.data.model.Document
+import net.dankito.accounting.javafx.controls.vatRateComboBox
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.utils.datetime.asLocalDate
 import net.dankito.utils.datetime.asUtilDate
 import net.dankito.utils.javafx.ui.controls.doubleTextfield
 import net.dankito.utils.javafx.ui.dialogs.Window
-import net.dankito.utils.javafx.util.converter.ZeroTo100PercentageStringConverter
 import tornadofx.*
 import java.time.LocalDate
 
@@ -84,9 +84,7 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
 
             label("value.added.tax.rate")
 
-            combobox(vatRate, presenter.getVatRatesForUser()) {
-                converter = ZeroTo100PercentageStringConverter()
-
+            vatRateComboBox(vatRate, presenter.getVatRatesForUser()) {
                 anchorpaneConstraints {
                     topAnchor = 0.0
                     rightAnchor = 0.0
