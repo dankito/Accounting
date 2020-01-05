@@ -14,9 +14,11 @@ import java.util.*
 class FilterServiceTest : DatabaseBasedTest() {
 
     companion object {
+        private const val FilterName = "Test filter"
+
         private const val StartsWithFilterText = "Racketeering Ltd. telefon charges"
 
-        private const val CountTransactonsStartsWith = 3
+        private const val CountTransactionsStartsWith = 3
     }
 
 
@@ -36,11 +38,11 @@ class FilterServiceTest : DatabaseBasedTest() {
         // given
         val startsWithFilter = Filter(FilterType.String, FilterOption.StartsWith, true, StartsWithFilterText,
             BankAccountTransaction::class.java, AccountTransactionProperty.Usage.propertyName)
-        val entityFilter = EntityFilter(BankAccountTransaction::class.java, listOf(startsWithFilter))
+        val entityFilter = EntityFilter(FilterName, BankAccountTransaction::class.java, 0f, listOf(startsWithFilter))
         underTest.saveOrUpdate(entityFilter)
 
-        val collectionToFilter = createTransactions(countTransactonsStartsWith = CountTransactonsStartsWith)
-        assertThat(collectionToFilter.size).isGreaterThan(CountTransactonsStartsWith)
+        val collectionToFilter = createTransactions(CountTransactionsStartsWith)
+        assertThat(collectionToFilter.size).isGreaterThan(CountTransactionsStartsWith)
 
 
         // when
@@ -48,15 +50,15 @@ class FilterServiceTest : DatabaseBasedTest() {
 
 
         // then
-        assertThat(result).hasSize(CountTransactonsStartsWith)
+        assertThat(result).hasSize(CountTransactionsStartsWith)
 
     }
 
 
-    private fun createTransactions(countTransactonsStartsWith: Int = CountTransactonsStartsWith): List<BankAccountTransaction> {
+    private fun createTransactions(countTransactionsStartsWith: Int = CountTransactionsStartsWith): List<BankAccountTransaction> {
         val collectionToFilter = mutableListOf<BankAccountTransaction>()
 
-        for (i in 0 until countTransactonsStartsWith) {
+        for (i in 0 until countTransactionsStartsWith) {
             collectionToFilter.add(createTransaction(35.0, StartsWithFilterText + " for month $i"))
         }
 

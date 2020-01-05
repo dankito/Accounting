@@ -169,7 +169,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         entityFilters.forEach { entityFilter ->
             val itemsOnWithFilterApplies = filterService.filterCollection(entityFilter, collectionToFilter)
 
-            // TODO: create ICreateDocumentFromEntity interface and a factory to get actual implementation, e. g. for BankAccountTransation, Email, ...
+            // TODO: create ICreateDocumentFromEntity interface and a factory to get actual implementation, e. g. for BankAccountTransaction, Email, ...
             (itemsOnWithFilterApplies as? Collection<BankAccountTransaction>)?.let {
                 addToExpendituresAndRevenues(itemsOnWithFilterApplies, entityFilter)
             }
@@ -189,9 +189,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     fun addToExpendituresAndRevenues(transactions: Collection<BankAccountTransaction>,
                                      automaticallyCreatedFromFilter: EntityFilter? = null) {
 
-        val vatRate = getDefaultVatRateForUser()
-
-        val documents = createDocumentsForTransactions(transactions, vatRate, automaticallyCreatedFromFilter)
+        val documents = createDocumentsForTransactions(transactions, automaticallyCreatedFromFilter)
 
         documents.forEach {
             saveOrUpdate(it)
@@ -199,39 +197,47 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     }
 
     fun adjustBeforeAddingToExpendituresAndRevenues(transactions: Collection<BankAccountTransaction>) {
-        val vatRate = getDefaultVatRateForUser()
-
-        val documents = createDocumentsForTransactions(transactions, vatRate)
+        val documents = createDocumentsForTransactions(transactions)
 
         documents.forEach {
             showEditDocumentWindow(it)
         }
     }
 
-    private fun createDocumentsForTransactions(transactions: Collection<BankAccountTransaction>, valueAddedTaxRate: Float,
+    private fun createDocumentsForTransactions(transactions: Collection<BankAccountTransaction>,
                                                automaticallyCreatedFromFilter: EntityFilter? = null): List<Document> {
 
         // don't create a second document from the same account transaction
         val transactionsWithNotYetCreatedDocuments = transactions.filter { it.createdDocument == null }
 
         return transactionsWithNotYetCreatedDocuments.map { transaction ->
-            mapTransactionToDocument(transaction, valueAddedTaxRate, automaticallyCreatedFromFilter)
+            mapTransactionToDocumentAndSetReferencesOnIt(transaction, automaticallyCreatedFromFilter)
         }
     }
 
-    private fun mapTransactionToDocument(transaction: BankAccountTransaction, valueAddedTaxRate: Float,
-        automaticallyCreatedFromFilter: EntityFilter? = null): Document {
+    private fun mapTransactionToDocumentAndSetReferencesOnIt(transaction: BankAccountTransaction, automaticallyCreatedFromFilter: EntityFilter? = null): Document {
+        val document = mapTransactionToDocument(transaction, automaticallyCreatedFromFilter)
+
+        transaction.createdDocument = document
+        document.createdFromAccountTransaction = transaction
+
+        document.automaticallyCreatedFromFilter = automaticallyCreatedFromFilter
+
+        return document
+    }
+
+    fun mapTransactionToDocument(transaction: BankAccountTransaction, automaticallyCreatedFromFilter: EntityFilter? = null): Document {
 
         val type = if (transaction.isDebit) DocumentType.Expenditure else DocumentType.Revenue
+
+        val valueAddedTaxRate = automaticallyCreatedFromFilter?.valueAddedTaxRateForCreatedDocuments ?: getDefaultVatRateForUser()
 
         val document = Document(type, Math.abs(transaction.amount.toDouble()), valueAddedTaxRate)
 
         document.paymentDate = transaction.valueDate
         document.description = transaction.senderOrReceiverName + " - " + transaction.usage
 
-        transaction.createdDocument = document
-        document.createdFromAccountTransaction = transaction
-        document.automaticallyCreatedFromFilter = automaticallyCreatedFromFilter
+        updateVat(document)
 
         return document
     }

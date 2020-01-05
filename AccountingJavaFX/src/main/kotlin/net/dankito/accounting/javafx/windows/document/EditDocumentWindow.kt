@@ -82,7 +82,7 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
 
             vboxConstraints { marginBottom = FieldVerticalSpace }
 
-            label("edit.document.window.vat.rate.label")
+            label("value.added.tax.rate")
 
             combobox(vatRate, presenter.getVatRatesForUser()) {
                 converter = ZeroTo100PercentageStringConverter()

@@ -4,26 +4,32 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.geometry.Pos
+import javafx.scene.control.ComboBox
 import javafx.scene.control.ListView
 import javafx.scene.control.SplitPane
 import javafx.scene.control.TextField
 import javafx.scene.layout.Priority
 import javafx.stage.Stage
+import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.data.model.event.BankAccountTransactionsUpdatedEvent
 import net.dankito.accounting.data.model.filter.*
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.BankAccountsPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
+import net.dankito.accounting.javafx.service.StyleService
 import net.dankito.accounting.javafx.windows.banking.controls.BankAccountTransactionsTable
 import net.dankito.accounting.javafx.windows.banking.model.EntityFilterViewModel
 import net.dankito.accounting.javafx.windows.banking.model.FilterViewModel
+import net.dankito.accounting.javafx.windows.mainwindow.controls.DocumentsTable
+import net.dankito.utils.IThreadPool
 import net.dankito.utils.events.IEventBus
 import net.dankito.utils.events.ISubscribedEvent
 import net.dankito.utils.javafx.ui.controls.addButton
 import net.dankito.utils.javafx.ui.controls.removeButton
 import net.dankito.utils.javafx.ui.dialogs.Window
 import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
+import net.dankito.utils.javafx.util.converter.ZeroTo100PercentageStringConverter
 import tornadofx.*
 import javax.inject.Inject
 
@@ -48,14 +54,20 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     protected lateinit var overviewPresenter: OverviewPresenter
 
     @Inject
+    protected lateinit var styleService: StyleService
+
+    @Inject
     protected lateinit var eventBus: IEventBus
+
+    @Inject
+    protected lateinit var threadPool: IThreadPool
 
 
     private val defaultEntityFilterName = messages["new"]
 
     private val entityFilters = FXCollections.observableArrayList<EntityFilterViewModel>()
 
-    private var selectedEntityFilter = EntityFilterViewModel(createNewEntityFilter()) // initialize with a dummy value (will be discarded soon)
+    private var selectedEntityFilter = EntityFilterViewModel()
 
     private val entityProperties = FXCollections.observableList(AccountTransactionProperty.values().toList())
 
@@ -74,6 +86,10 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
     private val countFilteredTransactions = SimpleStringProperty()
 
+    private val valueAddedTaxRateForCreatedDocumentsComboBox: ComboBox<Number>
+
+    private val previewCreatedDocumentsForEntityFilter = FXCollections.observableArrayList<Document>()
+
     private val isSelectedEntityFilterPersisted = SimpleBooleanProperty(false)
 
     private val hasSelectedEntityFilterUnsavedChanges = SimpleBooleanProperty(false)
@@ -84,6 +100,8 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
     init {
         AppComponent.component.inject(this)
+
+        valueAddedTaxRateForCreatedDocumentsComboBox = ComboBox<Number>(overviewPresenter.getVatRatesForUser().observable())
 
         entityFilters.addAll(overviewPresenter.getAccountTransactionsEntityFilters().map { EntityFilterViewModel(it) })
         addNewEntityFilter()
@@ -111,16 +129,17 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     override val root = vbox {
 
         prefHeight = 550.0
-        prefWidth = 700.0
+        prefWidth = 1300.0
 
         splitpane {
-            setDividerPositions(FilterListViewWidth / this@vbox.prefWidth)
+            setDividerPosition(0, FilterListViewWidth / this@vbox.prefWidth)
+            setDividerPosition(1, (FilterListViewWidth + 580.0) / this@vbox.prefWidth)
 
             vbox {
                 SplitPane.setResizableWithParent(this, false)
 
                 anchorpane {
-                    label(messages["edit.automtic.account.transaction.import.window.filter.label"]) {
+                    label(messages["edit.automatic.account.transaction.import.window.filter.label"]) {
                         anchorpaneConstraints {
                             topAnchor = 0.0
                             leftAnchor = 0.0
@@ -147,7 +166,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
                     isEditable = true
 
                     cellFormat {
-                        text = it.name.value + (if (it.item?.isPersisted() == false || hasUnsavedChanges(it)) "*" else "")
+                        text = it.name.value + (if (it.item?.isPersisted() == false || it.hasUnsavedChanges.value) "*" else "")
                     }
 
                     vboxConstraints {
@@ -161,9 +180,9 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
                     hbox {
                         alignment = Pos.CENTER_LEFT
 
-                        label(messages["edit.automtic.account.transaction.import.window.define.filter"])
+                        label(messages["edit.automatic.account.transaction.import.window.define.filter"])
 
-                        label(messages["edit.automtic.account.transaction.import.window.entity.filter.name.label"]) {
+                        label(messages["edit.automatic.account.transaction.import.window.entity.filter.name.label"]) {
 
                             hboxConstraints {
                                 marginLeft = 24.0
@@ -217,7 +236,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
                                 action {
                                     selectedEntityFilter.filters.remove(this@cellFormat.item)
 
-                                    updateFilteredTransactions()
+                                    updateFilteredTransactionsAndCreatedDocumentsPreview()
                                 }
 
                                 hboxConstraints {
@@ -286,7 +305,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
                     }
 
                     left {
-                        label(messages["edit.automtic.account.transaction.import.window.transactions.matching.filter"])
+                        label(messages["edit.automatic.account.transaction.import.window.transactions.matching.filter"])
                     }
 
                     right {
@@ -298,7 +317,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
                                 }
                             }
 
-                            label(messages["edit.automtic.account.transaction.import.window.count.filter.matches"])
+                            label(messages["edit.automatic.account.transaction.import.window.count.filter.matches"])
                         }
                     }
 
@@ -315,6 +334,29 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
                 }
 
                 add(transactionsTable)
+            }
+
+            vbox {
+                form {
+                    fieldset(messages["edit.automatic.account.transaction.import.window.created.documents.label"]) {
+                        field(messages["value.added.tax.rate"]) {
+                            // TODO: create VatRateComboBox
+                            add(valueAddedTaxRateForCreatedDocumentsComboBox.apply {
+                                converter = ZeroTo100PercentageStringConverter()
+
+                                selectionModel.selectedItemProperty().addListener { _, _, _ -> updateCreatedDocumentsPreview() }
+                            })
+                        }
+                    }
+                }
+
+                label(messages["edit.automatic.account.transaction.import.window.preview.created.documents.label"]) {
+                    vboxConstraints {
+                        marginBottom = 8.0
+                    }
+                }
+
+                add(DocumentsTable(previewCreatedDocumentsForEntityFilter, false, overviewPresenter, styleService, threadPool))
             }
         }
 
@@ -338,7 +380,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
                 }
             }
 
-            button(messages["edit.automtic.account.transaction.import.window.run.filter.once"]) {
+            button(messages["edit.automatic.account.transaction.import.window.run.filter.once"]) {
                 prefWidth = RunFilterNowButtonWidth
 
                 hiddenWhen(isSelectedEntityFilterPersisted)
@@ -353,7 +395,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
                 }
             }
 
-            button(messages["edit.automtic.account.transaction.import.window.run.filter.after.receiving.transactions"]) {
+            button(messages["edit.automatic.account.transaction.import.window.run.filter.after.receiving.transactions"]) {
                 prefWidth = RunFilterEachTimeTransactionsReceivedButtonWidth
 
                 hiddenWhen(isSelectedEntityFilterPersisted)
@@ -391,6 +433,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     private fun selectedEntityFilterChanged(entityFilter: EntityFilterViewModel?) {
         entityFilter?.let { // TODO: necessary?
             entityFilterNameTextField.textProperty().unbindBidirectional(selectedEntityFilter.name)
+            valueAddedTaxRateForCreatedDocumentsComboBox.valueProperty().unbindBidirectional(selectedEntityFilter.valueAddedTaxRateForCreatedDocuments)
 
             selectedEntityFilter = entityFilter
 
@@ -402,17 +445,10 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
             hasSelectedEntityFilterUnsavedChanges.bind(entityFilter.hasUnsavedChanges)
 
             entityFilterNameTextField.textProperty().bindBidirectional(selectedEntityFilter.name)
+            valueAddedTaxRateForCreatedDocumentsComboBox.valueProperty().bindBidirectional(entityFilter.valueAddedTaxRateForCreatedDocuments)
 
-            updateFilteredTransactions()
+            updateFilteredTransactionsAndCreatedDocumentsPreview()
         }
-    }
-
-    private fun hasUnsavedChanges(entityFilter: EntityFilterViewModel?): Boolean {
-        entityFilter?.let {
-            return entityFilter.name.isDirty || entityFilter.filters.firstOrNull { it.isDirty } != null
-        }
-
-        return false
     }
 
 
@@ -425,7 +461,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     }
 
     private fun createNewEntityFilter(): EntityFilter {
-        return EntityFilter(defaultEntityFilterName, BankAccountTransaction::class.java, listOf(createDefaultFilter()))
+        return EntityFilter(defaultEntityFilterName, BankAccountTransaction::class.java, overviewPresenter.getDefaultVatRateForUser(), listOf(createDefaultFilter()))
     }
 
     private fun equalsCurrentOrDefaultEntityFilterName(oldValue: String?): Boolean {
@@ -438,7 +474,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
         selectedEntityFilter.filters.add(newFilter)
 
-        updateFilteredTransactions()
+        updateFilteredTransactionsAndCreatedDocumentsPreview()
     }
 
     private fun mapToAccountTransactionFilter(filter: Filter): AccountTransactionFilter {
@@ -453,9 +489,15 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
 
     private fun filterSettingChanged() {
-        updateFilteredTransactions()
+        updateFilteredTransactionsAndCreatedDocumentsPreview()
 
         selectedEntityFilter.reevaluateHasUnsavedChanges()
+    }
+
+    private fun updateFilteredTransactionsAndCreatedDocumentsPreview() {
+        updateFilteredTransactions()
+
+        updateCreatedDocumentsPreview()
     }
 
     private fun updateFilteredTransactions() {
@@ -483,6 +525,15 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     }
 
 
+    private fun updateCreatedDocumentsPreview() {
+        val entityFilter = EntityFilter("", "", selectedEntityFilter.valueAddedTaxRateForCreatedDocuments.value, listOf())
+
+        previewCreatedDocumentsForEntityFilter.setAll(
+            filteredTransactions.map { overviewPresenter.mapTransactionToDocument(it, entityFilter) }
+        )
+    }
+
+
     private fun runFilterNow() {
         transactionsTable.addToExpendituresAndRevenues(filterTransactions())
 
@@ -496,6 +547,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
         val entityFilter = entityFilterViewModel.item
 
         entityFilter.name = entityFilterViewModel.name.value
+        entityFilter.valueAddedTaxRateForCreatedDocuments = entityFilterViewModel.valueAddedTaxRateForCreatedDocuments.value
 
         if (entityFilterViewModel.didFiltersChange) {
             entityFilter.updateFilterDefinitions(mapFiltersFromViewModel())
@@ -508,7 +560,8 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     }
 
     private fun runFilterEachTimeAfterReceivingTransactions() { // TODO: also run filter now
-        overviewPresenter.saveOrUpdate(EntityFilter(selectedEntityFilter.name.value, BankAccountTransaction::class.java, mapFiltersFromViewModel()))
+        overviewPresenter.saveOrUpdate(EntityFilter(selectedEntityFilter.name.value, BankAccountTransaction::class.java,
+            selectedEntityFilter.valueAddedTaxRateForCreatedDocuments.value, mapFiltersFromViewModel()))
 
         close()
     }

@@ -8,7 +8,7 @@ import javax.persistence.OneToMany
 
 
 @Entity
-class EntityFilter(
+open class EntityFilter(
 
     @Column
     var name: String,
@@ -16,18 +16,22 @@ class EntityFilter(
     @Column
     val classToFilter: String,
 
+    @Column
+    var valueAddedTaxRateForCreatedDocuments: Float = 0f,
+
     @OneToMany(cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
     val filterDefinitions: List<Filter>
 
 ) : BaseEntity() {
 
 
-    constructor(name: String, classToFilter: Class<*>, filterDefinitions: List<Filter>) : this(name, classToFilter.name, filterDefinitions)
+    constructor(name: String, classToFilter: Class<*>, valueAddedTaxRateForCreatedDocuments: Float, filterDefinitions: List<Filter>)
+            : this(name, classToFilter.name, valueAddedTaxRateForCreatedDocuments, filterDefinitions)
 
-    internal constructor() : this("", "", listOf()) // for object deserializers
+    internal constructor() : this("", "", 0f, listOf()) // for object deserializers
 
 
-    fun updateFilterDefinitions(newFilterDefinitions: List<Filter>) {
+    open fun updateFilterDefinitions(newFilterDefinitions: List<Filter>) {
         (filterDefinitions as? MutableList)?.let { filterDefinitions ->
             filterDefinitions.clear()
 
