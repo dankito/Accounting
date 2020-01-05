@@ -5,6 +5,15 @@ enum class AccountTransactionProperty(val propertyName: String) {
 
     SenderOrReceiverName("senderOrReceiverName"),
 
-    Usage("usage")
+    Usage("usage");
+
+
+    companion object {
+
+        fun fromPropertyName(propertyName: String): AccountTransactionProperty {
+            return values().first { it.propertyName == propertyName }
+        }
+
+    }
 
 }

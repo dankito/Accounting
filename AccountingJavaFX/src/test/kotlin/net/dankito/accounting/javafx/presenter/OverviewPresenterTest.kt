@@ -34,10 +34,11 @@ import java.util.concurrent.atomic.AtomicReference
 class OverviewPresenterTest : DatabaseBasedTest() {
 
     companion object {
+        private const val FilterName = "Test filter"
 
         private const val StartsWithFilterText = "Racketeering Ltd. telefon charges"
 
-        private const val CountTransactonsStartsWith = 3
+        private const val CountTransactionsStartsWith = 3
 
     }
 
@@ -88,11 +89,11 @@ class OverviewPresenterTest : DatabaseBasedTest() {
         // given
         val startsWithFilter = Filter(FilterType.String, FilterOption.StartsWith, true, StartsWithFilterText,
             BankAccountTransaction::class.java, AccountTransactionProperty.Usage.propertyName)
-        val entityFilter = EntityFilter(BankAccountTransaction::class.java, listOf(startsWithFilter))
+        val entityFilter = EntityFilter(FilterName, BankAccountTransaction::class.java, listOf(startsWithFilter))
         underTest.saveOrUpdate(entityFilter)
 
-        val accountTransactions = createTransactions(countTransactonsStartsWith = CountTransactonsStartsWith)
-        assertThat(accountTransactions.size).isGreaterThan(CountTransactonsStartsWith)
+        val accountTransactions = createTransactions(countTransactonsStartsWith = CountTransactionsStartsWith)
+        assertThat(accountTransactions.size).isGreaterThan(CountTransactionsStartsWith)
 
         doAnswer { answer ->
             val callback = answer.getArgument(0) as ((List<BankAccountTransaction>) -> Unit)
@@ -110,7 +111,7 @@ class OverviewPresenterTest : DatabaseBasedTest() {
         // then
         val result = documentDao.getAll()
 
-        assertThat(result).hasSize(CountTransactonsStartsWith)
+        assertThat(result).hasSize(CountTransactionsStartsWith)
 
         result.forEach { createdDocument ->
             assertThat(createdDocument.isPersisted()).isTrue()
@@ -725,7 +726,7 @@ class OverviewPresenterTest : DatabaseBasedTest() {
     }
 
 
-    private fun createTransactions(countTransactonsStartsWith: Int = CountTransactonsStartsWith): List<BankAccountTransaction> {
+    private fun createTransactions(countTransactonsStartsWith: Int = CountTransactionsStartsWith): List<BankAccountTransaction> {
         val collectionToFilter = mutableListOf<BankAccountTransaction>()
 
         for (i in 0 until countTransactonsStartsWith) {

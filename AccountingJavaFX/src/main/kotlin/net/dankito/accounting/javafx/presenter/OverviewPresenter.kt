@@ -53,7 +53,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         }
 
         eventBus.subscribe(BankAccountTransactionsUpdatedEvent::class.java) { event ->
-            runFilterAndCreateNewDocuments(BankAccountTransaction::class.java, event.updatedTransactions)
+            runAccountTransactionsFilterAndCreateNewDocuments(event.updatedTransactions)
         }
     }
 
@@ -161,15 +161,27 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         filterService.saveOrUpdate(entityFilter)
     }
 
-    fun <T> runFilterAndCreateNewDocuments(entityClass: Class<T>, collection: Collection<T>) {
-        filterService.getEntityFiltersForEntity(entityClass.name).forEach { entityFilter ->
-            val itemsOnWithFilterApplies = filterService.filterCollection(entityFilter, collection)
+    fun runAccountTransactionsFilterAndCreateNewDocuments(transactions: Collection<BankAccountTransaction>) {
+        runFilterAndCreateNewDocuments(getAccountTransactionsEntityFilters(), transactions)
+    }
+
+    fun <T> runFilterAndCreateNewDocuments(entityFilters: List<EntityFilter>, collectionToFilter: Collection<T>) {
+        entityFilters.forEach { entityFilter ->
+            val itemsOnWithFilterApplies = filterService.filterCollection(entityFilter, collectionToFilter)
 
             // TODO: create ICreateDocumentFromEntity interface and a factory to get actual implementation, e. g. for BankAccountTransation, Email, ...
             (itemsOnWithFilterApplies as? Collection<BankAccountTransaction>)?.let {
                 addToExpendituresAndRevenues(itemsOnWithFilterApplies, entityFilter)
             }
         }
+    }
+
+    fun getAccountTransactionsEntityFilters(): List<EntityFilter> {
+        return getEntityFiltersForEntity(BankAccountTransaction::class.java.name)
+    }
+
+    private fun getEntityFiltersForEntity(entityClass: String): List<EntityFilter> {
+        return filterService.getEntityFiltersForEntity(entityClass)
     }
 
 

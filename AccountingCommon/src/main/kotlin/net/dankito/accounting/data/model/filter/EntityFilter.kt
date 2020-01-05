@@ -11,6 +11,9 @@ import javax.persistence.OneToMany
 class EntityFilter(
 
     @Column
+    var name: String,
+
+    @Column
     val classToFilter: String,
 
     @OneToMany(cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
@@ -19,13 +22,22 @@ class EntityFilter(
 ) : BaseEntity() {
 
 
-    constructor(classToFilter: Class<*>, filterDefinitions: List<Filter>) : this(classToFilter.name, filterDefinitions)
+    constructor(name: String, classToFilter: Class<*>, filterDefinitions: List<Filter>) : this(name, classToFilter.name, filterDefinitions)
 
-    internal constructor() : this("", listOf()) // for object deserializers
+    internal constructor() : this("", "", listOf()) // for object deserializers
+
+
+    fun updateFilterDefinitions(newFilterDefinitions: List<Filter>) {
+        (filterDefinitions as? MutableList)?.let { filterDefinitions ->
+            filterDefinitions.clear()
+
+            filterDefinitions.addAll(newFilterDefinitions)
+        }
+    }
 
 
     override fun toString(): String {
-        return "${filterDefinitions.size} filters for $classToFilter"
+        return "$name: ${filterDefinitions.size} filters for $classToFilter"
     }
 
 }
