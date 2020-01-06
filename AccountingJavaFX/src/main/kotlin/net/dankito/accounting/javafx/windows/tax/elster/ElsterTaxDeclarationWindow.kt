@@ -7,6 +7,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonType
 import javafx.scene.control.Label
+import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.*
 import javafx.stage.FileChooser
 import javafx.stage.Screen
@@ -34,6 +35,7 @@ import net.dankito.utils.javafx.ui.controls.doubleTextfield
 import net.dankito.utils.javafx.ui.controls.intTextfield
 import net.dankito.utils.javafx.ui.dialogs.Window
 import net.dankito.utils.javafx.ui.extensions.addStyleToCurrentStyle
+import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
 import net.dankito.utils.javafx.util.FXUtils
 import tornadofx.*
 import java.io.File
@@ -122,6 +124,8 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
     private var taxNumberInput: TaxNumberInput = TaxNumberInput()
 
+    private val isUploadToElsterSelected = SimpleBooleanProperty(false)
+
 
     private val areRequiredFieldsForElsterXmlProvided = SimpleBooleanProperty(false)
 
@@ -133,6 +137,8 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
     init {
         AppComponent.component.inject(this)
+
+        isUploadToElsterSelected.addListener { _, _, newValue -> currentStage?.sizeToScene() }
 
         subscribedEvent = eventBus.subscribe(DocumentsUpdatedEvent::class.java) {
             showVatAmountsForPeriod()
@@ -283,49 +289,74 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         }
 
         hbox {
-            alignment = Pos.CENTER_LEFT
+            vboxConstraints {
+                marginTop = 18.0
+                marginBottom = 6.0
+            }
+            val toggleGroup = ToggleGroup()
 
-            label(messages["elster.tax.declaration.window.certificate.file.label"]) {
-                prefWidth = TaxPayerLabelsWidth
+            radiobutton(messages["elster.tax.declaration.window.create.elster.xml"], toggleGroup) {
+                isSelected = !!! isUploadToElsterSelected.value
             }
 
-            textfield(certificateFilePath) {
-                prefHeight = CertificateTextfieldsHeight
-                prefWidth = 400.0
-
-                textProperty().addListener { _, _, _ -> updateIsCertificateFileSet() }
+            radiobutton(messages["elster.tax.declaration.window.upload.to.elster"], toggleGroup) {
+                selectedProperty().bindBidirectional(isUploadToElsterSelected)
 
                 hboxConstraints {
-                    marginRight = 6.0
+                    marginLeft = 12.0
                 }
-            }
-
-            button(messages["..."]) {
-                prefHeight = CertificateTextfieldsHeight
-                prefWidth = 50.0
-
-                action { selectCertificateFile() }
-            }
-
-            vboxConstraints {
-                marginTop = VerticalSpaceBetweenSections
             }
         }
 
-        hbox {
-            alignment = Pos.CENTER_LEFT
+        vbox {
+            visibleWhen(isUploadToElsterSelected)
+            ensureOnlyUsesSpaceIfVisible()
 
-            label(messages["elster.tax.declaration.window.certificate.password.label"]) {
-                prefWidth = TaxPayerLabelsWidth
+            hbox {
+                alignment = Pos.CENTER_LEFT
+
+                label(messages["elster.tax.declaration.window.certificate.file.label"]) {
+                    prefWidth = TaxPayerLabelsWidth
+                }
+
+                textfield(certificateFilePath) {
+                    prefHeight = CertificateTextfieldsHeight
+                    prefWidth = 400.0
+
+                    textProperty().addListener { _, _, _ -> updateIsCertificateFileSet() }
+
+                    hboxConstraints {
+                        marginRight = 6.0
+                    }
+                }
+
+                button(messages["..."]) {
+                    prefHeight = CertificateTextfieldsHeight
+                    prefWidth = 50.0
+
+                    action { selectCertificateFile() }
+                }
+
+                vboxConstraints {
+                    marginTop = VerticalSpaceBetweenSections
+                }
             }
 
-            passwordfield(certificatePassword) {
-                prefHeight = CertificateTextfieldsHeight
-                prefWidth = 250.0
-            }
+            hbox {
+                alignment = Pos.CENTER_LEFT
 
-            vboxConstraints {
-                marginTop = VerticalSpaceBetweenSections
+                label(messages["elster.tax.declaration.window.certificate.password.label"]) {
+                    prefWidth = TaxPayerLabelsWidth
+                }
+
+                passwordfield(certificatePassword) {
+                    prefHeight = CertificateTextfieldsHeight
+                    prefWidth = 250.0
+                }
+
+                vboxConstraints {
+                    marginTop = VerticalSpaceBetweenSections
+                }
             }
         }
 
@@ -338,6 +369,9 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
                 enableWhen(areRequiredFieldsForElsterXmlProvided)
 
+                hiddenWhen(isUploadToElsterSelected)
+                ensureOnlyUsesSpaceIfVisible()
+
                 action { createUmsatzsteuerVoranmeldungXmlFile() }
             }
 
@@ -347,11 +381,10 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
                 enableWhen(areRequiredFieldsForElsterUploadProvided)
 
-                action { makeUmsatzsteuerVoranmeldung() }
+                visibleWhen(isUploadToElsterSelected)
+                ensureOnlyUsesSpaceIfVisible()
 
-                hboxConstraints {
-                    marginLeft = 12.0
-                }
+                action { makeUmsatzsteuerVoranmeldung() }
             }
 
             vboxConstraints {
@@ -456,6 +489,8 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         presenter.getAllTaxOfficesAsync { taxOffices -> // then try to get current list from Elster (requires online connection)
             retrievedTaxOfficesOffUiThread(taxOffices)
         }
+
+        isUploadToElsterSelected.value = presenter.settings.isUploadToElsterSelected ?: false
 
         certificateFilePath.value = presenter.settings.certificateFilePath
 
@@ -731,6 +766,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
             taxOffice = this@ElsterTaxDeclarationWindow.taxOffice.value
             federalState = this@ElsterTaxDeclarationWindow.federalState.value
             taxNumber = taxNumberInput.taxNumber.value
+            isUploadToElsterSelected = this@ElsterTaxDeclarationWindow.isUploadToElsterSelected.value
             certificateFilePath = this@ElsterTaxDeclarationWindow.certificateFilePath.value
             certificatePassword = this@ElsterTaxDeclarationWindow.certificatePassword.value
             lastSelectedElsterXmlFilePath = this@ElsterTaxDeclarationWindow.lastSelectedElsterXmlFile?.absolutePath

@@ -25,6 +25,9 @@ class ElsterTaxDeclarationSettings(
     @Column(name = TaxNumberColumnName)
     var taxNumber: String,
 
+    @Column(name = IsUploadToElsterSelectedColumnName)
+    var isUploadToElsterSelected: Boolean? = null,
+
     @Column(name = CertificateFilePathColumnName)
     var certificateFilePath: String? = null,
 
@@ -45,6 +48,8 @@ class ElsterTaxDeclarationSettings(
         const val TaxOfficeJoinColumnName = "tax_office"
 
         const val TaxNumberColumnName = "tax_number"
+
+        const val IsUploadToElsterSelectedColumnName = "is_upload_uo_elster_selected"
 
         const val CertificateFilePathColumnName = "certificate_file_path"
 
