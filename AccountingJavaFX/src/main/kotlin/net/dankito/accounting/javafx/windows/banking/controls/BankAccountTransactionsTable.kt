@@ -135,21 +135,21 @@ class BankAccountTransactionsTable(private val presenter: BankAccountsPresenter,
 
 
         contextMenu.apply {
-            item(messages[getResourceKeyForDirectlyAddingToExpendituresOrRevenues(type)]) {
-                action {
-                    addToExpendituresAndRevenues(selectedItems)
+            if (showEditDocumentMenuItem == false) {
+                item(messages[getResourceKeyForDirectlyAddingToExpendituresOrRevenues(type)]) {
+                    action {
+                        addToExpendituresAndRevenues(selectedItems)
+                    }
                 }
-            }
 
-            item(messages[getResourceKeyForAdjustBeforeAddingToExpendituresOrRevenues(type)]) {
-                action {
-                    adjustBeforeAddingToExpendituresAndRevenues(selectedItems)
+                item(messages[getResourceKeyForAdjustBeforeAddingToExpendituresOrRevenues(type)]) {
+                    action {
+                        adjustBeforeAddingToExpendituresAndRevenues(selectedItems)
+                    }
                 }
             }
 
             if (showEditDocumentMenuItem) {
-                separator()
-
                 item(messages["bank.account.transactions.table.context.menu.edit.document"]) {
                     action { showCreatedDocuments(selectedItems) }
                 }
