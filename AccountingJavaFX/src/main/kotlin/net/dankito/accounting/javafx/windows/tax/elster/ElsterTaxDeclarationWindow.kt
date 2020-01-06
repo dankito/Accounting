@@ -64,7 +64,11 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
         private const val TaxPayerButtonsWidth = 110.0
 
-        private const val CertificateTextfieldsHeight = 28.0
+        private const val CertificateAndElsterXmlFileLabelsWidth = 130.0
+        private const val CertificateAndElsterXmlFileTextfieldsHeight = 28.0
+        private const val CertificateAndElsterXmlFileTextfieldsWidth = 450.0
+
+        private const val SelectFileButtonWidth = 50.0
 
         private const val ElsterButtonsHeight = 34.0
         private const val ElsterButtonsWidth = 200.0
@@ -104,6 +108,8 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
     private val taxOffice = SimpleObjectProperty<TaxOffice>()
 
+    private val elsterXmlFilePath = SimpleStringProperty()
+
     private val certificateFilePath = SimpleStringProperty()
     private val isCertificateFileSet = SimpleBooleanProperty(false)
 
@@ -119,8 +125,6 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
     private val taxOfficesForSelectedFederalState = FXCollections.observableArrayList<TaxOffice>()
 
-
-    private var lastSelectedElsterXmlFile: File? = null
 
     private var taxNumberInput: TaxNumberInput = TaxNumberInput()
 
@@ -309,6 +313,39 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         }
 
         vbox {
+            hiddenWhen(isUploadToElsterSelected)
+            ensureOnlyUsesSpaceIfVisible()
+
+            hbox {
+                alignment = Pos.CENTER_LEFT
+
+                label(messages["elster.tax.declaration.window.elster.xml.file.label"]) {
+                    prefWidth = CertificateAndElsterXmlFileLabelsWidth
+                }
+
+                textfield(elsterXmlFilePath) {
+                    prefHeight = CertificateAndElsterXmlFileTextfieldsHeight
+                    prefWidth = CertificateAndElsterXmlFileTextfieldsWidth
+
+                    hboxConstraints {
+                        marginRight = 6.0
+                    }
+                }
+
+                button(messages["..."]) {
+                    prefHeight = CertificateAndElsterXmlFileTextfieldsHeight
+                    prefWidth = SelectFileButtonWidth
+
+                    action { selectElsterXmlFile() }
+                }
+
+                vboxConstraints {
+                    marginTop = VerticalSpaceBetweenSections
+                }
+            }
+        }
+
+        vbox {
             visibleWhen(isUploadToElsterSelected)
             ensureOnlyUsesSpaceIfVisible()
 
@@ -316,12 +353,12 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
                 alignment = Pos.CENTER_LEFT
 
                 label(messages["elster.tax.declaration.window.certificate.file.label"]) {
-                    prefWidth = TaxPayerLabelsWidth
+                    prefWidth = CertificateAndElsterXmlFileLabelsWidth
                 }
 
                 textfield(certificateFilePath) {
-                    prefHeight = CertificateTextfieldsHeight
-                    prefWidth = 400.0
+                    prefHeight = CertificateAndElsterXmlFileTextfieldsHeight
+                    prefWidth = CertificateAndElsterXmlFileTextfieldsWidth
 
                     textProperty().addListener { _, _, _ -> updateIsCertificateFileSet() }
 
@@ -331,8 +368,8 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
                 }
 
                 button(messages["..."]) {
-                    prefHeight = CertificateTextfieldsHeight
-                    prefWidth = 50.0
+                    prefHeight = CertificateAndElsterXmlFileTextfieldsHeight
+                    prefWidth = SelectFileButtonWidth
 
                     action { selectCertificateFile() }
                 }
@@ -346,11 +383,11 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
                 alignment = Pos.CENTER_LEFT
 
                 label(messages["elster.tax.declaration.window.certificate.password.label"]) {
-                    prefWidth = TaxPayerLabelsWidth
+                    prefWidth = CertificateAndElsterXmlFileLabelsWidth
                 }
 
                 passwordfield(certificatePassword) {
-                    prefHeight = CertificateTextfieldsHeight
+                    prefHeight = CertificateAndElsterXmlFileTextfieldsHeight
                     prefWidth = 250.0
                 }
 
@@ -496,7 +533,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
         certificatePassword.value = presenter.settings.certificatePassword ?: ""
 
-        lastSelectedElsterXmlFile = presenter.settings.lastSelectedElsterXmlFilePath?.let { File(it) }
+        elsterXmlFilePath.value = presenter.settings.lastSelectedElsterXmlFilePath
 
         taxNumberInput.setTaxNumber(presenter.settings.taxNumber)
 
@@ -630,15 +667,33 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
 
     private fun updateIsCertificateFileSet() {
-        isCertificateFileSet.value = checkIfCertificateFileExists()
+        isCertificateFileSet.value = checkIfFileExists(certificateFilePath.value)
     }
 
-    private fun checkIfCertificateFileExists(): Boolean {
-        if (certificateFilePath.value != null) {
-            return File(certificateFilePath.value).exists()
+    private fun checkIfFileExists(filePath: String?): Boolean {
+        if (filePath != null) {
+            return File(filePath).exists()
         }
 
         return false
+    }
+
+    private fun selectElsterXmlFile() {
+        val fileChooser = FileChooser()
+
+        fileChooser.extensionFilters.addAll(FileChooser.ExtensionFilter(
+            messages["elster.tax.declaration.window.elster.xml.file.extension.filter.description"], "*.xml", "*.XML"))
+
+        if (checkIfFileExists(elsterXmlFilePath.value)) {
+            val elsterXmlFile = File(elsterXmlFilePath.value)
+            fileChooser.initialDirectory = elsterXmlFile.parentFile
+            fileChooser.initialFileName = elsterXmlFile.name
+        }
+
+        fileChooser.showSaveDialog(currentStage)?.let { xmlOutputFile ->
+            elsterXmlFilePath.value = xmlOutputFile.absolutePath
+            saveSettings() // needed here to save lastSelectedElsterXmlFile
+        }
     }
 
     private fun selectCertificateFile() {
@@ -647,7 +702,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         fileChooser.extensionFilters.add(FileChooser.ExtensionFilter(
             messages["elster.tax.declaration.window.certificate.file.extension.filter.description"], "*.pfx", "*.PFX"))
 
-        if (checkIfCertificateFileExists()) {
+        if (checkIfFileExists(certificateFilePath.value)) {
             val certificateFile = File(certificateFilePath.value)
             fileChooser.initialDirectory = certificateFile.parentFile
             fileChooser.initialFileName = certificateFile.name
@@ -655,6 +710,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
         fileChooser.showOpenDialog(currentStage)?.let { selectedFile ->
             certificateFilePath.value = selectedFile.absolutePath
+            saveSettings()
         }
     }
 
@@ -694,38 +750,26 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
     private fun createUmsatzsteuerVoranmeldungXmlFile() {
         saveSettings() // TODO: find a better strategy when to save app settings
 
-        val fileChooser = FileChooser()
+        val result = presenter.createUmsatzsteuerVoranmeldungXmlFile(createUmsatzsteuerVoranmeldungData(false))
 
-        fileChooser.extensionFilters.addAll(FileChooser.ExtensionFilter(
-            messages["elster.tax.declaration.window.elster.xml.file.extension.filter.description"], "*.xml", "*.XML"))
+        if (result.successful) {
+            val xmlOutputFile = File(elsterXmlFilePath.value)
+            xmlOutputFile.parentFile.mkdirs()
 
-        lastSelectedElsterXmlFile?.let { lastSelectedElsterXmlFile ->
-            fileChooser.initialDirectory = lastSelectedElsterXmlFile.parentFile
-            fileChooser.initialFileName = lastSelectedElsterXmlFile.name
+            FileUtils().writeToTextFile(result.xmlString, xmlOutputFile)
+
+            createDialog(Alert.AlertType.INFORMATION,
+                String.format(messages["elster.tax.declaration.window.elster.xml.file.success.alert.message"], xmlOutputFile),
+                messages["elster.tax.declaration.window.elster.xml.file.success.alert.title"],
+                currentStage, ButtonType.OK).show()
         }
+        else {
+            var message = messages["elster.tax.declaration.window.elster.xml.file.error.alert.message"]
+            result.errors.forEach { message += System.lineSeparator() + System.lineSeparator() + it.message }
 
-        fileChooser.showSaveDialog(currentStage)?.let { xmlOutputFile ->
-            lastSelectedElsterXmlFile = xmlOutputFile
-            saveSettings() // needed here to save lastSelectedElsterXmlFile
-
-            val result = presenter.createUmsatzsteuerVoranmeldungXmlFile(createUmsatzsteuerVoranmeldungData(false))
-
-            if (result.successful) {
-                FileUtils().writeToTextFile(result.xmlString, xmlOutputFile)
-
-                createDialog(Alert.AlertType.INFORMATION,
-                    String.format(messages["elster.tax.declaration.window.elster.xml.file.success.alert.message"], xmlOutputFile),
-                    messages["elster.tax.declaration.window.elster.xml.file.success.alert.title"],
-                    currentStage, ButtonType.OK).show()
-            }
-            else {
-                var message = messages["elster.tax.declaration.window.elster.xml.file.error.alert.message"]
-                result.errors.forEach { message += System.lineSeparator() + System.lineSeparator() + it.message }
-
-                createDialog(Alert.AlertType.INFORMATION, message,
-                    messages["elster.tax.declaration.window.elster.xml.file.error.alert.title"],
-                    currentStage, ButtonType.OK).show()
-            }
+            createDialog(Alert.AlertType.INFORMATION, message,
+                messages["elster.tax.declaration.window.elster.xml.file.error.alert.title"],
+                currentStage, ButtonType.OK).show()
         }
     }
 
@@ -769,7 +813,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
             isUploadToElsterSelected = this@ElsterTaxDeclarationWindow.isUploadToElsterSelected.value
             certificateFilePath = this@ElsterTaxDeclarationWindow.certificateFilePath.value
             certificatePassword = this@ElsterTaxDeclarationWindow.certificatePassword.value
-            lastSelectedElsterXmlFilePath = this@ElsterTaxDeclarationWindow.lastSelectedElsterXmlFile?.absolutePath
+            lastSelectedElsterXmlFilePath = elsterXmlFilePath.value
         }
 
         presenter.saveSettings()
