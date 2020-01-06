@@ -127,7 +127,7 @@ class DocumentServiceTest : DatabaseBasedTest() {
     }
 
     private fun createInvoice(): Document {
-        val items = listOf(DocumentItem(1000.0, 19f, 190.0, 1190.0, "Webshop for Amazon"))
+        val items = listOf(DocumentItem(19f, 1190.0, "Webshop for Amazon"))
 
         return Document.createInvoice(items, "1")
     }

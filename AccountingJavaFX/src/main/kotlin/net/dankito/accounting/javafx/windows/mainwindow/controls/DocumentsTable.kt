@@ -41,11 +41,11 @@ open class DocumentsTable(
 
         dateColumn(messages["main.window.documents.table.payment.date.column.header"], Document::paymentDate)
 
-        currencyColumn(messages["main.window.documents.table.net.amount.column.header"], Document::netAmount, OverviewPresenter.CurrencyFormat)
+        currencyColumn(messages["net.amount"], Document::netAmount, OverviewPresenter.CurrencyFormat)
 
         currencyColumn(messages["value.added.tax"], Document::valueAddedTax, OverviewPresenter.CurrencyFormat)
 
-        currencyColumn(messages["main.window.documents.table.total.amount.column.header"], Document::totalAmount, OverviewPresenter.CurrencyFormat)
+        currencyColumn(messages["total.amount"], Document::totalAmount, OverviewPresenter.CurrencyFormat)
 
 
         selectionModel.selectionMode = SelectionMode.MULTIPLE

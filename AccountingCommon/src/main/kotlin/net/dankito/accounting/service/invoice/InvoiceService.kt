@@ -118,7 +118,7 @@ open class InvoiceService(protected val dao: ICreateInvoiceSettingsDao, protecte
             InvoicingDateFormat.format(document.issueDate),
             document.documentNumber ?: "",
             formatCurrency(document.netAmount),
-            formatPercentageString(document.valueAddedTaxRate),
+            formatPercentageString(document.valueAddedTaxRates.first()), // TODO: add a line for each different value added tax rate
             formatCurrency(document.valueAddedTax),
             formatCurrency(document.totalAmount),
             formatDate(calculateInvoiceStartDate(invoicingDate), InvoiceStartDateFormat),

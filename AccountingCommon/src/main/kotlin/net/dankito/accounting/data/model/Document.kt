@@ -12,11 +12,13 @@ import javax.persistence.*
  * (German: Beleg)
  */
 @Entity
-open class Document() : DocumentBase() {
+open class Document() : BaseEntity() {
 
     companion object {
 
         const val DocumentTypeColumnName = "type"
+
+        const val DocumentDescriptionColumnName = "document_description"
 
         const val IsSelfCreatedInvoiceColumnName = "is_self_created_invoice"
 
@@ -45,13 +47,8 @@ open class Document() : DocumentBase() {
         fun createInvoice(invoiceItems: List<DocumentItem>, documentNumber: String?, documentDescription: String? = null,
                           issueDate: Date = Date(), dueDate: Date? = null, recipient: NaturalOrLegalPerson? = null): Document {
 
-            val netAmount = invoiceItems.sumByDouble { it.netAmount }
-            val valueAddedTaxRate = if (invoiceItems.isEmpty()) 0f else invoiceItems[0].valueAddedTaxRate
-            val valueAddedTax = invoiceItems.sumByDouble { it.valueAddedTax }
-            val totalAmount = invoiceItems.sumByDouble { it.totalAmount }
-
-            return Document(DocumentType.Revenue, true, netAmount, valueAddedTaxRate, valueAddedTax, totalAmount,
-                documentNumber, documentDescription, PaymentState.Outstanding, issueDate, dueDate, null, null, invoiceItems, null, recipient)
+            return Document(DocumentType.Revenue, invoiceItems, PaymentState.Outstanding, true, documentNumber,
+                documentDescription, issueDate, dueDate, null, null, null, recipient)
         }
 
     }
@@ -61,24 +58,21 @@ open class Document() : DocumentBase() {
         this.type = type
     }
 
-    constructor(type: DocumentType, totalAmount: Double, valueAddedTaxRate: Float,
-                paymentState: PaymentState = PaymentState.Paid) : this(type) {
+    constructor(type: DocumentType, totalAmount: Double, valueAddedTaxRate: Float, paymentState: PaymentState = PaymentState.Paid)
+            : this(type, listOf(DocumentItem(valueAddedTaxRate, totalAmount)), paymentState)
 
-        this.valueAddedTaxRate = valueAddedTaxRate
-        this.totalAmount = totalAmount
+    constructor(type: DocumentType, items: List<DocumentItem>, paymentState: PaymentState = PaymentState.Paid) : this(type) {
+
+        this.items = items
         this.paymentState = paymentState
     }
 
-    constructor(type: DocumentType, isSelfCreatedInvoice: Boolean, netAmount: Double, valueAddedTaxRate: Float,
-                valueAddedTax: Double, totalAmount: Double, documentNumber: String?, documentDescription: String?,
-                paymentState: PaymentState, issueDate: Date?, dueDate: Date?, paymentDate: Date?, filePath: String?,
-                items: List<DocumentItem> = listOf(),
-                issuer: NaturalOrLegalPerson? = null, recipient: NaturalOrLegalPerson? = null
-    ) : this(type, totalAmount, valueAddedTaxRate) {
+    constructor(type: DocumentType, items: List<DocumentItem> = listOf(), paymentState: PaymentState, isSelfCreatedInvoice: Boolean,
+                documentNumber: String?, documentDescription: String?, issueDate: Date?, dueDate: Date?, paymentDate: Date?,
+                filePath: String?, issuer: NaturalOrLegalPerson? = null, recipient: NaturalOrLegalPerson? = null)
+            : this(type, items, paymentState) {
 
         this.isSelfCreatedInvoice = isSelfCreatedInvoice
-        this.netAmount = netAmount
-        this.valueAddedTax = valueAddedTax
         this.documentNumber = documentNumber
         this.description = documentDescription
         this.paymentState = paymentState
@@ -97,6 +91,9 @@ open class Document() : DocumentBase() {
     @Enumerated(EnumType.ORDINAL)
     @Column(name = DocumentTypeColumnName)
     var type: DocumentType = DocumentType.Expenditure
+
+    @Column(name = DocumentDescriptionColumnName)
+    var description: String? = null
 
     @Column(name = IsSelfCreatedInvoiceColumnName, columnDefinition = "SMALLINT DEFAULT 0", nullable = false)
     var isSelfCreatedInvoice: Boolean = false
@@ -124,7 +121,7 @@ open class Document() : DocumentBase() {
     var filePath: String? = null
 
     @OneToMany(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ], orphanRemoval = true)
-    var items: List<DocumentItem> = listOf()
+    var items: List<DocumentItem> = mutableListOf()
 
     @OneToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.PERSIST ])
     @JoinColumn(name = IssuerJoinColumnName)
@@ -143,18 +140,51 @@ open class Document() : DocumentBase() {
     var automaticallyCreatedFromFilter: EntityFilter? = null
 
 
+    val netAmount: Double
+        get() = items.sumByDouble { it.netAmount }
 
-    fun getVatForVatRate(vatRate: Float): Double? {
-        if (this.valueAddedTaxRate == vatRate) {
-            return valueAddedTax
+    val valueAddedTaxRates: List<Float>
+        get() = items.map { it.valueAddedTaxRate }
+
+    val isValueAddedTaxRateSet: Boolean
+        get() = valueAddedTaxRates.isNotEmpty()
+
+    val valueAddedTax: Double
+        get() = items.sumByDouble { it.valueAddedTax }
+
+    val totalAmount: Double
+        get() = items.sumByDouble { it.grossAmount }
+
+
+
+    open fun hasVatForVatRate(vatRate: Float): Boolean {
+        return valueAddedTaxRates.contains(vatRate)
+    }
+
+    open fun getVatForVatRate(vatRate: Float): Double? {
+        return items.filter { it.valueAddedTaxRate == vatRate }.sumByDouble { it.valueAddedTax }
+    }
+
+
+    open fun addItem(item: DocumentItem): Boolean {
+        (items as? MutableList)?.let { mutableItems ->
+            return mutableItems.add(item)
         }
 
-        return null
+        return false
+    }
+
+    open fun removeItem(item: DocumentItem): Boolean {
+        (items as? MutableList)?.let { mutableItems ->
+            return mutableItems.remove(item)
+        }
+
+        return false
     }
 
 
     override fun toString(): String {
-        return "$type of $totalAmount ($paymentState) for $description)"
+        return "$type of $totalAmount (vatRates = $valueAddedTaxRates, vat = $valueAddedTax, net = $netAmount) for $description)"
     }
 
 }

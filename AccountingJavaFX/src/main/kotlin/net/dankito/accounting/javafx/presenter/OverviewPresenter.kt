@@ -1,9 +1,6 @@
 package net.dankito.accounting.javafx.presenter
 
-import net.dankito.accounting.data.model.AccountingPeriod
-import net.dankito.accounting.data.model.Document
-import net.dankito.accounting.data.model.DocumentType
-import net.dankito.accounting.data.model.PaymentState
+import net.dankito.accounting.data.model.*
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.data.model.event.AccountingPeriodChangedEvent
 import net.dankito.accounting.data.model.event.BankAccountTransactionsUpdatedEvent
@@ -128,16 +125,22 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     }
 
     private fun updateVat(document: Document) {
-        if (document.isValueAddedTaxRateSet) {
-            if (document.isTotalAmountSet) {
-                document.valueAddedTax = calculateVatFromTotalAmount(document)
+        document.items.forEach { item ->
+            updateVat(item)
+        }
+    }
 
-                document.netAmount = document.totalAmount - document.valueAddedTax
+    fun updateVat(item: DocumentItem) {
+        if (item.isValueAddedTaxRateSet) {
+            if (item.isGrossAmountSet) {
+                item.valueAddedTax = calculateVatFromTotalAmount(item)
+
+                item.netAmount = item.grossAmount - item.valueAddedTax
             }
-            else if (document.isNetAmountSet) {
-                document.valueAddedTax = calculateVatFromNetAmount(document)
+            else if (item.isNetAmountSet) {
+                item.valueAddedTax = calculateVatFromNetAmount(item)
 
-                document.totalAmount = document.netAmount + document.valueAddedTax
+                item.grossAmount = item.netAmount + item.valueAddedTax
             }
         }
     }
@@ -296,7 +299,9 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         document.description = createDocumentDescription(transaction, automaticallyCreatedFromFilter)
 
         automaticallyCreatedFromFilter?.let {
-            document.valueAddedTaxRate = automaticallyCreatedFromFilter.valueAddedTaxRateForCreatedDocuments
+            document.items.forEach { item ->
+                item.valueAddedTaxRate = automaticallyCreatedFromFilter.valueAddedTaxRateForCreatedDocuments
+            }
         }
 
         updateVat(document)
@@ -325,12 +330,12 @@ open class OverviewPresenter(private val documentService: IDocumentService,
      * calculate VAT from this value.
      */
     @JvmOverloads
-    fun calculateVatFromNetAmount(document: Document, roundDownNetAmount: Boolean = false): Double {
-        return vatCalculator.calculateVatFromNetAmount(document.netAmount, document.valueAddedTaxRate, roundDownNetAmount)
+    fun calculateVatFromNetAmount(item: DocumentItem, roundDownNetAmount: Boolean = false): Double {
+        return vatCalculator.calculateVatFromNetAmount(item.netAmount, item.valueAddedTaxRate, roundDownNetAmount)
     }
 
-    fun calculateVatFromTotalAmount(document: Document): Double {
-        return vatCalculator.calculateVatFromTotalAmount(document.totalAmount, document.valueAddedTaxRate)
+    fun calculateVatFromTotalAmount(item: DocumentItem): Double {
+        return vatCalculator.calculateVatFromTotalAmount(item.grossAmount, item.valueAddedTaxRate)
     }
 
 

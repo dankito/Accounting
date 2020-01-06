@@ -507,16 +507,16 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         val revenuesInPeriod = overviewPresenter.getDocumentsInPeriod(overviewPresenter.getRevenues(), periodStart, periodEnd)
         val expendituresInPeriod = overviewPresenter.getDocumentsInPeriod(overviewPresenter.getExpenditures(), periodStart, periodEnd)
 
-        val revenuesWith19PercentVatInPeriod = revenuesInPeriod.filter { it.valueAddedTaxRate == 19f }
+        val revenuesWith19PercentVatInPeriod = revenuesInPeriod.flatMap { it.items }.filter { it.valueAddedTaxRate == 19f }
         this.revenuesWith19PercentVatNetAmount.value = revenuesWith19PercentVatInPeriod.sumByDouble { it.netAmount }.toInt()
         this.receivedVatWith19Percent.value = revenuesWith19PercentVatInPeriod.sumByDouble { it.valueAddedTax }
 
-        val revenuesWith7PercentVatInPeriod = revenuesInPeriod.filter { it.valueAddedTaxRate == 7f }
+        val revenuesWith7PercentVatInPeriod = revenuesInPeriod.flatMap { it.items }.filter { it.valueAddedTaxRate == 7f }
         this.revenuesWith7PercentVatNetAmount.value = revenuesWith7PercentVatInPeriod.sumByDouble { it.netAmount }.toInt()
         this.receivedVatWith7Percent.value = revenuesWith7PercentVatInPeriod.sumByDouble { it.valueAddedTax }
 
-        this.spentVatWith19Percent.value = expendituresInPeriod.filter { it.valueAddedTaxRate == 19f }.sumByDouble { it.valueAddedTax }
-        this.spentWith7Percent.value = expendituresInPeriod.filter { it.valueAddedTaxRate == 7f }.sumByDouble { it.valueAddedTax }
+        this.spentVatWith19Percent.value = expendituresInPeriod.flatMap { it.items }.filter { it.valueAddedTaxRate == 19f }.sumByDouble { it.valueAddedTax }
+        this.spentWith7Percent.value = expendituresInPeriod.flatMap { it.items }.filter { it.valueAddedTaxRate == 7f }.sumByDouble { it.valueAddedTax }
 
         this.vatBalance.value = receivedVatWith19Percent.value + receivedVatWith7Percent.value -
                 (spentVatWith19Percent.value + spentWith7Percent.value)
