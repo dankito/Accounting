@@ -40,6 +40,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
 
         private const val RunFilterNowButtonWidth = 200.0
         private const val RunFilterEachTimeTransactionsReceivedButtonWidth = 400.0
+        private const val SaveAndUpdateCreatedDocumentsButtonWidth = 420.0
         private const val ButtonsHorizontalMargin = 12.0
 
         private val ClassToFilter = BankAccountTransaction::class.java.name
@@ -114,7 +115,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
         }
 
         subscribedEvent = eventBus.subscribe(BankAccountTransactionsUpdatedEvent::class.java) {
-            runLater { updateFilteredTransactions(presenter.getAccountTransactions()) }
+            runLater { updateFilteredTransactions() }
         }
     }
 
@@ -423,6 +424,23 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
                 }
             }
 
+            button(messages["edit.automatic.account.transaction.import.window.save.and.update.created.documents"]) {
+                prefWidth = SaveAndUpdateCreatedDocumentsButtonWidth
+
+                visibleWhen(isSelectedEntityFilterPersisted)
+                ensureOnlyUsesSpaceIfVisible()
+
+                enableWhen(hasSelectedEntityFilterUnsavedChanges)
+
+                action { updatedPersistedEntityFilterAndDocumentsCreatedByIt() }
+
+                anchorpaneConstraints {
+                    topAnchor = 0.0
+                    rightAnchor = RunFilterNowButtonWidth + ButtonsHorizontalMargin
+                    bottomAnchor = 0.0
+                }
+            }
+
             button(messages["save"]) {
                 prefWidth = RunFilterNowButtonWidth
 
@@ -551,12 +569,6 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     }
 
 
-    private fun runFilterNow() {
-        transactionsTable.addToExpendituresAndRevenues(filterTransactions())
-
-        close()
-    }
-
     private fun updatedPersistedEntityFilter() {
         val entityFilterViewModel = selectedEntityFilter
         entityFilterViewModel.commit() // TODO: why doesn't it write the changes to it's item?
@@ -575,6 +587,23 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
         overviewPresenter.saveOrUpdate(entityFilter)
 
         entityFilterViewModel.reevaluateHasUnsavedChanges()
+    }
+
+    private fun updatedPersistedEntityFilterAndDocumentsCreatedByIt() {
+        updatedPersistedEntityFilter()
+
+        updatedDocumentsCreatedByEntityFilter()
+    }
+
+    private fun updatedDocumentsCreatedByEntityFilter() {
+        overviewPresenter.updateDocumentsForEntityFilter(filteredTransactions, selectedEntityFilter.item)
+    }
+
+
+    private fun runFilterNow() {
+        transactionsTable.addToExpendituresAndRevenues(filterTransactions())
+
+        close()
     }
 
     private fun runFilterEachTimeAfterReceivingTransactions() { // TODO: also run filter now

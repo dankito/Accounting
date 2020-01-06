@@ -107,6 +107,12 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     }
 
 
+    fun saveOrUpdate(documents: List<Document>) {
+        documents.forEach {
+            saveOrUpdate(it)
+        }
+    }
+
     fun saveOrUpdate(document: Document) {
         updateVat(document)
 
@@ -210,9 +216,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
         val documents = createDocumentsForTransactions(transactions, automaticallyCreatedFromFilter)
 
-        documents.forEach {
-            saveOrUpdate(it)
-        }
+        saveOrUpdate(documents)
     }
 
     fun adjustBeforeAddingToExpendituresAndRevenues(transactions: Collection<BankAccountTransaction>) {
@@ -234,15 +238,43 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         }
     }
 
+    fun updateDocumentsForEntityFilter(transactions: Collection<BankAccountTransaction>,
+                                       automaticallyCreatedFromFilter: EntityFilter? = null): List<Document> {
+
+        val updatedDocuments = transactions.map { transaction ->
+            transaction.createdDocument?.let {
+                return@map updateDocumentValuesAndSetReferencesOnIt(it, transaction, automaticallyCreatedFromFilter)
+            }
+
+            mapTransactionToDocumentAndSetReferencesOnIt(transaction, automaticallyCreatedFromFilter)
+        }
+
+        saveOrUpdate(updatedDocuments)
+
+        return updatedDocuments
+    }
+
     private fun mapTransactionToDocumentAndSetReferencesOnIt(transaction: BankAccountTransaction, automaticallyCreatedFromFilter: EntityFilter? = null): Document {
         val document = mapTransactionToDocument(transaction, automaticallyCreatedFromFilter)
 
+        setDocumentReferencesReferences(document, transaction, automaticallyCreatedFromFilter)
+
+        return document
+    }
+
+    private fun updateDocumentValuesAndSetReferencesOnIt(document: Document, transaction: BankAccountTransaction, automaticallyCreatedFromFilter: EntityFilter? = null): Document {
+        setDocumentValues(document, transaction, automaticallyCreatedFromFilter)
+
+        setDocumentReferencesReferences(document, transaction, automaticallyCreatedFromFilter)
+
+        return document
+    }
+
+    private fun setDocumentReferencesReferences(document: Document, transaction: BankAccountTransaction, automaticallyCreatedFromFilter: EntityFilter? = null) {
         transaction.createdDocument = document
         document.createdFromAccountTransaction = transaction
 
         document.automaticallyCreatedFromFilter = automaticallyCreatedFromFilter
-
-        return document
     }
 
     fun mapTransactionToDocument(transaction: BankAccountTransaction, automaticallyCreatedFromFilter: EntityFilter? = null): Document {
@@ -254,11 +286,20 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         val document = Document(type, Math.abs(transaction.amount.toDouble()), valueAddedTaxRate)
 
         document.paymentDate = transaction.valueDate
-        document.description = createDocumentDescription(transaction, automaticallyCreatedFromFilter)
 
-        updateVat(document)
+        setDocumentValues(document, transaction, automaticallyCreatedFromFilter)
 
         return document
+    }
+
+    private fun setDocumentValues(document: Document, transaction: BankAccountTransaction, automaticallyCreatedFromFilter: EntityFilter?) {
+        document.description = createDocumentDescription(transaction, automaticallyCreatedFromFilter)
+
+        automaticallyCreatedFromFilter?.let {
+            document.valueAddedTaxRate = automaticallyCreatedFromFilter.valueAddedTaxRateForCreatedDocuments
+        }
+
+        updateVat(document)
     }
 
     // visible for testing
