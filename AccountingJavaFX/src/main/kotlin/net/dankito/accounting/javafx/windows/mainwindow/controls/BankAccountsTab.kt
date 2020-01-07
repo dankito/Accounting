@@ -107,9 +107,16 @@ class BankAccountsTab : View() {
 
                     hboxConstraints {
                         marginLeft = 12.0
-                        marginRight = 12.0
                     }
                 })
+
+                label(messages["main.window.tab.bank.accounts.automatically.create.documents.label"]) {
+
+                    hboxConstraints {
+                        marginLeft = 18.0
+                        marginRight = 6.0
+                    }
+                }
 
                 addButton {
                     action { presenter.showEditAutomaticAccountTransactionImportWindow() }
