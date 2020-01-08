@@ -18,6 +18,9 @@ ext {
     harvestClientVersion = '1.1.1'
 
     hbciVersion = '1.0.0'
+
+
+    textExtractorVersion = '1.0.0-SNAPSHOT'
     
 
     couchbaseLiteVersion = '1.4.1'

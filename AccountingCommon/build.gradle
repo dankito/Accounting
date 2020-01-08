@@ -30,6 +30,8 @@ dependencies {
 
     compile "net.dankito.utils:java-utils:$javaUtilsVersion"
 
+    compile "net.dankito.text.extraction:text-info-extractor:$textExtractorVersion"
+
 
     compile "fr.opensagres.xdocreport:fr.opensagres.xdocreport.document.odt:$xdocReportVersion"
     compile "fr.opensagres.xdocreport:fr.opensagres.xdocreport.template.velocity:$xdocReportVersion"

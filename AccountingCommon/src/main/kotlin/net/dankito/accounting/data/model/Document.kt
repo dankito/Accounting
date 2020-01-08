@@ -54,24 +54,18 @@ open class Document() : BaseEntity() {
     }
 
 
-    constructor(type: DocumentType) : this() {
-        this.type = type
-    }
-
     constructor(type: DocumentType, totalAmount: Double, valueAddedTaxRate: Float, paymentState: PaymentState = PaymentState.Paid)
             : this(type, listOf(DocumentItem(valueAddedTaxRate, totalAmount)), paymentState)
 
-    constructor(type: DocumentType, items: List<DocumentItem>, paymentState: PaymentState = PaymentState.Paid) : this(type) {
+    constructor(type: DocumentType, items: List<DocumentItem> = listOf(), paymentState: PaymentState = PaymentState.Paid,
+                isSelfCreatedInvoice: Boolean = false, documentNumber: String? = null, documentDescription: String? = null,
+                issueDate: Date? = null, dueDate: Date? = null, paymentDate: Date? = null, filePath: String? = null,
+                issuer: NaturalOrLegalPerson? = null, recipient: NaturalOrLegalPerson? = null)
+            : this() {
 
+        this.type = type
         this.items = items
         this.paymentState = paymentState
-    }
-
-    constructor(type: DocumentType, items: List<DocumentItem> = listOf(), paymentState: PaymentState, isSelfCreatedInvoice: Boolean,
-                documentNumber: String?, documentDescription: String?, issueDate: Date?, dueDate: Date?, paymentDate: Date?,
-                filePath: String?, issuer: NaturalOrLegalPerson? = null, recipient: NaturalOrLegalPerson? = null)
-            : this(type, items, paymentState) {
-
         this.isSelfCreatedInvoice = isSelfCreatedInvoice
         this.documentNumber = documentNumber
         this.description = documentDescription
@@ -167,6 +161,10 @@ open class Document() : BaseEntity() {
 
 
     open fun addItem(item: DocumentItem): Boolean {
+        if (items !is MutableList) {
+            items = ArrayList(items)
+        }
+
         (items as? MutableList)?.let { mutableItems ->
             return mutableItems.add(item)
         }

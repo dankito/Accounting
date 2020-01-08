@@ -27,6 +27,14 @@ dependencies {
 
     compile "net.dankito.utils:java-fx-utils:$javaFxUtilsVersion"
 
+    // needed for OpenPdf
+    compile "org.bouncycastle:bcprov-jdk15on:1.61"
+    compile "org.bouncycastle:bcpkix-jdk15on:1.61"
+
+    compile "net.dankito.text.extraction:text-extractor-common:$textExtractorVersion"
+    compile "net.dankito.text.extraction:pdftotext-text-extractor:$textExtractorVersion"
+    compile "net.dankito.text.extraction:openpdf-text-extractor:$textExtractorVersion"
+
     compile "com.couchbase.lite:couchbase-lite-java:$couchbaseLiteVersion"
 
     compile "org.apache.commons:commons-csv:$apacheCommonsCsvVersion"

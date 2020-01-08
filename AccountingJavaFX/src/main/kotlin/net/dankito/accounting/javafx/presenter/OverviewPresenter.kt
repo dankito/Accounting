@@ -5,6 +5,7 @@ import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.data.model.event.AccountingPeriodChangedEvent
 import net.dankito.accounting.data.model.event.BankAccountTransactionsUpdatedEvent
 import net.dankito.accounting.data.model.filter.EntityFilter
+import net.dankito.accounting.data.model.invoice.InvoiceData
 import net.dankito.accounting.data.model.settings.AppSettings
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.ValueAddedTaxCalculator
@@ -12,9 +13,12 @@ import net.dankito.accounting.service.banking.IBankAccountService
 import net.dankito.accounting.service.document.IDocumentService
 import net.dankito.accounting.service.filter.IFilterService
 import net.dankito.accounting.service.settings.ISettingsService
+import net.dankito.text.extraction.ITextExtractorRegistry
+import net.dankito.text.extraction.info.invoice.InvoiceDataExtractor
 import net.dankito.utils.datetime.asUtilDate
 import net.dankito.utils.events.IEventBus
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.NumberFormat
@@ -28,6 +32,8 @@ open class OverviewPresenter(private val documentService: IDocumentService,
                              private val settingsService: ISettingsService,
                              private val bankAccountService: IBankAccountService,
                              private val filterService: IFilterService,
+                             private val textExtractorRegistry: ITextExtractorRegistry,
+                             private val invoiceDataExtractor: InvoiceDataExtractor,
                              private val eventBus: IEventBus,
                              private val router: Router,
                              private val vatCalculator: ValueAddedTaxCalculator = ValueAddedTaxCalculator()
@@ -260,7 +266,7 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     private fun mapTransactionToDocumentAndSetReferencesOnIt(transaction: BankAccountTransaction, automaticallyCreatedFromFilter: EntityFilter? = null): Document {
         val document = mapTransactionToDocument(transaction, automaticallyCreatedFromFilter)
 
-        setDocumentReferencesReferences(document, transaction, automaticallyCreatedFromFilter)
+        setDocumentReferences(document, transaction, automaticallyCreatedFromFilter)
 
         return document
     }
@@ -268,12 +274,12 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     private fun updateDocumentValuesAndSetReferencesOnIt(document: Document, transaction: BankAccountTransaction, automaticallyCreatedFromFilter: EntityFilter? = null): Document {
         setDocumentValues(document, transaction, automaticallyCreatedFromFilter)
 
-        setDocumentReferencesReferences(document, transaction, automaticallyCreatedFromFilter)
+        setDocumentReferences(document, transaction, automaticallyCreatedFromFilter)
 
         return document
     }
 
-    private fun setDocumentReferencesReferences(document: Document, transaction: BankAccountTransaction, automaticallyCreatedFromFilter: EntityFilter? = null) {
+    private fun setDocumentReferences(document: Document, transaction: BankAccountTransaction, automaticallyCreatedFromFilter: EntityFilter? = null) {
         transaction.createdDocument = document
         document.createdFromAccountTransaction = transaction
 
@@ -322,6 +328,38 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         }
 
         return transaction.senderOrReceiverName + " - " + transaction.usage
+    }
+
+
+    fun extractInvoiceData(invoiceFile: File): InvoiceData {
+        val extractors = textExtractorRegistry.getAllExtractorsForType(invoiceFile)
+
+        var bestExtractedText: String? = null
+        var firstException: Exception? = null
+
+        for (extractor in extractors) {
+            val extractedText = extractor.extractText(invoiceFile)
+
+            if (extractedText.text.isNotBlank()) { // if text extraction failed we continue on to next text extractor
+                if (extractedText.text.trim().length > (bestExtractedText?.length ?: -1)) {
+                    bestExtractedText = extractedText.text.trim()
+                }
+
+                val extractedInvoiceData = invoiceDataExtractor.extractInvoiceData(extractedText.text)
+                if (extractedInvoiceData.couldExtractInvoiceData) {
+                    return InvoiceData(invoiceFile, extractedText.text.trim(), extractedInvoiceData, null)
+                }
+                else if (firstException == null) { // if invoice data extraction failed we continue on to next text extractor
+                    firstException = extractedInvoiceData.error
+                }
+            }
+        }
+
+        if (firstException == null && extractors.isEmpty()) {
+            firstException = Exception("No suitable text extractors found for file '$invoiceFile'") // TODO: translate
+        }
+
+        return InvoiceData(invoiceFile, bestExtractedText, null, firstException)
     }
 
 
@@ -618,20 +656,20 @@ open class OverviewPresenter(private val documentService: IDocumentService,
         router.showCreateInvoiceWindow()
     }
 
-    fun showCreateRevenueWindow() {
+    fun showCreateRevenueWindow(extractedData: InvoiceData? = null) {
         val newRevenue = Document(DocumentType.Revenue)
 
-        router.showEditDocumentWindow(newRevenue, this)
+        showEditDocumentWindow(newRevenue, extractedData)
     }
 
-    fun showCreateExpenditureWindow() {
+    fun showCreateExpenditureWindow(extractedData: InvoiceData? = null) {
         val newExpenditure = Document(DocumentType.Expenditure)
 
-        router.showEditDocumentWindow(newExpenditure, this)
+        showEditDocumentWindow(newExpenditure, extractedData)
     }
 
-    fun showEditDocumentWindow(document: Document) {
-        router.showEditDocumentWindow(document, this)
+    fun showEditDocumentWindow(document: Document, extractedData: InvoiceData? = null) {
+        router.showEditDocumentWindow(document, this, extractedData)
     }
 
 }

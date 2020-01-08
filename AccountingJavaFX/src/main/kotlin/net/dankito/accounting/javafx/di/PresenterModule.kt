@@ -18,6 +18,8 @@ import net.dankito.accounting.service.tax.IFederalStateService
 import net.dankito.accounting.service.tax.ITaxOfficeService
 import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
 import net.dankito.accounting.service.timetracker.ITimeTrackerService
+import net.dankito.text.extraction.ITextExtractorRegistry
+import net.dankito.text.extraction.info.invoice.InvoiceDataExtractor
 import net.dankito.utils.IThreadPool
 import net.dankito.utils.events.IEventBus
 import net.dankito.utils.javafx.os.JavaFxOsService
@@ -40,11 +42,12 @@ class PresenterModule {
     @Singleton
     fun provideOverviewPresenter(documentService: IDocumentService, settingsService: ISettingsService,
                                  bankAccountService: IBankAccountService, filterService: IFilterService,
+                                 textExtractorRegistry: ITextExtractorRegistry, invoiceDataExtractor: InvoiceDataExtractor,
                                  eventBus: IEventBus, router: Router, vatCalculator: ValueAddedTaxCalculator
     ) : OverviewPresenter {
 
-        return OverviewPresenter(documentService, settingsService, bankAccountService, filterService, eventBus,
-            router, vatCalculator)
+        return OverviewPresenter(documentService, settingsService, bankAccountService, filterService,
+            textExtractorRegistry, invoiceDataExtractor, eventBus, router, vatCalculator)
     }
 
     @Provides

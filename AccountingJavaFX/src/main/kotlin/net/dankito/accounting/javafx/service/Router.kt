@@ -5,6 +5,7 @@ import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.Person
 import net.dankito.accounting.data.model.banking.BankAccount
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
+import net.dankito.accounting.data.model.invoice.InvoiceData
 import net.dankito.accounting.data.model.timetracker.TimeTrackerAccount
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.banking.BankAccountTransactionDetailsWindow
@@ -21,8 +22,8 @@ import tornadofx.get
 class Router {
 
 
-    fun showEditDocumentWindow(document: Document, presenter: OverviewPresenter) {
-        EditDocumentWindow(document, presenter).show()
+    fun showEditDocumentWindow(document: Document, presenter: OverviewPresenter, extractedData: InvoiceData? = null) {
+        EditDocumentWindow(document, presenter, extractedData).show()
     }
 
     fun showCreateInvoiceWindow() {

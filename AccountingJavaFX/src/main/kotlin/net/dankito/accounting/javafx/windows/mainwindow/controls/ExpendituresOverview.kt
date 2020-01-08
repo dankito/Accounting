@@ -1,6 +1,7 @@
 package net.dankito.accounting.javafx.windows.mainwindow.controls
 
 import net.dankito.accounting.data.model.Document
+import net.dankito.accounting.data.model.invoice.InvoiceData
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 
 
@@ -12,8 +13,8 @@ class ExpendituresOverview(presenter: OverviewPresenter)
         return presenter.getExpenditures()
     }
 
-    override fun showCreateNewDocumentWindow() {
-        presenter.showCreateExpenditureWindow()
+    override fun showCreateNewDocumentWindow(extractedData: InvoiceData?) {
+        presenter.showCreateExpenditureWindow(extractedData)
     }
 
 }

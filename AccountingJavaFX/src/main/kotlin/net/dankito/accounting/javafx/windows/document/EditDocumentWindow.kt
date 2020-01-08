@@ -10,8 +10,10 @@ import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.text.TextAlignment
+import javafx.util.converter.NumberStringConverter
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentItem
+import net.dankito.accounting.data.model.invoice.InvoiceData
 import net.dankito.accounting.javafx.controls.VatRateComboBox
 import net.dankito.accounting.javafx.controls.vatRateComboBox
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
@@ -28,7 +30,7 @@ import tornadofx.*
 import java.time.LocalDate
 
 
-class EditDocumentWindow(private val document: Document, private val presenter: OverviewPresenter) : Window() {
+class EditDocumentWindow(private val document: Document, private val presenter: OverviewPresenter, private val extractedData: InvoiceData? = null) : Window() {
 
     companion object {
 
@@ -67,16 +69,19 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
 
     private val editDocumentItems = SimpleBooleanProperty()
 
-    private val vatRate = SimpleFloatProperty(if (document.isValueAddedTaxRateSet) document.valueAddedTaxRates.first()
-                                                else presenter.getDefaultVatRateForUser())
+    private val vatRate = SimpleFloatProperty(
+        extractedData?.data?.potentialValueAddedTaxRate?.amount?.toFloat()
+        ?: document.valueAddedTaxRates.firstOrNull()
+        ?: presenter.getDefaultVatRateForUser()
+    )
 
     private val documentItems = FXCollections.observableArrayList<DocumentItemViewItem>(document.items.map { mapToViewItem(it) })
 
     private lateinit var tableViewDocumentItems: TableView<DocumentItemViewItem>
 
-    private val totalAmount = SimpleDoubleProperty(document.totalAmount)
+    private val totalAmount = SimpleDoubleProperty(extractedData?.data?.potentialTotalAmount?.amount ?: document.totalAmount)
 
-    private val totalAmountTextField: DoubleTextField = doubleTextfield(totalAmount, false, 2)
+    private val hasTotalAmountSuggestions = extractedData?.data?.allAmounts?.isNotEmpty() ?: false
 
 
     private var documentViewAndEditDocumentItemSplitPane: SplitPane by singleAssign()
@@ -160,7 +165,9 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
 
                     label("value.added.tax.rate")
 
-                    vatRateComboBox(vatRate, presenter.getVatRatesForUser()) {
+                    val vatRates = HashSet(presenter.getVatRatesForUser())
+                    extractedData?.data?.percentages?.map { it.amount.toFloat() }?.let { vatRates.addAll(it) }
+                    vatRateComboBox(vatRate, vatRates.toList()) {
                         anchorpaneConstraints {
                             topAnchor = 0.0
                             rightAnchor = 0.0
@@ -228,16 +235,42 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
 
                     label("edit.document.window.total.amount.label")
 
-                    add(totalAmountTextField.apply {
+                    doubleTextfield(totalAmount, false, 2) {
                         minWidth = AmountTextFieldsWidth
                         maxWidth = AmountTextFieldsWidth
+
+                        isVisible = !!! hasTotalAmountSuggestions
+                        ensureOnlyUsesSpaceIfVisible()
+
+                        editableWhen(editDocumentItems.not())
 
                         anchorpaneConstraints {
                             topAnchor = 0.0
                             rightAnchor = CurrencyLabelWidth + CurrencyLabelLeftMargin
                             bottomAnchor = 0.0
                         }
-                    })
+                    }
+
+                    combobox(SimpleDoubleProperty(), extractedData?.data?.allAmounts?.map { it.amount }?.toSet()?.toList()) {
+                        minWidth = AmountTextFieldsWidth
+                        maxWidth = AmountTextFieldsWidth
+
+                        converter = NumberStringConverter()
+
+                        isVisible = hasTotalAmountSuggestions
+                        ensureOnlyUsesSpaceIfVisible()
+
+                        isEditable = true // isEditable sets bound value to 0.0 !
+                        disableWhen(editDocumentItems)
+
+                        valueProperty().bindBidirectional(totalAmount) // so bind to totalAmount after isEditable is set
+
+                        anchorpaneConstraints {
+                            topAnchor = 0.0
+                            rightAnchor = CurrencyLabelWidth + CurrencyLabelLeftMargin
+                            bottomAnchor = 0.0
+                        }
+                    }
 
                     label(presenter.getUserCurrencySymbol()) {
                         prefWidth = CurrencyLabelWidth
@@ -359,7 +392,6 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
 
     private fun VBox.toggleShowEditDocumentItemsControls(showEditDocumentItemsControls: Boolean) {
         editDocumentItems.set(showEditDocumentItemsControls)
-        totalAmountTextField.isEditable = !!!showEditDocumentItemsControls
 
         if (showEditDocumentItemsControls) {
             if (documentItems.isEmpty()) {
