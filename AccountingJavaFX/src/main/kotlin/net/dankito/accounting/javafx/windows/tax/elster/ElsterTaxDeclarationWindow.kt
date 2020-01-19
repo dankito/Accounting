@@ -17,9 +17,11 @@ import net.dankito.accounting.data.model.Person
 import net.dankito.accounting.data.model.event.DocumentsUpdatedEvent
 import net.dankito.accounting.data.model.tax.FederalState
 import net.dankito.accounting.data.model.tax.TaxOffice
+import net.dankito.accounting.javafx.controls.SelectPersonView
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.ElsterTaxPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
+import net.dankito.accounting.javafx.presenter.SelectPersonPresenter
 import net.dankito.accounting.javafx.windows.tax.elster.controls.TaxNumberInput
 import net.dankito.tax.elster.model.*
 import net.dankito.tax.elster.test.TestFinanzamt
@@ -62,8 +64,6 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
         private const val TaxPayerLabelsWidth = 116.0
 
-        private const val TaxPayerButtonsWidth = 110.0
-
         private const val CertificateAndElsterXmlFileLabelsWidth = 130.0
         private const val CertificateAndElsterXmlFileTextfieldsHeight = 28.0
         private const val CertificateAndElsterXmlFileTextfieldsWidth = 450.0
@@ -78,6 +78,9 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
     @Inject
     protected lateinit var presenter: ElsterTaxPresenter
+
+    @Inject
+    protected lateinit var selectPersonPresenter: SelectPersonPresenter
 
     @Inject
     protected lateinit var eventBus: IEventBus
@@ -117,8 +120,6 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
 
     private val isATaxpayerSelected = SimpleBooleanProperty(taxpayer.value != null) // TODO: also check if all required Person fields are set
-
-    private val allPersons = FXCollections.observableArrayList<Person>()
 
 
     private val federalStates = FXCollections.observableArrayList<FederalState>()
@@ -212,35 +213,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
                 prefWidth = TaxPayerLabelsWidth
             }
 
-            combobox<Person>(taxpayer, allPersons) {
-                prefWidth = 300.0
-
-                cellFormat { text = it.name }
-
-                valueProperty().addListener { _, _, newValue -> isATaxpayerSelected.value = newValue != null }
-
-                hboxConstraints {
-                    marginRight = HorizontalSpaceAfterLabel
-                }
-            }
-
-            button(messages["edit..."]) {
-                prefWidth = TaxPayerButtonsWidth
-
-                enableWhen(isATaxpayerSelected)
-
-                action { editSelectedPerson() }
-            }
-
-            button(messages["new..."]) {
-                prefWidth = TaxPayerButtonsWidth
-
-                action { createNewPerson() }
-
-                hboxConstraints {
-                    marginLeft = 12.0
-                }
-            }
+            add(SelectPersonView(selectPersonPresenter, taxpayer))
 
             vboxConstraints {
                 marginTop = VerticalSpaceBetweenSections
@@ -515,6 +488,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
 
     private fun initFields() {
+        taxpayer.addListener { _, _, newValue -> isATaxpayerSelected.value = newValue != null }
         taxpayer.value = presenter.settings.taxpayer
 
         federalState.value = getInitialFederalState()
@@ -541,8 +515,6 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         initYearAndPeriod()
 
         showVatAmountsForPeriod()
-
-        showAvailablePersons()
 
         areRequiredFieldsForElsterXmlProvided.bind(isATaxpayerSelected.and(taxNumberInput.isEnteredTaxNumberValid))
         areRequiredFieldsForElsterUploadProvided.bind(areRequiredFieldsForElsterXmlProvided.and(isCertificateFileSet))
@@ -626,28 +598,6 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
             selectedFederalStateChanged(federalState.value)
         }
-    }
-
-    private fun createNewPerson() {
-        presenter.showCreatePersonWindow { createdPerson ->
-            createdPerson?.let {
-                showAvailablePersons()
-
-                taxpayer.value = createdPerson
-            }
-        }
-    }
-
-    private fun editSelectedPerson() {
-        presenter.showEditPersonWindow(taxpayer.value) { didUserSavePerson ->
-            if (didUserSavePerson) {
-                showAvailablePersons()
-            }
-        }
-    }
-
-    private fun showAvailablePersons() {
-        allPersons.setAll(presenter.getAllPersons())
     }
 
     private fun selectedFederalStateChanged(newValue: FederalState) {

@@ -61,6 +61,13 @@ class PresenterModule {
 
     @Provides
     @Singleton
+    fun provideSelectPersonPresenter(personService: IPersonService, router: Router) : SelectPersonPresenter {
+
+        return SelectPersonPresenter(personService, router)
+    }
+
+    @Provides
+    @Singleton
     fun provideEditPersonPresenter(personService: IPersonService, addressService: IAddressService) : EditPersonPresenter {
 
         return EditPersonPresenter(personService, addressService)
@@ -88,18 +95,15 @@ class PresenterModule {
     @Provides
     @Singleton
     fun provideElsterTaxPresenter(settingsService: IElsterTaxDeclarationService,
-                                  personService: IPersonService,
                                   federalStateService: IFederalStateService,
                                   taxOfficeService: ITaxOfficeService,
                                   eventBus: IEventBus,
-                                  router: Router,
                                   threadPool: IThreadPool,
                                   @Named(DaoModule.LogFilesFolderKey) logFilesFolder: File
     ) : ElsterTaxPresenter {
 
         return ElsterTaxPresenter(
-            settingsService, personService, federalStateService, taxOfficeService, eventBus,
-            router, threadPool, logFilesFolder
+            settingsService, federalStateService, taxOfficeService, eventBus, threadPool, logFilesFolder
         )
     }
 

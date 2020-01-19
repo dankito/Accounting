@@ -1,13 +1,10 @@
 package net.dankito.accounting.javafx.presenter
 
 import net.dankito.accounting.data.model.AccountingPeriod
-import net.dankito.accounting.data.model.Person
 import net.dankito.accounting.data.model.event.ApplicationClosingEvent
 import net.dankito.accounting.data.model.tax.FederalState
 import net.dankito.accounting.data.model.tax.TaxOffice
 import net.dankito.accounting.data.model.tax.elster.ElsterTaxDeclarationSettings
-import net.dankito.accounting.javafx.service.Router
-import net.dankito.accounting.service.person.IPersonService
 import net.dankito.accounting.service.tax.IFederalStateService
 import net.dankito.accounting.service.tax.ITaxOfficeService
 import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
@@ -26,11 +23,9 @@ import kotlin.collections.ArrayList
  * result in a JVM crash.
  */
 class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationService,
-                         private val personService: IPersonService,
                          private val federalStateService: IFederalStateService,
                          private val taxOfficeService: ITaxOfficeService,
                          eventBus: IEventBus,
-                         private val router: Router,
                          private val threadPool: IThreadPool,
                          logFilesFolder: File): AutoCloseable {
 
@@ -68,10 +63,6 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
 
     fun saveSettings() {
         settingsService.saveSettings()
-    }
-
-    fun getAllPersons(): List<Person> {
-        return personService.getAllPersons()
     }
 
     fun getAllTaxOfficesAsync(callback: (List<FederalState>) -> Unit) {
@@ -217,19 +208,6 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
         }
 
         return null
-    }
-
-
-    fun showCreatePersonWindow(createdPersonCallback: (Person?) -> Unit) {
-        val newPerson = Person()
-
-        showEditPersonWindow(newPerson) { userDidSavePerson ->
-            createdPersonCallback( if (userDidSavePerson) newPerson else null )
-        }
-    }
-
-    fun showEditPersonWindow(person: Person, userDidEditPersonCallback: (Boolean) -> Unit) {
-        router.showEditPersonWindow(person, userDidEditPersonCallback)
     }
 
 }
