@@ -3,6 +3,7 @@ package net.dankito.accounting.javafx.presenter
 import net.dankito.accounting.data.model.person.NaturalOrLegalPerson
 import net.dankito.accounting.data.model.person.PersonType
 import net.dankito.accounting.javafx.service.Router
+import net.dankito.accounting.javafx.windows.person.model.RequiredField
 import net.dankito.accounting.service.person.IPersonService
 
 
@@ -20,18 +21,18 @@ class SelectPersonPresenter(
     }
 
 
-    fun showCreatePersonWindow(personType: PersonType, createdPersonCallback: (NaturalOrLegalPerson?) -> Unit) {
-        showEditPersonWindow(null, personType) { _, editedPerson ->
+    fun showCreatePersonWindow(personType: PersonType, requiredFields: List<RequiredField>, createdPersonCallback: (NaturalOrLegalPerson?) -> Unit) {
+        showEditPersonWindow(null, personType, requiredFields) { _, editedPerson ->
             createdPersonCallback(editedPerson)
         }
     }
 
-    fun showEditPersonWindow(person: NaturalOrLegalPerson, userDidEditPersonCallback: (Boolean, NaturalOrLegalPerson?) -> Unit) {
-        showEditPersonWindow(person, person.type, userDidEditPersonCallback)
+    fun showEditPersonWindow(person: NaturalOrLegalPerson, requiredFields: List<RequiredField>, userDidEditPersonCallback: (Boolean, NaturalOrLegalPerson?) -> Unit) {
+        showEditPersonWindow(person, person.type, requiredFields, userDidEditPersonCallback)
     }
 
-    private fun showEditPersonWindow(person: NaturalOrLegalPerson?, personType: PersonType, userDidEditPersonCallback: (Boolean, NaturalOrLegalPerson?) -> Unit) {
-        router.showEditPersonWindow(person, personType, userDidEditPersonCallback)
+    private fun showEditPersonWindow(person: NaturalOrLegalPerson?, personType: PersonType, requiredFields: List<RequiredField>, userDidEditPersonCallback: (Boolean, NaturalOrLegalPerson?) -> Unit) {
+        router.showEditPersonWindow(person, personType, requiredFields, userDidEditPersonCallback)
     }
 
 }

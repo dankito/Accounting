@@ -15,6 +15,7 @@ import net.dankito.accounting.javafx.windows.banking.EditBankAccountWindow
 import net.dankito.accounting.javafx.windows.document.EditDocumentWindow
 import net.dankito.accounting.javafx.windows.invoice.CreateInvoiceWindow
 import net.dankito.accounting.javafx.windows.person.EditPersonWindow
+import net.dankito.accounting.javafx.windows.person.model.RequiredField
 import net.dankito.accounting.javafx.windows.timetracker.EditTimeTrackerAccountWindow
 import tornadofx.FX.Companion.messages
 import tornadofx.get
@@ -35,8 +36,8 @@ class Router {
         EditTimeTrackerAccountWindow(account, userDidEditTimeTrackerAccountCallback).show()
     }
 
-    fun showEditPersonWindow(person: NaturalOrLegalPerson?, personType: PersonType, didUserSavePersonCallback: ((Boolean, NaturalOrLegalPerson?) -> Unit)? = null) {
-        EditPersonWindow(person, personType, didUserSavePersonCallback).show()
+    fun showEditPersonWindow(person: NaturalOrLegalPerson?, personType: PersonType, requiredFields: List<RequiredField>, didUserSavePersonCallback: ((Boolean, NaturalOrLegalPerson?) -> Unit)? = null) {
+        EditPersonWindow(person, personType, requiredFields, didUserSavePersonCallback).show()
     }
 
 

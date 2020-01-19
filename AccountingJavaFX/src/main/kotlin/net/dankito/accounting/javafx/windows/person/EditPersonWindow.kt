@@ -10,6 +10,7 @@ import net.dankito.accounting.data.model.person.Person
 import net.dankito.accounting.data.model.person.PersonType
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.EditPersonPresenter
+import net.dankito.accounting.javafx.windows.person.model.RequiredField
 import net.dankito.utils.javafx.ui.dialogs.Window
 import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
 import tornadofx.*
@@ -19,7 +20,8 @@ import javax.inject.Inject
 // TODO: add validation (e. g. a name has to be entered, country may not be longer than 20 characters, ...)
 class EditPersonWindow(
     person: NaturalOrLegalPerson?,
-    private val personType: PersonType,
+    personType: PersonType,
+    private val requiredFields: List<RequiredField> = listOf(),
     private val didUserSavePersonCallback: ((Boolean, NaturalOrLegalPerson?) -> Unit)? = null
 ) : Window() {
 
@@ -57,9 +59,13 @@ class EditPersonWindow(
 
     private val country = SimpleStringProperty(personToEdit.address.country)
 
+    private val haveAllRequiredFieldsBeenEntered = SimpleBooleanProperty(requiredFields.isEmpty())
+
 
     init {
         AppComponent.component.inject(this)
+
+        initLogic()
     }
 
 
@@ -152,6 +158,8 @@ class EditPersonWindow(
 
                 isDefaultButton = true
 
+                enableWhen(haveAllRequiredFieldsBeenEntered)
+
                 action { saveAndClose() }
 
                 anchorpaneConstraints {
@@ -176,6 +184,43 @@ class EditPersonWindow(
             }
         }
 
+    }
+
+
+    private fun initLogic() {
+        isNaturalPerson.addListener { _, _, _ -> checkIfRequiredFieldsHaveBeenEntered() }
+
+        companyName.addListener { _, _, _ -> checkIfRequiredFieldsHaveBeenEntered() }
+        firstName.addListener { _, _, _ -> checkIfRequiredFieldsHaveBeenEntered() }
+        lastName.addListener { _, _, _ -> checkIfRequiredFieldsHaveBeenEntered() }
+
+        street.addListener { _, _, _ -> checkIfRequiredFieldsHaveBeenEntered() }
+        streetNumber.addListener { _, _, _ -> checkIfRequiredFieldsHaveBeenEntered() }
+        zipCode.addListener { _, _, _ -> checkIfRequiredFieldsHaveBeenEntered() }
+        city.addListener { _, _, _ -> checkIfRequiredFieldsHaveBeenEntered() }
+        country.addListener { _, _, _ -> checkIfRequiredFieldsHaveBeenEntered() }
+
+        checkIfRequiredFieldsHaveBeenEntered()
+    }
+
+    private fun checkIfRequiredFieldsHaveBeenEntered() {
+        if (requiredFields.isNotEmpty()) {
+            haveAllRequiredFieldsBeenEntered.value = requiredFields.firstOrNull { hasRequiredFieldBeenEntered(it) == false } == null
+        }
+    }
+
+    private fun hasRequiredFieldBeenEntered(field: RequiredField): Boolean {
+        return when (field) {
+            RequiredField.CompanyName -> isNaturalPerson.value || companyName.value.isNotBlank()
+            RequiredField.PersonFirstName -> isNaturalPerson.value == false || firstName.value.isNotBlank()
+            RequiredField.PersonLastName -> isNaturalPerson.value == false || lastName.value.isNotBlank()
+
+            RequiredField.AddressStreet -> street.value.isNotBlank()
+            RequiredField.AddressStreetNumber -> streetNumber.value.isNotBlank()
+            RequiredField.AddressZipCode -> zipCode.value.isNotBlank()
+            RequiredField.AddressCity -> city.value.isNotBlank()
+            RequiredField.AddressCountry -> country.value.isNotBlank()
+        }
     }
 
 

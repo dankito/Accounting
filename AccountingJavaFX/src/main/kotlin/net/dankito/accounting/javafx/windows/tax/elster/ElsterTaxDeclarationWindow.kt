@@ -23,6 +23,7 @@ import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.ElsterTaxPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.presenter.SelectPersonPresenter
+import net.dankito.accounting.javafx.windows.person.model.RequiredField
 import net.dankito.accounting.javafx.windows.tax.elster.controls.TaxNumberInput
 import net.dankito.tax.elster.model.*
 import net.dankito.tax.elster.test.TestFinanzamt
@@ -214,7 +215,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
                 prefWidth = TaxPayerLabelsWidth
             }
 
-            add(SelectPersonView(selectPersonPresenter, taxpayer, PersonType.TaxPayer))
+            add(SelectPersonView(selectPersonPresenter, taxpayer, PersonType.TaxPayer, RequiredField.values().toList()))
 
             vboxConstraints {
                 marginTop = VerticalSpaceBetweenSections
