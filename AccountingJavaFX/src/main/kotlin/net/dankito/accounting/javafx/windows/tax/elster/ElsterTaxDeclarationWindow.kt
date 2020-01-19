@@ -13,8 +13,9 @@ import javafx.stage.FileChooser
 import javafx.stage.Screen
 import javafx.stage.Stage
 import net.dankito.accounting.data.model.AccountingPeriod
-import net.dankito.accounting.data.model.Person
 import net.dankito.accounting.data.model.event.DocumentsUpdatedEvent
+import net.dankito.accounting.data.model.person.Person
+import net.dankito.accounting.data.model.person.PersonType
 import net.dankito.accounting.data.model.tax.FederalState
 import net.dankito.accounting.data.model.tax.TaxOffice
 import net.dankito.accounting.javafx.controls.SelectPersonView
@@ -213,7 +214,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
                 prefWidth = TaxPayerLabelsWidth
             }
 
-            add(SelectPersonView(selectPersonPresenter, taxpayer))
+            add(SelectPersonView(selectPersonPresenter, taxpayer, PersonType.TaxPayer))
 
             vboxConstraints {
                 marginTop = VerticalSpaceBetweenSections

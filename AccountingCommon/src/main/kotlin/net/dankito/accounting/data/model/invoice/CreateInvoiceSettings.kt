@@ -2,8 +2,9 @@ package net.dankito.accounting.data.model.invoice
 
 import net.dankito.accounting.data.model.Address
 import net.dankito.accounting.data.model.BaseEntity
-import net.dankito.accounting.data.model.Company
-import net.dankito.accounting.data.model.NaturalOrLegalPerson
+import net.dankito.accounting.data.model.person.Company
+import net.dankito.accounting.data.model.person.NaturalOrLegalPerson
+import net.dankito.accounting.data.model.person.PersonType
 import net.dankito.accounting.data.model.timetracker.TimeTrackerAccount
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -35,7 +36,7 @@ class CreateInvoiceSettings(
 
     @OneToOne
     @JoinColumn(name = LastSelectedRecipientJoinColumnName)
-    var lastSelectedRecipient: NaturalOrLegalPerson = Company("", Address())
+    var lastSelectedRecipient: NaturalOrLegalPerson = Company("", PersonType.Client, Address())
 
 ) : BaseEntity() {
 

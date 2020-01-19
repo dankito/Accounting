@@ -3,9 +3,10 @@ package net.dankito.accounting.service.person
 import net.dankito.accounting.data.dao.IAddressDao
 import net.dankito.accounting.data.dao.ICompanyDao
 import net.dankito.accounting.data.dao.IPersonDao
-import net.dankito.accounting.data.model.Company
-import net.dankito.accounting.data.model.NaturalOrLegalPerson
-import net.dankito.accounting.data.model.Person
+import net.dankito.accounting.data.model.person.Company
+import net.dankito.accounting.data.model.person.NaturalOrLegalPerson
+import net.dankito.accounting.data.model.person.Person
+import net.dankito.accounting.data.model.person.PersonType
 
 
 open class PersonService(protected val personDao: IPersonDao, protected val companyDao: ICompanyDao,
@@ -19,6 +20,10 @@ open class PersonService(protected val personDao: IPersonDao, protected val comp
         allPersons.addAll(getAllCompanies())
 
         return allPersons
+    }
+
+    override fun getAllOfType(type: PersonType): List<NaturalOrLegalPerson> {
+        return getAll().filter { it.type == type }
     }
 
     override fun getAllPersons(): List<Person> {

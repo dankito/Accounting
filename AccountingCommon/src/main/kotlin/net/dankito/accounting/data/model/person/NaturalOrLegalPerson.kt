@@ -1,5 +1,7 @@
-package net.dankito.accounting.data.model
+package net.dankito.accounting.data.model.person
 
+import net.dankito.accounting.data.model.Address
+import net.dankito.accounting.data.model.BaseEntity
 import javax.persistence.*
 
 
@@ -8,6 +10,9 @@ abstract class NaturalOrLegalPerson(
 
     @Column(name = NameColumnName)
     open var name: String,
+
+    @Column(name = TypeColumnName)
+    var type: PersonType,
 
 
     @OneToOne(fetch = FetchType.EAGER, cascade = [ CascadeType.PERSIST, CascadeType.REMOVE ])
@@ -20,11 +25,13 @@ abstract class NaturalOrLegalPerson(
 
         const val NameColumnName = "name"
 
+        const val TypeColumnName = "type"
+
         const val AddressJoinColumnName = "address"
 
     }
 
-    constructor() : this("", Address()) // for object deserializers
+    constructor() : this("", PersonType.Client, Address()) // for object deserializers
 
 
     override fun toString(): String {

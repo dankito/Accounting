@@ -1,6 +1,6 @@
 package net.dankito.accounting.data.model.invoice
 
-import net.dankito.accounting.data.model.NaturalOrLegalPerson
+import net.dankito.accounting.data.model.person.NaturalOrLegalPerson
 
 
 open class FormattedInvoice(val items: List<FormattedInvoiceItem>,

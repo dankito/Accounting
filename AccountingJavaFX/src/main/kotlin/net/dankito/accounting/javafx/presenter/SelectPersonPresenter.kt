@@ -1,6 +1,7 @@
 package net.dankito.accounting.javafx.presenter
 
-import net.dankito.accounting.data.model.Person
+import net.dankito.accounting.data.model.person.NaturalOrLegalPerson
+import net.dankito.accounting.data.model.person.PersonType
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.person.IPersonService
 
@@ -10,21 +11,27 @@ class SelectPersonPresenter(
     private val router: Router
 ) {
 
-    fun getAllPersons(): List<Person> {
-        return personService.getAllPersons()
+    fun getAll(): List<NaturalOrLegalPerson> {
+        return personService.getAll()
+    }
+
+    fun getAllOfType(type: PersonType): List<NaturalOrLegalPerson> {
+        return personService.getAllOfType(type)
     }
 
 
-    fun showCreatePersonWindow(createdPersonCallback: (Person?) -> Unit) {
-        val newPerson = Person()
-
-        showEditPersonWindow(newPerson) { userDidSavePerson ->
-            createdPersonCallback( if (userDidSavePerson) newPerson else null )
+    fun showCreatePersonWindow(personType: PersonType, createdPersonCallback: (NaturalOrLegalPerson?) -> Unit) {
+        showEditPersonWindow(null, personType) { _, editedPerson ->
+            createdPersonCallback(editedPerson)
         }
     }
 
-    fun showEditPersonWindow(person: Person, userDidEditPersonCallback: (Boolean) -> Unit) {
-        router.showEditPersonWindow(person, userDidEditPersonCallback)
+    fun showEditPersonWindow(person: NaturalOrLegalPerson, userDidEditPersonCallback: (Boolean, NaturalOrLegalPerson?) -> Unit) {
+        showEditPersonWindow(person, person.type, userDidEditPersonCallback)
+    }
+
+    private fun showEditPersonWindow(person: NaturalOrLegalPerson?, personType: PersonType, userDidEditPersonCallback: (Boolean, NaturalOrLegalPerson?) -> Unit) {
+        router.showEditPersonWindow(person, personType, userDidEditPersonCallback)
     }
 
 }

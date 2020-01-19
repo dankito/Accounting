@@ -2,6 +2,7 @@ package net.dankito.accounting.data.model
 
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.data.model.filter.EntityFilter
+import net.dankito.accounting.data.model.person.NaturalOrLegalPerson
 import java.util.*
 import javax.persistence.*
 

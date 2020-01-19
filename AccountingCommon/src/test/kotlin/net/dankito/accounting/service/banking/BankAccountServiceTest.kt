@@ -4,11 +4,12 @@ import com.nhaarman.mockito_kotlin.doReturn
 import net.dankito.accounting.data.dao.banking.IBankAccountDao
 import net.dankito.accounting.data.dao.banking.IBankAccountTransactionDao
 import net.dankito.accounting.data.model.Address
-import net.dankito.accounting.data.model.Company
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentItem
 import net.dankito.accounting.data.model.banking.BankAccount
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
+import net.dankito.accounting.data.model.person.Company
+import net.dankito.accounting.data.model.person.PersonType
 import net.dankito.utils.events.RxEventBus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -171,7 +172,7 @@ class BankAccountServiceTest {
 
     private fun createInvoice(): Document {
         return Document.createInvoice(listOf(DocumentItem(0f, InvoiceTotalAmount)),
-            InvoiceNumber, recipient = Company(InvoiceRecipientName, Address()))
+            InvoiceNumber, recipient = Company(InvoiceRecipientName, PersonType.Client, Address()))
     }
 
     private fun createTransactionsIncluding(transaction: BankAccountTransaction): List<BankAccountTransaction> {

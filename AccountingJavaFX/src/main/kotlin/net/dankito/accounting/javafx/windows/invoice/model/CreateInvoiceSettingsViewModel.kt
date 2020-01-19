@@ -4,8 +4,8 @@ import javafx.beans.property.DoubleProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import net.dankito.accounting.data.model.Address
-import net.dankito.accounting.data.model.NaturalOrLegalPerson
 import net.dankito.accounting.data.model.invoice.CreateInvoiceSettings
+import net.dankito.accounting.data.model.person.NaturalOrLegalPerson
 import net.dankito.accounting.data.model.timetracker.TimeTrackerAccount
 import tornadofx.ViewModel
 import tornadofx.observable

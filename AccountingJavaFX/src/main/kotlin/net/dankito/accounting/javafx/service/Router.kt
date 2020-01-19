@@ -2,10 +2,11 @@ package net.dankito.accounting.javafx.service
 
 import javafx.stage.Modality
 import net.dankito.accounting.data.model.Document
-import net.dankito.accounting.data.model.Person
 import net.dankito.accounting.data.model.banking.BankAccount
 import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.data.model.invoice.InvoiceData
+import net.dankito.accounting.data.model.person.NaturalOrLegalPerson
+import net.dankito.accounting.data.model.person.PersonType
 import net.dankito.accounting.data.model.timetracker.TimeTrackerAccount
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.banking.BankAccountTransactionDetailsWindow
@@ -34,8 +35,8 @@ class Router {
         EditTimeTrackerAccountWindow(account, userDidEditTimeTrackerAccountCallback).show()
     }
 
-    fun showEditPersonWindow(person: Person, didUserSavePersonCallback: ((Boolean) -> Unit)? = null) {
-        EditPersonWindow(person, didUserSavePersonCallback).show()
+    fun showEditPersonWindow(person: NaturalOrLegalPerson?, personType: PersonType, didUserSavePersonCallback: ((Boolean, NaturalOrLegalPerson?) -> Unit)? = null) {
+        EditPersonWindow(person, personType, didUserSavePersonCallback).show()
     }
 
 

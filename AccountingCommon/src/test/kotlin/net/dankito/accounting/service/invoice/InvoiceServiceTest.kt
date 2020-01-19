@@ -1,8 +1,13 @@
 package net.dankito.accounting.service.invoice
 
 import net.dankito.accounting.data.dao.invoice.ICreateInvoiceSettingsDao
-import net.dankito.accounting.data.model.*
+import net.dankito.accounting.data.model.Address
+import net.dankito.accounting.data.model.Document
+import net.dankito.accounting.data.model.DocumentItem
 import net.dankito.accounting.data.model.invoice.CreateInvoiceJob
+import net.dankito.accounting.data.model.person.NaturalOrLegalPerson
+import net.dankito.accounting.data.model.person.Person
+import net.dankito.accounting.data.model.person.PersonType
 import net.dankito.accounting.service.person.IPersonService
 import org.junit.Ignore
 import org.junit.Test
@@ -63,7 +68,7 @@ class InvoiceServiceTest {
     }
 
     private fun createRecipient(): NaturalOrLegalPerson? {
-        return Person("Marieke", "Musterfrau", Address("Musterstraße", "42", "12345", "Musterstedt", "Germany"))
+        return Person("Marieke", "Musterfrau", PersonType.Client, Address("Musterstraße", "42", "12345", "Musterstedt", "Germany"))
     }
 
 

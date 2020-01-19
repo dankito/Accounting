@@ -1,5 +1,6 @@
-package net.dankito.accounting.data.model
+package net.dankito.accounting.data.model.person
 
+import net.dankito.accounting.data.model.Address
 import javax.persistence.Column
 import javax.persistence.Entity
 
@@ -13,9 +14,11 @@ class Person(
     @Column(name = LastNameColumnName)
     var lastName: String,
 
+    type: PersonType,
+
     address: Address
 
-) : NaturalOrLegalPerson(firstName + " " + lastName, address) {
+) : NaturalOrLegalPerson(firstName + " " + lastName, type, address) {
 
     companion object {
 
@@ -25,7 +28,7 @@ class Person(
 
     }
 
-    constructor() : this("", "", Address()) // for object deserializers
+    constructor() : this("", "", PersonType.Client, Address()) // for object deserializers
 
 
     /**

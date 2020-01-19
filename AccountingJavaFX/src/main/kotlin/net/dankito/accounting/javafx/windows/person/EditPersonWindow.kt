@@ -1,27 +1,29 @@
 package net.dankito.accounting.javafx.windows.person
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.event.EventTarget
-import javafx.geometry.Pos
-import javafx.scene.layout.Pane
-import javafx.scene.layout.Priority
-import net.dankito.accounting.data.model.Person
+import javafx.scene.control.ToggleGroup
+import net.dankito.accounting.data.model.Address
+import net.dankito.accounting.data.model.person.Company
+import net.dankito.accounting.data.model.person.NaturalOrLegalPerson
+import net.dankito.accounting.data.model.person.Person
+import net.dankito.accounting.data.model.person.PersonType
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.EditPersonPresenter
 import net.dankito.utils.javafx.ui.dialogs.Window
+import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
 import tornadofx.*
 import javax.inject.Inject
 
 
 // TODO: add validation (e. g. a name has to be entered, country may not be longer than 20 characters, ...)
-class EditPersonWindow(private val person: Person, private val didUserSavePersonCallback: ((Boolean) -> Unit)? = null)
-    : Window() {
+class EditPersonWindow(
+    person: NaturalOrLegalPerson?,
+    private val personType: PersonType,
+    private val didUserSavePersonCallback: ((Boolean, NaturalOrLegalPerson?) -> Unit)? = null
+) : Window() {
 
     companion object {
-
-        private const val FieldHeight = 32.0
-
-        private const val LabelsWidth = 100.0
 
         private const val ButtonsHeight = 36.0
         private const val ButtonsWidth = 120.0
@@ -33,19 +35,27 @@ class EditPersonWindow(private val person: Person, private val didUserSavePerson
     protected lateinit var presenter: EditPersonPresenter
 
 
-    private val firstName = SimpleStringProperty(person.firstName)
+    private var personToEdit: NaturalOrLegalPerson = person ?: Person("", "", personType, Address("", "", "", "", ""))
 
-    private val lastName = SimpleStringProperty(person.lastName)
+    private val allowChoosingPersonType = SimpleBooleanProperty(person == null)
 
-    private val street = SimpleStringProperty(person.address.street)
+    private val isNaturalPerson = SimpleBooleanProperty(personToEdit is Person)
 
-    private val streetNumber = SimpleStringProperty(person.address.streetNumber)
+    private val companyName = SimpleStringProperty((personToEdit as? Company)?.name ?: "")
 
-    private val zipCode = SimpleStringProperty(person.address.zipCode)
+    private val firstName = SimpleStringProperty((personToEdit as? Person)?.firstName ?: "")
 
-    private val city = SimpleStringProperty(person.address.city)
+    private val lastName = SimpleStringProperty((personToEdit as? Person)?.lastName ?: "")
 
-    private val country = SimpleStringProperty(person.address.country)
+    private val street = SimpleStringProperty(personToEdit.address.street)
+
+    private val streetNumber = SimpleStringProperty(personToEdit.address.streetNumber)
+
+    private val zipCode = SimpleStringProperty(personToEdit.address.zipCode)
+
+    private val city = SimpleStringProperty(personToEdit.address.city)
+
+    private val country = SimpleStringProperty(personToEdit.address.country)
 
 
     init {
@@ -65,19 +75,74 @@ class EditPersonWindow(private val person: Person, private val didUserSavePerson
         paddingLeft = 2.0
         paddingRight = 2.0
 
-        field("edit.person.window.first.name.label", firstName)
+        isNaturalPerson.addListener { _, _, _ -> currentStage?.sizeToScene() }
 
-        field("edit.person.window.last.name.label", lastName)
+        form {
+            fieldset {
 
-        field("edit.person.window.street.label", street)
+                hbox {
+                    visibleWhen(allowChoosingPersonType)
+                    ensureOnlyUsesSpaceIfVisible()
 
-        field("edit.person.window.street.number.label", streetNumber)
+                    val toggleGroup = ToggleGroup()
 
-        field("edit.person.window.zip.code.label", zipCode)
+                    radiobutton(messages["edit.person.window.edit.person"], toggleGroup, isNaturalPerson) {
+                        selectedProperty().bindBidirectional(isNaturalPerson)
 
-        field("edit.person.window.city.label", city)
+                        hboxConstraints {
+                            marginRight = 12.0
+                        }
+                    }
 
-        field("edit.person.window.country.label", country)
+                    radiobutton(messages["edit.person.window.edit.company"], toggleGroup)
+
+                    vboxConstraints {
+                        marginBottom = 12.0
+                    }
+                }
+
+                field(messages["edit.person.window.company.name.label"]) {
+                    hiddenWhen(isNaturalPerson)
+                    ensureOnlyUsesSpaceIfVisible()
+
+                    textfield(companyName)
+                }
+
+                field(messages["edit.person.window.first.name.label"]) {
+                    visibleWhen(isNaturalPerson)
+                    ensureOnlyUsesSpaceIfVisible()
+
+                    textfield(firstName)
+                }
+
+                field(messages["edit.person.window.last.name.label"]) {
+                    visibleWhen(isNaturalPerson)
+                    ensureOnlyUsesSpaceIfVisible()
+
+                    textfield(lastName)
+                }
+
+                field(messages["edit.person.window.street.label"]) {
+                    textfield(street)
+                }
+
+                field(messages["edit.person.window.street.number.label"]) {
+                    textfield(streetNumber)
+                }
+
+                field(messages["edit.person.window.zip.code.label"]) {
+                    textfield(zipCode)
+                }
+
+                field(messages["edit.person.window.city.label"]) {
+                    textfield(city)
+                }
+
+                field(messages["edit.person.window.country.label"]) {
+                    textfield(country)
+                }
+            }
+        }
 
         anchorpane {
             prefHeight = ButtonsHeight
@@ -113,43 +178,24 @@ class EditPersonWindow(private val person: Person, private val didUserSavePerson
 
     }
 
-    private fun EventTarget.field(labelResourceKey: String, value: SimpleStringProperty): Pane {
-        return hbox {
-
-            label(messages[labelResourceKey]) {
-                prefWidth = LabelsWidth
-
-                prefHeight = FieldHeight
-
-                alignment = Pos.CENTER_LEFT
-            }
-
-            textfield(value) {
-                prefHeight = FieldHeight
-
-                hboxConstraints {
-                    hGrow = Priority.ALWAYS
-                }
-            }
-
-            vboxConstraints {
-                marginBottom = 6.0
-            }
-        }
-    }
-
 
     private fun saveAndClose() {
-        person.firstName = firstName.value
-        person.lastName = lastName.value
+        (personToEdit as? Person)?.let { person ->
+            person.firstName = firstName.value
+            person.lastName = lastName.value
+        }
 
-        person.address.street = street.value
-        person.address.streetNumber = streetNumber.value
-        person.address.zipCode = zipCode.value
-        person.address.city = city.value
-        person.address.country = country.value
+        (personToEdit as? Company)?.let { company ->
+            company.name = companyName.value
+        }
 
-        presenter.saveOrUpdate(person)
+        personToEdit.address.street = street.value
+        personToEdit.address.streetNumber = streetNumber.value
+        personToEdit.address.zipCode = zipCode.value
+        personToEdit.address.city = city.value
+        personToEdit.address.country = country.value
+
+        presenter.saveOrUpdate(personToEdit)
 
         closeWindow(true)
     }
@@ -161,7 +207,7 @@ class EditPersonWindow(private val person: Person, private val didUserSavePerson
     }
 
     private fun closeWindow(didSavePerson: Boolean) {
-        didUserSavePersonCallback?.invoke(didSavePerson)
+        didUserSavePersonCallback?.invoke(didSavePerson, if (didSavePerson) personToEdit else null)
 
         close()
     }

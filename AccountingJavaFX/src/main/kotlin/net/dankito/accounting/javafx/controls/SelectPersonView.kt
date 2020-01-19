@@ -1,16 +1,19 @@
 package net.dankito.accounting.javafx.controls
 
+import javafx.beans.property.Property
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
-import net.dankito.accounting.data.model.Person
+import javafx.collections.ObservableList
+import net.dankito.accounting.data.model.person.NaturalOrLegalPerson
+import net.dankito.accounting.data.model.person.PersonType
 import net.dankito.accounting.javafx.presenter.SelectPersonPresenter
 import tornadofx.*
 
 
-open class SelectPersonView(
+open class SelectPersonView<T : NaturalOrLegalPerson>(
     protected val presenter: SelectPersonPresenter,
-    protected val selectedPerson: SimpleObjectProperty<Person>
+    protected val selectedPerson: Property<T>,
+    protected val typesOfPersonsToEdit: PersonType
 ) : View() {
 
     companion object {
@@ -21,12 +24,12 @@ open class SelectPersonView(
 
     protected val isAPersonSelected = SimpleBooleanProperty(selectedPerson.value != null)
 
-    protected val availablePersons = FXCollections.observableArrayList(presenter.getAllPersons())
+    protected val availablePersons = FXCollections.observableArrayList(presenter.getAllOfType(typesOfPersonsToEdit)) as ObservableList<T>
 
 
     override val root = hbox {
 
-        combobox<Person>(selectedPerson, availablePersons) {
+        combobox<T>(selectedPerson, availablePersons) {
             prefWidth = 300.0
 
             cellFormat { text = it.name }
@@ -60,17 +63,17 @@ open class SelectPersonView(
 
 
     protected open fun createNewPerson() {
-        presenter.showCreatePersonWindow { createdPerson ->
+        presenter.showCreatePersonWindow(typesOfPersonsToEdit) { createdPerson ->
             createdPerson?.let {
                 showAvailablePersons()
 
-                selectedPerson.value = createdPerson
+                selectedPerson.value = createdPerson as T
             }
         }
     }
 
     protected open fun editSelectedPerson() {
-        presenter.showEditPersonWindow(selectedPerson.value) { didUserSavePerson ->
+        presenter.showEditPersonWindow(selectedPerson.value) { didUserSavePerson, _ ->
             if (didUserSavePerson) {
                 showAvailablePersons()
             }
@@ -78,7 +81,7 @@ open class SelectPersonView(
     }
 
     protected open fun showAvailablePersons() {
-        availablePersons.setAll(presenter.getAllPersons())
+        availablePersons.setAll(presenter.getAllOfType(typesOfPersonsToEdit) as List<T>)
     }
 
 }

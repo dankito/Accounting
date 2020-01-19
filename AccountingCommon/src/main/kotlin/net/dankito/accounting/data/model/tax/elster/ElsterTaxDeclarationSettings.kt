@@ -1,7 +1,7 @@
 package net.dankito.accounting.data.model.tax.elster
 
 import net.dankito.accounting.data.model.BaseEntity
-import net.dankito.accounting.data.model.Person
+import net.dankito.accounting.data.model.person.Person
 import net.dankito.accounting.data.model.tax.FederalState
 import net.dankito.accounting.data.model.tax.TaxOffice
 import javax.persistence.*

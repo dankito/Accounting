@@ -1,13 +1,16 @@
 package net.dankito.accounting.service.person
 
-import net.dankito.accounting.data.model.Company
-import net.dankito.accounting.data.model.NaturalOrLegalPerson
-import net.dankito.accounting.data.model.Person
+import net.dankito.accounting.data.model.person.Company
+import net.dankito.accounting.data.model.person.NaturalOrLegalPerson
+import net.dankito.accounting.data.model.person.Person
+import net.dankito.accounting.data.model.person.PersonType
 
 
 interface IPersonService {
 
     fun getAll(): List<NaturalOrLegalPerson>
+
+    fun getAllOfType(type: PersonType): List<NaturalOrLegalPerson>
 
     fun getAllPersons(): List<Person>
 

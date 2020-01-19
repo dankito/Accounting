@@ -6,7 +6,6 @@ import net.dankito.accounting.di.DaoModule
 import net.dankito.accounting.javafx.presenter.*
 import net.dankito.accounting.javafx.service.Router
 import net.dankito.accounting.service.ValueAddedTaxCalculator
-import net.dankito.accounting.service.address.IAddressService
 import net.dankito.accounting.service.banking.IBankAccountService
 import net.dankito.accounting.service.document.IDocumentService
 import net.dankito.accounting.service.filter.ICollectionFilter
@@ -68,9 +67,9 @@ class PresenterModule {
 
     @Provides
     @Singleton
-    fun provideEditPersonPresenter(personService: IPersonService, addressService: IAddressService) : EditPersonPresenter {
+    fun provideEditPersonPresenter(personService: IPersonService) : EditPersonPresenter {
 
-        return EditPersonPresenter(personService, addressService)
+        return EditPersonPresenter(personService)
     }
 
 

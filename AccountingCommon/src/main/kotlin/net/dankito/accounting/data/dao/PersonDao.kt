@@ -1,6 +1,6 @@
 package net.dankito.accounting.data.dao
 
-import net.dankito.accounting.data.model.Person
+import net.dankito.accounting.data.model.person.Person
 import net.dankito.jpa.entitymanager.IEntityManager
 
 
