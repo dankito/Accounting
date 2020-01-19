@@ -30,7 +30,7 @@ open class DocumentItem protected constructor() : BaseEntity() {
 
         const val ValueAddedTaxColumnName = "value_added_tax"
 
-        const val GrossAmountColumnName = "total_amount" // TODO: rename to gross_amount
+        const val GrossAmountColumnName = "gross_amount"
 
     }
 
