@@ -29,6 +29,7 @@ ext {
 
     jpaAptVersion = '1.0-alpha4-SNAPSHOT'
 
+    apacheCommonsCsvVersion = '1.7'
 
     javaFxUtilsVersion = '2.0.0-SNAPSHOT'
 
