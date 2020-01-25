@@ -12,6 +12,7 @@ import net.dankito.tax.elster.ElsterClient
 import net.dankito.tax.elster.model.*
 import net.dankito.utils.IThreadPool
 import net.dankito.utils.events.IEventBus
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -33,6 +34,8 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
         private val DateToYearFormatter = SimpleDateFormat("yyyy")
         private val DateToMonthFormatter = SimpleDateFormat("MM")
         private val PeriodStartDateFormatter = SimpleDateFormat("dd.MM.yyyy")
+
+        private val log = LoggerFactory.getLogger(ElsterTaxPresenter::class.java)
     }
 
     /**
@@ -67,6 +70,14 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
 
     fun getAllTaxOfficesAsync(callback: (List<FederalState>) -> Unit) {
         threadPool.runAsync {
+            val federalStates = getAllTaxOffices()
+
+            callback(federalStates)
+        }
+    }
+
+    private fun getAllTaxOffices(): List<FederalState> {
+        try {
             val federalStates = mapToFederalStates(client.getFinanzämter())
 
             val previousFederalStates = ArrayList(persistedFederalStatesProperty)
@@ -80,8 +91,12 @@ class ElsterTaxPresenter(private val settingsService: IElsterTaxDeclarationServi
             previousFederalStates.removeAll(federalStates)
             federalStateService.delete(previousFederalStates)
 
-            callback(federalStates)
+            return federalStates
+        } catch (e: Exception) {
+            log.info("Could not get German tax offices", e)
         }
+
+        return listOf()
     }
 
     private fun mapToFederalStates(orderedFinanzaemter: Map<Bundesland, List<Finanzamt>>): List<FederalState> {
