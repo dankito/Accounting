@@ -12,10 +12,10 @@ import net.dankito.accounting.javafx.presenter.BankAccountsPresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.windows.banking.controls.BankAccountTransactionsTable
 import net.dankito.utils.events.IEventBus
-import net.dankito.utils.javafx.ui.controls.UpdateButton
+import net.dankito.utils.javafx.ui.controls.ProcessingIndicatorButton
 import net.dankito.utils.javafx.ui.controls.addButton
+import net.dankito.utils.javafx.ui.controls.processingIndicatorButton
 import net.dankito.utils.javafx.ui.controls.searchtextfield
-import net.dankito.utils.javafx.ui.controls.updateButton
 import tornadofx.*
 import java.text.DateFormat
 import javax.inject.Inject
@@ -49,7 +49,7 @@ class BankAccountsTab : View() {
 
     private val balance = SimpleStringProperty("")
 
-    private val updateButton: UpdateButton = updateButton(messages["update..."], { updateAccountTransactions() })
+    private val updateButton: ProcessingIndicatorButton = processingIndicatorButton(messages["update..."])
 
 
     init {
@@ -60,7 +60,7 @@ class BankAccountsTab : View() {
         retrievedAccountTransactions(presenter.getAccountTransactions())
 
         eventBus.subscribe(UpdatingBankAccountTransactionsEvent::class.java) {
-            runLater { updateButton.setIsUpdating() }
+            runLater { updateButton.setIsProcessing() }
         }
 
         eventBus.subscribe(BankAccountTransactionsUpdatedEvent::class.java) {
@@ -104,6 +104,7 @@ class BankAccountsTab : View() {
                 }
 
                 add(updateButton.apply {
+                    action { updateAccountTransactions() }
 
                     hboxConstraints {
                         marginLeft = 12.0
@@ -177,7 +178,7 @@ class BankAccountsTab : View() {
             balance.value = overviewPresenter.getCurrencyString(allTransactions[0].account.balance)
         }
 
-        updateButton.resetIsUpdating()
+        updateButton.resetIsProcessing()
     }
 
 }

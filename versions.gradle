@@ -31,7 +31,7 @@ ext {
 
     apacheCommonsCsvVersion = '1.7'
 
-    javaFxUtilsVersion = '2.0.0-SNAPSHOT'
+    javaFxUtilsVersion = '1.0.4'
 
     daggerVersion = '2.22.1'
 
