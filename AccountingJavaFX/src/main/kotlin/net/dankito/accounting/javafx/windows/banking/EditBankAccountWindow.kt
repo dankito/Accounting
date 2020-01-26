@@ -10,7 +10,6 @@ import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import net.dankito.accounting.data.model.banking.BankAccount
 import net.dankito.accounting.data.model.banking.CheckBankAccountCredentialsResult
-import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.presenter.BankAccountsPresenter
 import net.dankito.utils.exception.ExceptionHelper
 import net.dankito.utils.javafx.ui.dialogs.Window
@@ -55,7 +54,7 @@ class EditBankAccountWindow(private val account: BankAccount) : Window() {
 
 
     init {
-        AppComponent.component.inject(this)
+//        AppComponent.component.inject(this)
     }
 
 

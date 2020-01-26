@@ -8,7 +8,6 @@ import net.dankito.accounting.di.ServiceModule
 import net.dankito.accounting.javafx.AccountingJavaFXApp
 import net.dankito.accounting.javafx.windows.banking.BankAccountTransactionDetailsWindow
 import net.dankito.accounting.javafx.windows.banking.EditAutomaticAccountTransactionImportWindow
-import net.dankito.accounting.javafx.windows.banking.EditBankAccountWindow
 import net.dankito.accounting.javafx.windows.invoice.CreateInvoiceWindow
 import net.dankito.accounting.javafx.windows.mainwindow.MainWindow
 import net.dankito.accounting.javafx.windows.mainwindow.controls.*
@@ -52,8 +51,6 @@ interface AppComponent : CommonComponent {
 
     fun inject(editTimeTrackerAccountWindow: EditTimeTrackerAccountWindow)
 
-
-    fun inject(editBankAccountWindow: EditBankAccountWindow)
 
     fun inject(editAutomaticAccountTransactionImportWindow: EditAutomaticAccountTransactionImportWindow)
 

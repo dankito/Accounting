@@ -8,6 +8,8 @@ import net.dankito.utils.ThreadPool
 import net.dankito.utils.events.IEventBus
 import net.dankito.utils.events.IRxEventBus
 import net.dankito.utils.events.RxEventBus
+import net.dankito.utils.web.client.IWebClient
+import net.dankito.utils.web.client.OkHttpWebClient
 import javax.inject.Singleton
 
 
@@ -24,6 +26,13 @@ class CommonUtilsModule {
     @Singleton
     fun provideEventBus(rxEventBus: IRxEventBus) : IEventBus {
         return rxEventBus
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideWebClient() : IWebClient {
+        return OkHttpWebClient()
     }
 
 

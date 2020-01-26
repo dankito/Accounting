@@ -15,7 +15,7 @@ class BankAccountsPresenter(private val accountService: IBankAccountService,
 
 
     fun checkAccountCredentialsAsync(account: BankAccount, callback: (CheckBankAccountCredentialsResult) -> Unit) {
-        accountService.checkAccountCredentialsAsync(account, callback)
+
     }
 
     fun saveAccountAndFetchTransactions(account: BankAccount) {

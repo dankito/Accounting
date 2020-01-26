@@ -23,8 +23,8 @@ import net.dankito.accounting.javafx.windows.invoice.model.CreateInvoiceSettings
 import net.dankito.accounting.javafx.windows.invoice.model.InvoiceViewModel
 import net.dankito.accounting.javafx.windows.invoice.model.SelectFileType
 import net.dankito.utils.datetime.asUtilDate
-import net.dankito.utils.javafx.ui.controls.UpdateButton
 import net.dankito.utils.javafx.ui.controls.doubleTextfield
+import net.dankito.utils.javafx.ui.controls.processingIndicatorButton
 import net.dankito.utils.javafx.ui.dialogs.Window
 import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
 import net.dankito.utils.javafx.util.converter.ZeroTo100PercentageStringConverter
@@ -95,7 +95,7 @@ class CreateInvoiceWindow : Window() {
 
     private var selectInvoiceOutputFileView: SelectFileView by singleAssign()
 
-    private val updateButton = UpdateButton(messages["update..."], { importTimeTrackerData() })
+    private val updateButton = processingIndicatorButton(messages["update..."])
 
 
     init {
@@ -185,7 +185,9 @@ class CreateInvoiceWindow : Window() {
                         }
                     }
                     right {
-                        add(updateButton)
+                        add(updateButton.apply {
+                            action { importTimeTrackerData() }
+                        })
                     }
                 }
 
@@ -416,13 +418,13 @@ class CreateInvoiceWindow : Window() {
     }
 
     private fun importTimeTrackerData() {
-        updateButton.setIsUpdating()
+        updateButton.setIsProcessing()
 
         timeTrackerAccountPresenter.importTimeTrackerDataAsync(settingsViewModel.timeTrackerAccount.value) { trackedTimes ->
             runLater {
                 trackedTimes?.let { showTrackedMonths(it) }
 
-                updateButton.resetIsUpdating()
+                updateButton.resetIsProcessing()
             }
         }
     }

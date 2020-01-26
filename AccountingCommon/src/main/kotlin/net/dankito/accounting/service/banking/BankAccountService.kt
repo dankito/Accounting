@@ -3,17 +3,23 @@ package net.dankito.accounting.service.banking
 import net.dankito.accounting.data.dao.banking.IBankAccountDao
 import net.dankito.accounting.data.dao.banking.IBankAccountTransactionDao
 import net.dankito.accounting.data.model.Document
-import net.dankito.accounting.data.model.banking.*
+import net.dankito.accounting.data.model.banking.BankAccount
+import net.dankito.accounting.data.model.banking.BankAccountTransaction
+import net.dankito.accounting.data.model.banking.BankAccountTransactions
+import net.dankito.accounting.data.model.banking.GetAccountTransactionsResult
 import net.dankito.accounting.data.model.event.BankAccountAddedEvent
 import net.dankito.accounting.data.model.event.BankAccountTransactionsUpdatedEvent
 import net.dankito.accounting.data.model.event.UpdatingBankAccountTransactionsEvent
+import net.dankito.banking.ui.presenter.BankingPresenter
 import net.dankito.utils.events.IEventBus
 
 
-open class BankAccountService(private val bankingClient: IBankingClient,
-                              private val bankAccountDao: IBankAccountDao,
-                              private val transactionDao: IBankAccountTransactionDao,
-                              private val eventBus: IEventBus
+open class BankAccountService(
+    private val presenter: BankingPresenter,
+    private val bankingClient: IBankingClient,
+    private val bankAccountDao: IBankAccountDao,
+    private val transactionDao: IBankAccountTransactionDao,
+    private val eventBus: IEventBus
 ) : IBankAccountService {
 
     companion object {
@@ -36,10 +42,6 @@ open class BankAccountService(private val bankingClient: IBankingClient,
         this.bankAccountsProperty = bankAccounts
 
         return bankAccounts
-    }
-
-    override fun checkAccountCredentialsAsync(account: BankAccount, callback: (CheckBankAccountCredentialsResult) -> Unit) {
-        bankingClient.checkAccountCredentialsAsync(account, callback)
     }
 
     override fun saveOrUpdateAccount(account: BankAccount) {

@@ -4,7 +4,7 @@ import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
 import javafx.scene.input.KeyCombination
 import net.dankito.accounting.javafx.di.AppComponent
-import net.dankito.accounting.javafx.presenter.MainWindowPresenter
+import net.dankito.banking.ui.presenter.BankingPresenter
 import tornadofx.*
 import javax.inject.Inject
 
@@ -12,7 +12,7 @@ import javax.inject.Inject
 class MainMenuBar : View() {
 
     @Inject
-    protected lateinit var presenter: MainWindowPresenter
+    protected lateinit var presenter: BankingPresenter
 
 
     init {
@@ -30,7 +30,7 @@ class MainMenuBar : View() {
                 menu(messages["main.window.menu.file.add"]) {
 
                     item(messages["main.window.menu.file.add.bank.account"]) {
-                        action { presenter.showCreateBankAccountWindow() }
+                        action { presenter.showAddAccountDialog() }
                     }
 
                 }

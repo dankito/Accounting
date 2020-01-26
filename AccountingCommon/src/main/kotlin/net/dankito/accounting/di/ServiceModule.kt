@@ -37,6 +37,7 @@ import net.dankito.accounting.service.tax.elster.ElsterTaxDeclarationService
 import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
 import net.dankito.accounting.service.timetracker.ITimeTrackerService
 import net.dankito.accounting.service.timetracker.TimeTrackerService
+import net.dankito.banking.ui.presenter.BankingPresenter
 import net.dankito.utils.events.IEventBus
 import java.io.File
 import javax.inject.Named
@@ -104,10 +105,10 @@ class ServiceModule {
 
     @Provides
     @Singleton
-    fun provideBankAccountService(bankingClient: IBankingClient, accountDao: IBankAccountDao,
+    fun provideBankAccountService(presenter: BankingPresenter, bankingClient: IBankingClient, accountDao: IBankAccountDao,
                                   transactionDao: IBankAccountTransactionDao, eventBus: IEventBus) : IBankAccountService {
 
-        return BankAccountService(bankingClient, accountDao, transactionDao, eventBus)
+        return BankAccountService(presenter, bankingClient, accountDao, transactionDao, eventBus)
     }
 
 

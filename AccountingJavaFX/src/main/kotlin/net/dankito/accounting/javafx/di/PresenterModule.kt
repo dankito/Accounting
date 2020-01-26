@@ -17,11 +17,18 @@ import net.dankito.accounting.service.tax.IFederalStateService
 import net.dankito.accounting.service.tax.ITaxOfficeService
 import net.dankito.accounting.service.tax.elster.IElsterTaxDeclarationService
 import net.dankito.accounting.service.timetracker.ITimeTrackerService
+import net.dankito.banking.fints4javaBankingClientCreator
+import net.dankito.banking.persistence.IBankingPersistence
+import net.dankito.banking.ui.javafx.RouterJavaFx
+import net.dankito.banking.ui.javafx.util.Base64ServiceJava8
+import net.dankito.banking.ui.model.Account
+import net.dankito.banking.ui.presenter.BankingPresenter
 import net.dankito.text.extraction.ITextExtractorRegistry
 import net.dankito.text.extraction.info.invoice.InvoiceDataExtractor
 import net.dankito.utils.IThreadPool
 import net.dankito.utils.events.IEventBus
 import net.dankito.utils.javafx.os.JavaFxOsService
+import net.dankito.utils.web.client.IWebClient
 import java.io.File
 import javax.inject.Named
 import javax.inject.Singleton
@@ -29,13 +36,6 @@ import javax.inject.Singleton
 
 @Module
 class PresenterModule {
-
-    @Provides
-    @Singleton
-    fun provideMainWindowPresenter(router: Router) : MainWindowPresenter {
-
-        return MainWindowPresenter(router)
-    }
 
     @Provides
     @Singleton
@@ -47,6 +47,24 @@ class PresenterModule {
 
         return OverviewPresenter(documentService, settingsService, bankAccountService, filterService,
             textExtractorRegistry, invoiceDataExtractor, eventBus, router, vatCalculator)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBankingPresenter(@Named(DaoModule.DataFolderKey) dataFolder: File, threadPool: IThreadPool, webClient: IWebClient) : BankingPresenter {
+        val bankingClientCreator = fints4javaBankingClientCreator(webClient, Base64ServiceJava8())
+
+        val noOpPersister = object : IBankingPersistence {
+            override fun readPersistedAccounts(): List<Account> {
+                return listOf()
+            }
+
+            override fun saveOrUpdateAccount(account: Account, allAccounts: List<Account>) {
+            }
+
+        }
+
+        return BankingPresenter(bankingClientCreator, dataFolder, noOpPersister, RouterJavaFx(), threadPool)
     }
 
     @Provides
