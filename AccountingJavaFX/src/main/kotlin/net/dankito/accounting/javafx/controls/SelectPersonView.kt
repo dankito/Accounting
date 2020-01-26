@@ -7,13 +7,15 @@ import javafx.collections.ObservableList
 import net.dankito.accounting.data.model.person.NaturalOrLegalPerson
 import net.dankito.accounting.data.model.person.PersonType
 import net.dankito.accounting.javafx.presenter.SelectPersonPresenter
+import net.dankito.accounting.javafx.windows.person.model.RequiredField
 import tornadofx.*
 
 
 open class SelectPersonView<T : NaturalOrLegalPerson>(
     protected val presenter: SelectPersonPresenter,
     protected val selectedPerson: Property<T>,
-    protected val typesOfPersonsToEdit: PersonType
+    protected val typesOfPersonsToEdit: PersonType,
+    protected val requiredFields: List<RequiredField>
 ) : View() {
 
     companion object {
@@ -63,7 +65,7 @@ open class SelectPersonView<T : NaturalOrLegalPerson>(
 
 
     protected open fun createNewPerson() {
-        presenter.showCreatePersonWindow(typesOfPersonsToEdit) { createdPerson ->
+        presenter.showCreatePersonWindow(typesOfPersonsToEdit, requiredFields) { createdPerson ->
             createdPerson?.let {
                 showAvailablePersons()
 
@@ -73,7 +75,7 @@ open class SelectPersonView<T : NaturalOrLegalPerson>(
     }
 
     protected open fun editSelectedPerson() {
-        presenter.showEditPersonWindow(selectedPerson.value) { didUserSavePerson, _ ->
+        presenter.showEditPersonWindow(selectedPerson.value, requiredFields) { didUserSavePerson, _ ->
             if (didUserSavePerson) {
                 showAvailablePersons()
             }
