@@ -27,9 +27,9 @@ class MainMenuBar : View() {
 
             menu(messages["main.window.menu.file"]) {
 
-                menu(messages["main.window.menu.file.add"]) {
+                menu(messages["main.window.menu.file.new"]) {
 
-                    item(messages["main.window.menu.file.add.bank.account"]) {
+                    item(messages["main.window.menu.file.new.bank.account"]) {
                         action { presenter.showCreateBankAccountWindow() }
                     }
 
