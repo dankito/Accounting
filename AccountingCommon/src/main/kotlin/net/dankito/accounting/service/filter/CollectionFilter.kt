@@ -68,7 +68,7 @@ open class CollectionFilter : ICollectionFilter {
             FilterOption.Equals -> value.equals(filterText, ignoreCase)
             FilterOption.EqualsNot -> value.equals(filterText, ignoreCase) == false
             FilterOption.Contains -> value.contains(filterText, ignoreCase)
-            FilterOption.ContainsNot -> value.contains(filterText, ignoreCase) == false
+            FilterOption.ContainsNot -> filterText.isEmpty() || value.contains(filterText, ignoreCase) == false
             FilterOption.StartsWith -> value.startsWith(filterText, ignoreCase)
             FilterOption.EndsWith -> value.endsWith(filterText, ignoreCase)
         }
