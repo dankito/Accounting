@@ -226,6 +226,13 @@ class EditPersonWindow(
 
 
     private fun saveAndClose() {
+        if (personToEdit.isPersisted() == false) {
+            // a new Person or Company gets created and user selected Company
+            if (isNaturalPerson.value == false && personToEdit is Person) {
+                personToEdit = Company(companyName.value, personToEdit.type, personToEdit.address)
+            }
+        }
+
         (personToEdit as? Person)?.let { person ->
             person.firstName = firstName.value
             person.lastName = lastName.value
@@ -235,11 +242,13 @@ class EditPersonWindow(
             company.name = companyName.value
         }
 
-        personToEdit.address.street = street.value
-        personToEdit.address.streetNumber = streetNumber.value
-        personToEdit.address.zipCode = zipCode.value
-        personToEdit.address.city = city.value
-        personToEdit.address.country = country.value
+        personToEdit.apply {
+            address.street = street.value
+            address.streetNumber = streetNumber.value
+            address.zipCode = zipCode.value
+            address.city = city.value
+            address.country = country.value
+        }
 
         presenter.saveOrUpdate(personToEdit)
 
