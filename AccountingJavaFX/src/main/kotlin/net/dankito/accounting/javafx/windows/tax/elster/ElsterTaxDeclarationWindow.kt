@@ -215,7 +215,7 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
                 prefWidth = TaxPayerLabelsWidth
             }
 
-            add(SelectPersonView(selectPersonPresenter, taxpayer, PersonType.TaxPayer, RequiredField.values().toList()))
+            add(SelectPersonView(selectPersonPresenter, taxpayer, PersonType.TaxPayer, RequiredField.allWithoutCountry))
 
             vboxConstraints {
                 marginTop = VerticalSpaceBetweenSections

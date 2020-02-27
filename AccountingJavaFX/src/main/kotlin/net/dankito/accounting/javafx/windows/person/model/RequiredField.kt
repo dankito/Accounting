@@ -17,6 +17,13 @@ enum class RequiredField {
 
     AddressCity,
 
-    AddressCountry
+    AddressCountry;
+
+
+    companion object {
+
+        val allWithoutCountry: List<RequiredField> = RequiredField.values().toList().filter { it != AddressCountry }
+
+    }
 
 }
