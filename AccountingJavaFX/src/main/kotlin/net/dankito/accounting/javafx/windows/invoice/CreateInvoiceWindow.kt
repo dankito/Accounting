@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory
 import tornadofx.*
 import java.io.File
 import java.text.DateFormat
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
@@ -239,6 +240,10 @@ class CreateInvoiceWindow : Window() {
 
             field(messages["create.invoice.window.invoice.end.date"]) {
                 datepicker(invoiceViewModel.invoiceEndDate)
+            }
+
+            field(messages["create.invoice.window.invoice.time.for.payment"]) {
+                textfield().bind(settingsViewModel.timeForPayment, false)
             }
         }
 
@@ -468,8 +473,10 @@ class CreateInvoiceWindow : Window() {
             presenter.createDocumentItem(0, invoiceItemQuantity.value)
         )
 
+        val dueDate = LocalDate.now().plusDays(settings.timeForPayment.toLong()).asUtilDate()
+
         val invoice = Document.createInvoice(invoiceItems, invoiceViewModel.invoiceNumber.value,
-            invoiceViewModel.invoiceDescription.value, invoiceViewModel.invoicingDate.value.asUtilDate(), null,
+            invoiceViewModel.invoiceDescription.value, invoiceViewModel.invoicingDate.value.asUtilDate(), dueDate,
             settings.lastSelectedRecipient)
 
         presenter.createAndShowInvoice(invoice)

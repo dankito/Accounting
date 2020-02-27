@@ -1,6 +1,7 @@
 package net.dankito.accounting.javafx.windows.invoice.model
 
 import javafx.beans.property.DoubleProperty
+import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import net.dankito.accounting.data.model.invoice.CreateInvoiceSettings
@@ -24,5 +25,7 @@ class CreateInvoiceSettingsViewModel(val settings: CreateInvoiceSettings) : View
     val invoiceItemDescription = bind { settings.observable(CreateInvoiceSettings::invoiceItemDescription)}
 
     val valueAddedTax = bind { settings.observable(CreateInvoiceSettings::valueAddedTaxRate) } as DoubleProperty
+
+    val timeForPayment = bind { settings.observable(CreateInvoiceSettings::timeForPayment) } as IntegerProperty
 
 }

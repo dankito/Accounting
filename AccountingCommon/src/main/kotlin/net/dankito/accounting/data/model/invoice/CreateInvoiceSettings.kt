@@ -34,6 +34,9 @@ class CreateInvoiceSettings(
     @Column(name = ValueAddedTaxRateColumnName)
     var valueAddedTaxRate: Double = 19.0,
 
+    @Column(name = TimeForPaymentColumnName)
+    var timeForPayment: Int = 30,
+
     @OneToOne
     @JoinColumn(name = LastSelectedRecipientJoinColumnName)
     var lastSelectedRecipient: NaturalOrLegalPerson = Company("", PersonType.Client, Address())
@@ -53,6 +56,8 @@ class CreateInvoiceSettings(
         const val InvoiceItemDescriptionColumnName = "invoice_item_description"
 
         const val ValueAddedTaxRateColumnName = "value_added_tax_rate"
+
+        const val TimeForPaymentColumnName = "time_for_payment"
 
         const val LastSelectedRecipientJoinColumnName = "last_selected_recipient"
 

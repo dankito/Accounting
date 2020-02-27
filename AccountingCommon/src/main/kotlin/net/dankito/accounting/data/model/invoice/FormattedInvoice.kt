@@ -12,5 +12,6 @@ open class FormattedInvoice(val items: List<FormattedInvoiceItem>,
                        val totalAmount: String,
                        val invoiceStartDate: String,
                        val invoiceEndDate: String,
+                       val timeForPayment: Int,
                        val recipient: NaturalOrLegalPerson?
 )

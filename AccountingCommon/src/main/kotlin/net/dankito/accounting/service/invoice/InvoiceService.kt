@@ -123,6 +123,7 @@ open class InvoiceService(protected val dao: ICreateInvoiceSettingsDao, protecte
             formatCurrency(document.totalAmount),
             formatDate(calculateInvoiceStartDate(invoicingDate), InvoiceStartDateFormat),
             formatDate(calculateInvoiceEndDate(invoicingDate), InvoiceEndDateFormat),
+            calculateTimeForPayment(document),
             document.recipient
         )
     }
@@ -198,6 +199,18 @@ open class InvoiceService(protected val dao: ICreateInvoiceSettingsDao, protecte
 
     override fun calculateInvoiceNumber(invoicingDate: Date): String {
         return InvoiceNumberFromInvoicingDateFormat.format(invoicingDate)
+    }
+
+    protected open fun calculateTimeForPayment(document: Document): Int {
+        document.dueDate?.let { dueDate ->
+            document.issueDate?.let { issueDate ->
+                val timeForPaymentInMillis = dueDate.time - issueDate.time
+
+                return (timeForPaymentInMillis / 1000 / 60 / 60 / 24).toInt()
+            }
+        }
+
+        return 0
     }
 
 
