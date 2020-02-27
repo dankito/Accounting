@@ -41,4 +41,9 @@ class Address(
 
     internal constructor() : this("", "", "", "", "") // for object deserializers
 
+
+    override fun toString(): String {
+        return "$street $streetNumber $zipCode $city"
+    }
+
 }
