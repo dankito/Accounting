@@ -12,7 +12,4 @@ class MainWindowPresenter(private val router: Router) {
         router.showEditBankAccountWindow(newBankAccount)
     }
 
-    fun showEditBankAccountWindow(bankAccount: BankAccount) {
-        router.showEditBankAccountWindow(bankAccount)
-    }
 }
