@@ -13,6 +13,7 @@ import net.dankito.accounting.javafx.presenter.EditPersonPresenter
 import net.dankito.accounting.javafx.windows.person.model.RequiredField
 import net.dankito.utils.javafx.ui.dialogs.Window
 import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
+import net.dankito.utils.javafx.ui.extensions.fixedWidth
 import tornadofx.*
 import javax.inject.Inject
 
@@ -128,19 +129,19 @@ class EditPersonWindow(
                     textfield(lastName)
                 }
 
-                field(messages["edit.person.window.street.label"]) {
+                field(messages["edit.person.window.street.name.and.number.label"]) {
                     textfield(street)
+
+                    textfield(streetNumber) {
+                        fixedWidth = 60.0
+                    }
                 }
 
-                field(messages["edit.person.window.street.number.label"]) {
-                    textfield(streetNumber)
-                }
+                field(messages["edit.person.window.postal.code.and.city.label"]) {
+                    textfield(zipCode) {
+                        fixedWidth = 60.0
+                    }
 
-                field(messages["edit.person.window.zip.code.label"]) {
-                    textfield(zipCode)
-                }
-
-                field(messages["edit.person.window.city.label"]) {
                     textfield(city)
                 }
 
