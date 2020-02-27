@@ -22,7 +22,9 @@ enum class RequiredField {
 
     companion object {
 
-        val allWithoutCountry: List<RequiredField> = RequiredField.values().toList().filter { it != AddressCountry }
+        val All: List<RequiredField> = values().toList()
+
+        val AllWithoutCountry: List<RequiredField> = All.filter { it != AddressCountry }
 
     }
 

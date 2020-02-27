@@ -214,7 +214,7 @@ class CreateInvoiceWindow : Window() {
 
         fieldset(messages["create.invoice.window.recipient.section.title"]) {
             field(messages["create.invoice.window.recipient"]) {
-                add(SelectPersonView(selectPersonPresenter, settingsViewModel.client, PersonType.Client, RequiredField.allWithoutCountry))
+                add(SelectPersonView(selectPersonPresenter, settingsViewModel.client, PersonType.Client, RequiredField.AllWithoutCountry))
             }
         }
 
