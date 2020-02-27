@@ -15,7 +15,7 @@ ext {
 
     xdocReportVersion = '2.0.2'
 
-    harvestClientVersion = '1.1.1'
+    harvestClientVersion = '1.1.2'
 
     hbciVersion = '1.0.1-SNAPSHOT'
 
