@@ -25,9 +25,10 @@ ext {
 
     couchbaseLiteVersion = '1.4.1'
 
-    couchbaseLiteJpaVersion = '1.0-alpha4-SNAPSHOT'
+    couchbaseLiteJpaVersion = '1.0.0-alpha4'
 
-    jpaAptVersion = '1.0-alpha4-SNAPSHOT'
+    jpaAptVersion = '1.0.0-alpha4'
+
 
     apacheCommonsCsvVersion = '1.7'
 
