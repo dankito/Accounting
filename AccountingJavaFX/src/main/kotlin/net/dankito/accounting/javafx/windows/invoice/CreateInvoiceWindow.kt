@@ -10,18 +10,22 @@ import javafx.scene.control.ListView
 import javafx.stage.FileChooser
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.invoice.CreateInvoiceSettings
+import net.dankito.accounting.data.model.person.PersonType
 import net.dankito.accounting.data.model.timetracker.TimeTrackerAccount
 import net.dankito.accounting.data.model.timetracker.TrackedMonth
 import net.dankito.accounting.data.model.timetracker.TrackedTimes
+import net.dankito.accounting.javafx.controls.SelectPersonView
 import net.dankito.accounting.javafx.di.AppComponent
 import net.dankito.accounting.javafx.extensions.asLocalDate
 import net.dankito.accounting.javafx.presenter.CreateInvoicePresenter
 import net.dankito.accounting.javafx.presenter.OverviewPresenter
+import net.dankito.accounting.javafx.presenter.SelectPersonPresenter
 import net.dankito.accounting.javafx.presenter.TimeTrackerAccountPresenter
 import net.dankito.accounting.javafx.windows.invoice.controls.SelectFileView
 import net.dankito.accounting.javafx.windows.invoice.model.CreateInvoiceSettingsViewModel
 import net.dankito.accounting.javafx.windows.invoice.model.InvoiceViewModel
 import net.dankito.accounting.javafx.windows.invoice.model.SelectFileType
+import net.dankito.accounting.javafx.windows.person.model.RequiredField
 import net.dankito.utils.datetime.asUtilDate
 import net.dankito.utils.javafx.ui.controls.ProcessingIndicatorButton
 import net.dankito.utils.javafx.ui.controls.doubleTextfield
@@ -72,6 +76,9 @@ class CreateInvoiceWindow : Window() {
     @Inject
     protected lateinit var overviewPresenter: OverviewPresenter
 
+    @Inject
+    protected lateinit var selectPersonPresenter: SelectPersonPresenter
+
 
     private val settings: CreateInvoiceSettings
 
@@ -113,7 +120,7 @@ class CreateInvoiceWindow : Window() {
 
         updateInvoiceDescription()
 
-        settingsViewModel.clientName.addListener { _, _, _ ->
+        settingsViewModel.client.addListener { _, _, _ ->
             updateInvoiceOutputFilename()
             updateInvoiceDescription()
         }
@@ -206,26 +213,8 @@ class CreateInvoiceWindow : Window() {
         }
 
         fieldset(messages["create.invoice.window.recipient.section.title"]) {
-            field(messages["create.invoice.window.recipient.name"]) {
-                textfield(settingsViewModel.clientName)
-            }
-
-            field(messages["create.invoice.window.recipient.address.street.name.and.number"]) {
-                textfield(settingsViewModel.clientAddressStreetName)
-
-                textfield(settingsViewModel.clientAddressStreetNumber) {
-                    minWidth = 60.0
-                    maxWidth = minWidth
-                }
-            }
-
-            field(messages["create.invoice.window.recipient.address.postal.code.and.city"]) {
-                textfield(settingsViewModel.clientAddressPostalCode) {
-                    minWidth = 60.0
-                    maxWidth = minWidth
-                }
-
-                textfield(settingsViewModel.clientAddressCity)
+            field(messages["create.invoice.window.recipient"]) {
+                add(SelectPersonView(selectPersonPresenter, settingsViewModel.client, PersonType.Client, RequiredField.allWithoutCountry))
             }
         }
 
@@ -449,7 +438,7 @@ class CreateInvoiceWindow : Window() {
 
     private fun updateInvoiceDescription() {
         // TODO: check if user already set this value
-        invoiceViewModel.invoiceDescription.value = settingsViewModel.clientName.value +
+        invoiceViewModel.invoiceDescription.value = settingsViewModel.client.value.name +
                 (selectedTrackedMonth?.let { " " + MonthDateFormatter.format(it.month.asLocalDate()) } ?: "")
     }
 
@@ -465,7 +454,7 @@ class CreateInvoiceWindow : Window() {
     private fun updateInvoiceOutputFilename() {
         val currentFile = File(settings.invoiceOutputFilePath)
         val filename = "${InvoiceOutputFileDateFormatter.format(invoiceViewModel.invoicingDate.value)}_" +
-                "${settingsViewModel.clientName.value}.pdf"
+                "${settingsViewModel.client.value.name}.pdf"
         val file = File(currentFile.parentFile, filename)
 
         selectInvoiceOutputFileView.selectedFile = file
