@@ -13,6 +13,7 @@ import javafx.scene.text.TextAlignment
 import javafx.util.converter.NumberStringConverter
 import net.dankito.accounting.data.model.Document
 import net.dankito.accounting.data.model.DocumentItem
+import net.dankito.accounting.data.model.DocumentType
 import net.dankito.accounting.data.model.invoice.InvoiceData
 import net.dankito.accounting.javafx.controls.VatRateComboBox
 import net.dankito.accounting.javafx.controls.vatRateComboBox
@@ -103,6 +104,13 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
 
     init {
         showEditDocumentItemPane.addListener { _, _, newValue -> updateShowEditDocumentItemPane(newValue) }
+    }
+
+
+    fun show() {
+        var messageKey = getWindowTitleMessageKey()
+
+        show(FX.messages[messageKey])
     }
 
 
@@ -505,6 +513,28 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
 
     private fun updateTotalAmount() {
         totalAmount.value = documentItems.sumByDouble { it.grossAmount.value }
+    }
+
+
+    private fun getWindowTitleMessageKey(): String {
+        var messageKey = "edit.expenditure.window.title"
+
+        if (document.isPersisted() == false) {
+            if (document.type == DocumentType.Revenue) {
+                messageKey = "create.revenue.window.title"
+            } else {
+                messageKey = "create.expenditure.window.title"
+            }
+        } else {
+            if (document.isSelfCreatedInvoice) {
+                messageKey = "edit.invoice.window.title"
+            } else if (document.type == DocumentType.Revenue) {
+                messageKey = "edit.revenue.window.title"
+            } else {
+                messageKey = "edit.expenditure.window.title"
+            }
+        }
+        return messageKey
     }
 
 

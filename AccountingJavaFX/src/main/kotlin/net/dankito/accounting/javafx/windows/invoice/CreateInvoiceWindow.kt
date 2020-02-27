@@ -138,6 +138,12 @@ class CreateInvoiceWindow : Window() {
         updateInvoiceOutputFilename()
     }
 
+
+    fun show() {
+        show(FX.messages["create.invoice.window.title"])
+    }
+
+
     override val root = form {
         fieldset(messages["create.invoice.window.import.data.section.title"]) {
             field(messages["create.invoice.window.time.tracker.account"]) {
