@@ -5,6 +5,7 @@ import net.dankito.accounting.data.model.banking.BankAccountTransaction
 import net.dankito.accounting.data.model.event.AccountingPeriodChangedEvent
 import net.dankito.accounting.data.model.event.BankAccountTransactionsUpdatedEvent
 import net.dankito.accounting.data.model.filter.EntityFilter
+import net.dankito.accounting.data.model.filter.Filter
 import net.dankito.accounting.data.model.invoice.InvoiceData
 import net.dankito.accounting.data.model.settings.AppSettings
 import net.dankito.accounting.javafx.service.Router
@@ -191,8 +192,8 @@ open class OverviewPresenter(private val documentService: IDocumentService,
     }
 
 
-    fun saveOrUpdate(entityFilter: EntityFilter) {
-        filterService.saveOrUpdate(entityFilter)
+    fun saveOrUpdate(entityFilter: EntityFilter, updatedFilterDefinitions: List<Filter>?) {
+        filterService.saveOrUpdate(entityFilter, updatedFilterDefinitions)
     }
 
     fun runAccountTransactionsFilterAndCreateNewDocuments(transactions: Collection<BankAccountTransaction>) {

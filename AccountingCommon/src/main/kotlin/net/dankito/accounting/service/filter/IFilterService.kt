@@ -1,6 +1,7 @@
 package net.dankito.accounting.service.filter
 
 import net.dankito.accounting.data.model.filter.EntityFilter
+import net.dankito.accounting.data.model.filter.Filter
 
 
 interface IFilterService {
@@ -10,7 +11,7 @@ interface IFilterService {
     fun getEntityFiltersForEntity(entityClass: String): List<EntityFilter>
 
 
-    fun saveOrUpdate(entityFilter: EntityFilter)
+    fun saveOrUpdate(entityFilter: EntityFilter, updatedFilterDefinitions: List<Filter>?)
 
     fun delete(entityFilter: EntityFilter)
 

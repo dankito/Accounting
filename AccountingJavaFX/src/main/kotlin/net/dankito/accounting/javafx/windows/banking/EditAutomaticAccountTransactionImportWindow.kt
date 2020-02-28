@@ -579,12 +579,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
         entityFilter.valueAddedTaxRateForCreatedDocuments = entityFilterViewModel.valueAddedTaxRateForCreatedDocuments.value
         entityFilter.descriptionForCreatedDocuments = entityFilterViewModel.descriptionForCreatedDocuments.value
 
-        if (entityFilterViewModel.didFiltersChange) {
-            entityFilter.updateFilterDefinitions(mapFiltersFromViewModel())
-            // TODO: filters do not get updated in EntityFilterViewModel
-        }
-
-        overviewPresenter.saveOrUpdate(entityFilter)
+        overviewPresenter.saveOrUpdate(entityFilter, if (entityFilterViewModel.didFiltersChange) mapFiltersFromViewModel() else null)
 
         entityFilterViewModel.reevaluateHasUnsavedChanges()
     }
@@ -609,7 +604,7 @@ class EditAutomaticAccountTransactionImportWindow : Window() {
     private fun runFilterEachTimeAfterReceivingTransactions() { // TODO: also run filter now
         overviewPresenter.saveOrUpdate(EntityFilter(selectedEntityFilter.name.value, BankAccountTransaction::class.java,
             selectedEntityFilter.valueAddedTaxRateForCreatedDocuments.value,
-            selectedEntityFilter.descriptionForCreatedDocuments.value, mapFiltersFromViewModel()))
+            selectedEntityFilter.descriptionForCreatedDocuments.value, mapFiltersFromViewModel()), null)
 
         close()
     }

@@ -3,6 +3,7 @@ package net.dankito.accounting.service.filter
 import net.dankito.accounting.data.dao.filter.IEntityFilterDao
 import net.dankito.accounting.data.dao.filter.IFilterDao
 import net.dankito.accounting.data.model.filter.EntityFilter
+import net.dankito.accounting.data.model.filter.Filter
 
 
 class FilterService(private val collectionFilter: ICollectionFilter,
@@ -19,8 +20,16 @@ class FilterService(private val collectionFilter: ICollectionFilter,
     }
 
 
-    override fun saveOrUpdate(entityFilter: EntityFilter) {
-        filterDao.saveOrUpdate(entityFilter.filterDefinitions)
+    override fun saveOrUpdate(entityFilter: EntityFilter, updatedFilterDefinitions: List<Filter>?) {
+        if (updatedFilterDefinitions != null) {
+            entityFilter.filterDefinitions.forEach { filterDefinition ->
+                filterDao.delete(filterDefinition)
+            }
+
+            entityFilter.updateFilterDefinitions(updatedFilterDefinitions)
+
+            filterDao.saveOrUpdate(entityFilter.filterDefinitions)
+        }
 
         entityFilterDao.saveOrUpdate(entityFilter)
     }
