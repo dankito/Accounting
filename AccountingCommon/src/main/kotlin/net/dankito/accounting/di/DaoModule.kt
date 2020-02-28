@@ -3,7 +3,10 @@ package net.dankito.accounting.di
 import dagger.Module
 import dagger.Provides
 import net.dankito.accounting.data.dao.*
-import net.dankito.accounting.data.dao.banking.*
+import net.dankito.accounting.data.dao.banking.BankAccountDao
+import net.dankito.accounting.data.dao.banking.BankAccountTransactionDao
+import net.dankito.accounting.data.dao.banking.IBankAccountDao
+import net.dankito.accounting.data.dao.banking.IBankAccountTransactionDao
 import net.dankito.accounting.data.dao.filter.EntityFilterDao
 import net.dankito.accounting.data.dao.filter.FilterDao
 import net.dankito.accounting.data.dao.filter.IEntityFilterDao
@@ -156,12 +159,6 @@ class DaoModule(private val dataFolder: File = File("data")) {
     @Singleton
     fun provideBankAccountTransactionDao(entityManager: IEntityManager) : IBankAccountTransactionDao {
         return BankAccountTransactionDao(entityManager)
-    }
-
-    @Provides
-    @Singleton
-    fun provideBankAccountTransactionsDao(entityManager: IEntityManager) : IBankAccountTransactionsDao {
-        return BankAccountTransactionsDao(entityManager)
     }
 
 
