@@ -107,11 +107,7 @@ open class DocumentItem protected constructor() : BaseEntity() {
 
 
     override fun toString(): String {
-        if (index > UnsetIndex) {
-            return "[$index] $quantity à $unitPrice for $description"
-        }
-
-        return super.toString()
+        return "[$index] $grossAmount (vatRate = $valueAddedTaxRate, vat = $valueAddedTax, net = $netAmount) for $description)"
     }
 
 }
