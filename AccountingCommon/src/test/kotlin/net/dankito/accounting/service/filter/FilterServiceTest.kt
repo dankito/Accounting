@@ -39,7 +39,7 @@ class FilterServiceTest : DatabaseBasedTest() {
         val startsWithFilter = Filter(FilterType.String, FilterOption.StartsWith, true, StartsWithFilterText,
             BankAccountTransaction::class.java, AccountTransactionProperty.Usage.propertyName)
         val entityFilter = EntityFilter(FilterName, BankAccountTransaction::class.java, 0f, "", listOf(startsWithFilter))
-        underTest.saveOrUpdate(entityFilter)
+        underTest.saveOrUpdate(entityFilter, null)
 
         val collectionToFilter = createTransactions(CountTransactionsStartsWith)
         assertThat(collectionToFilter.size).isGreaterThan(CountTransactionsStartsWith)
