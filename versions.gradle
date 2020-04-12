@@ -11,7 +11,7 @@ ext {
     
     rxJavaVersion = '2.2.9'
 
-    javaUtilsVersion = '1.0.9'
+    javaUtilsVersion = '1.0.15'
 
 
     xdocReportVersion = '2.0.2'
