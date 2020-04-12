@@ -32,7 +32,7 @@ dependencies {
     compile "org.bouncycastle:bcpkix-jdk15on:1.61"
 
     compile "net.dankito.text.extraction:text-extractor-common:$textExtractorVersion"
-    compile "net.dankito.text.extraction:pdftotext-text-extractor:$textExtractorVersion"
+    compile "net.dankito.text.extraction:poppler-text-extractor:$textExtractorVersion"
     compile "net.dankito.text.extraction:openpdf-text-extractor:$textExtractorVersion"
 
     compile "com.couchbase.lite:couchbase-lite-java:$couchbaseLiteVersion"

@@ -20,7 +20,9 @@ ext {
     hbciVersion = '1.0.1-SNAPSHOT'
 
 
-    textExtractorVersion = '1.0.0-SNAPSHOT'
+    textExtractorVersion = '0.5.0'
+
+    textInfoExtractorVersion = '1.0.0'
     
 
     couchbaseLiteVersion = '1.4.1'

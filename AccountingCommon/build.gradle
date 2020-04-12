@@ -30,7 +30,7 @@ dependencies {
 
     compile "net.dankito.utils:java-utils:$javaUtilsVersion"
 
-    compile "net.dankito.text.extraction:text-info-extractor:$textExtractorVersion"
+    compile "net.dankito.text.extraction:text-info-extractor:$textInfoExtractorVersion"
 
 
     compile "fr.opensagres.xdocreport:fr.opensagres.xdocreport.document.odt:$xdocReportVersion"
