@@ -3,12 +3,10 @@ package net.dankito.accounting.javafx.windows.mainwindow.controls
 import com.sun.javafx.scene.control.skin.MenuButtonSkinBase
 import com.sun.javafx.scene.control.skin.SplitMenuButtonSkin
 import javafx.collections.FXCollections
-import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
-import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import javafx.stage.FileChooser
@@ -22,8 +20,9 @@ import net.dankito.accounting.javafx.presenter.OverviewPresenter
 import net.dankito.accounting.javafx.service.StyleService
 import net.dankito.utils.IThreadPool
 import net.dankito.utils.events.IEventBus
-import net.dankito.utils.javafx.ui.color.UiColors
+import net.dankito.utils.javafx.ui.controls.addButtonWithDropDownMenu
 import net.dankito.utils.javafx.ui.controls.searchtextfield
+import net.dankito.utils.javafx.ui.extensions.fixedWidth
 import net.dankito.utils.javafx.util.FXUtils
 import org.slf4j.LoggerFactory
 import tornadofx.*
@@ -128,18 +127,8 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
                 }
             }
 
-            // TODO: add to JavaFxUtils
-            add(SplitMenuButton().apply {
-                minWidth = AddDocumentButtonWidth
-                maxWidth = AddDocumentButtonWidth
-
-                text = "+"
-                font = Font.font(font.family, FontWeight.BOLD, 17.0)
-                textFill = Color.valueOf(UiColors.AddButtonHexColor)
-                alignment = Pos.CENTER
-                contentDisplay = ContentDisplay.TEXT_ONLY
-
-                setDropDownButtonWidth()
+            addButtonWithDropDownMenu {
+                fixedWidth = AddDocumentButtonWidth
 
                 action { showCreateNewDocumentWindow() }
 
@@ -150,7 +139,7 @@ abstract class DocumentsOverview(titleResourceKey: String, protected val present
                     rightAnchor = 0.0
                     bottomAnchor = AddDocumentButtonTopBottomMargin
                 }
-            })
+            }
         }
 
 
