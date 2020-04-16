@@ -333,25 +333,25 @@ open class OverviewPresenter(private val documentService: IDocumentService,
 
 
     fun extractInvoiceData(invoiceFile: File): InvoiceData {
-        val extractors = textExtractorRegistry.getAllExtractorsForType(invoiceFile)
+        val extractors = textExtractorRegistry.getAllExtractorsForFile(invoiceFile)
 
         var bestExtractedText: String? = null
         var firstException: Exception? = null
 
         for (extractor in extractors) {
-            val extractedText = extractor.extractText(invoiceFile)
+            extractor.extractText(invoiceFile).text?.let { extractedText ->
+                if (extractedText.isNotBlank()) { // if text extraction failed we continue on to next text extractor
+                    if (extractedText.trim().length > (bestExtractedText?.length ?: -1)) {
+                        bestExtractedText = extractedText.trim()
+                    }
 
-            if (extractedText.text.isNotBlank()) { // if text extraction failed we continue on to next text extractor
-                if (extractedText.text.trim().length > (bestExtractedText?.length ?: -1)) {
-                    bestExtractedText = extractedText.text.trim()
-                }
-
-                val extractedInvoiceData = invoiceDataExtractor.extractInvoiceData(extractedText.text)
-                if (extractedInvoiceData.couldExtractInvoiceData) {
-                    return InvoiceData(invoiceFile, extractedText.text.trim(), extractedInvoiceData, null)
-                }
-                else if (firstException == null) { // if invoice data extraction failed we continue on to next text extractor
-                    firstException = extractedInvoiceData.error
+                    val extractedInvoiceData = invoiceDataExtractor.extractInvoiceData(extractedText)
+                    if (extractedInvoiceData.couldExtractInvoiceData) {
+                        return InvoiceData(invoiceFile, extractedText.trim(), extractedInvoiceData, null)
+                    }
+                    else if (firstException == null) { // if invoice data extraction failed we continue on to next text extractor
+                        firstException = extractedInvoiceData.error
+                    }
                 }
             }
         }
