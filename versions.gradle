@@ -11,7 +11,7 @@ ext {
     
     rxJavaVersion = '2.2.9'
 
-    javaUtilsVersion = '1.0.15'
+    javaUtilsVersion = '1.0.16'
 
 
     xdocReportVersion = '2.0.2'
@@ -35,7 +35,7 @@ ext {
 
     apacheCommonsCsvVersion = '1.7'
 
-    javaFxUtilsVersion = '1.0.7-SNAPSHOT'
+    javaFxUtilsVersion = '1.0.7'
 
     daggerVersion = '2.22.1'
 
