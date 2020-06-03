@@ -405,7 +405,9 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         }
 
 
-        initFields()
+        runLater { // otherwise currentWindow isn't set yet
+            initFields()
+        }
 
     }
 
