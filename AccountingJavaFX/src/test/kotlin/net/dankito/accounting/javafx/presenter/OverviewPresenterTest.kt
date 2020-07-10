@@ -19,6 +19,8 @@ import net.dankito.accounting.service.filter.CollectionFilter
 import net.dankito.accounting.service.filter.FilterService
 import net.dankito.accounting.service.settings.ISettingsService
 import net.dankito.accounting.util.db.DatabaseBasedTest
+import net.dankito.text.extraction.TextExtractorRegistry
+import net.dankito.text.extraction.info.invoice.InvoiceDataExtractor
 import net.dankito.utils.datetime.asUtilDate
 import net.dankito.utils.events.RxEventBus
 import org.assertj.core.api.Assertions.assertThat
@@ -75,7 +77,7 @@ class OverviewPresenterTest : DatabaseBasedTest() {
 
         doReturn(appSettingsMock).`when`(settingsServiceMock).appSettings
 
-        underTest = object : OverviewPresenter(documentService, settingsServiceMock, bankAccountServiceMock, filterService, eventBus, routerMock) {
+        underTest = object : OverviewPresenter(documentService, settingsServiceMock, bankAccountServiceMock, filterService, TextExtractorRegistry(), InvoiceDataExtractor(), eventBus, routerMock) {
 
             override fun getToday(): LocalDate {
                 return mockedTodayValue.get()
@@ -94,7 +96,7 @@ class OverviewPresenterTest : DatabaseBasedTest() {
         val startsWithFilter = Filter(FilterType.String, FilterOption.StartsWith, true, StartsWithFilterText,
             BankAccountTransaction::class.java, AccountTransactionProperty.Usage.propertyName)
         val entityFilter = EntityFilter(FilterName, BankAccountTransaction::class.java, 0f, OverviewPresenter.DefaultDescriptionForCreatedDocuments, listOf(startsWithFilter))
-        underTest.saveOrUpdate(entityFilter)
+        underTest.saveOrUpdate(entityFilter, null)
 
         val accountTransactions = createTransactions(countTransactonsStartsWith = CountTransactionsStartsWith)
         assertThat(accountTransactions.size).isGreaterThan(CountTransactionsStartsWith)
