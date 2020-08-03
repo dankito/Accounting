@@ -40,9 +40,12 @@ import net.dankito.utils.javafx.ui.controls.intTextfield
 import net.dankito.utils.javafx.ui.dialogs.Window
 import net.dankito.utils.javafx.ui.extensions.addStyleToCurrentStyle
 import net.dankito.utils.javafx.ui.extensions.ensureOnlyUsesSpaceIfVisible
+import net.dankito.utils.javafx.ui.extensions.updateWindowSize
 import net.dankito.utils.javafx.util.FXUtils
 import tornadofx.*
 import java.io.File
+import java.text.DecimalFormat
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.*
@@ -56,6 +59,8 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         private val UploadedFilesFolder = File("ElsterUpload")
 
         private val OutputFilesDateTimeFormat = SimpleDateFormat("yyyy.MM.dd_HH-mm-ss")
+
+        private val PercentageNumberFormat = NumberFormat.getPercentInstance() as DecimalFormat
 
 
         private const val VerticalSpaceBetweenSections = 6.0
@@ -75,6 +80,12 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         private const val ElsterButtonsHeight = 34.0
         private const val ElsterButtonsWidth = 200.0
 
+
+        init {
+            PercentageNumberFormat.multiplier = 1
+            PercentageNumberFormat.maximumFractionDigits = 2
+        }
+
     }
 
 
@@ -93,16 +104,10 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
     private val zeitraum = SimpleObjectProperty<Voranmeldungszeitraum>()
 
 
-    private val revenuesWith19PercentVatNetAmount = SimpleIntegerProperty()
+    // to be able that user can enter custom VAT rates i have to declare it that generic
+    private var receivedVat = mutableMapOf<Float, Pair<SimpleIntegerProperty, SimpleDoubleProperty>>()
 
-    private val revenuesWith7PercentVatNetAmount = SimpleIntegerProperty()
-
-    private val receivedVatWith19Percent = SimpleDoubleProperty()
-    private val receivedVatWith7Percent = SimpleDoubleProperty()
-
-    private val spentVatWith19Percent = SimpleDoubleProperty()
-
-    private val spentWith7Percent = SimpleDoubleProperty()
+    private var spentVat = mutableMapOf<Float, SimpleDoubleProperty>()
 
     private val vatBalance = SimpleDoubleProperty()
 
@@ -137,6 +142,9 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
     private val areRequiredFieldsForElsterXmlProvided = SimpleBooleanProperty(false)
 
     private val areRequiredFieldsForElsterUploadProvided = SimpleBooleanProperty(false)
+
+
+    private lateinit var vatLayout: Pane
 
 
     private val subscribedEvent: ISubscribedEvent
@@ -194,15 +202,9 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
             }
         }
 
-        netAmountField("elster.tax.declaration.window.revenues.with.19.percent.vat", revenuesWith19PercentVatNetAmount, receivedVatWith19Percent)
+        vatLayout = vbox { }
 
-        netAmountField("elster.tax.declaration.window.revenues.with.7.percent.vat", revenuesWith7PercentVatNetAmount, receivedVatWith7Percent)
-
-        vatAmountField("elster.tax.declaration.window.spent.vat.with.19.percent", spentVatWith19Percent)
-
-        vatAmountField("elster.tax.declaration.window.spent.vat.with.7.percent", spentWith7Percent)
-
-        vatAmountField("elster.tax.declaration.window.vat.balance", vatBalance, true) {
+        vatAmountField("elster.tax.declaration.window.vat.balance", vatBalance, allowNegativeNumbers = true) {
             vboxConstraints {
                 marginBottom = 12.0
             }
@@ -412,13 +414,19 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
     }
 
     private fun EventTarget.vatAmountField(labelResourceKey: String, value: Property<Number>,
+                                           vatPercentage: Float? = null,
                                            allowNegativeNumbers: Boolean = false,
                                            additionalVatProperty: SimpleDoubleProperty? = null, op: HBox.() -> Unit = {}): Pane {
+
+        var label = messages[labelResourceKey]
+        if (vatPercentage != null) {
+            label = String.format(label, PercentageNumberFormat.format(vatPercentage))
+        }
 
         return hbox {
             alignment = Pos.CENTER_LEFT
 
-            label(messages[labelResourceKey]) {
+            label(label) {
                 prefWidth = VatAmountsLabelsWidth
             }
 
@@ -474,11 +482,11 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         }
     }
 
-    private fun EventTarget.netAmountField(labelResourceKey: String, value: Property<Number>,
+    private fun EventTarget.netAmountField(labelResourceKey: String, vatPercentage: Float, value: Property<Number>,
                                            additionalVatProperty: SimpleDoubleProperty, op: VBox.() -> Unit = {}): Pane {
 
         return vbox {
-            vatAmountField(labelResourceKey, value, false, additionalVatProperty)
+            vatAmountField(labelResourceKey, value, vatPercentage, false, additionalVatProperty)
 
             label(messages["elster.tax.declaration.window.enter.net.amount.without.cent.hint"]) {
                 vboxConstraints {
@@ -492,6 +500,8 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
 
     private fun initFields() {
+        showReceivedAndSpentVat()
+
         taxpayer.addListener { _, _, newValue -> isATaxpayerSelected.value = newValue != null }
         taxpayer.value = presenter.settings.taxpayer
 
@@ -522,6 +532,23 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
         areRequiredFieldsForElsterXmlProvided.bind(isATaxpayerSelected.and(taxNumberInput.isEnteredTaxNumberValid))
         areRequiredFieldsForElsterUploadProvided.bind(areRequiredFieldsForElsterXmlProvided.and(isCertificateFileSet))
+    }
+
+    private fun showReceivedAndSpentVat() {
+        vatLayout.clear()
+
+        vatLayout.apply {
+            receivedVat.forEach { (vatPercentage, netAmountAndReceivedVatProperties) ->
+                netAmountField("elster.tax.declaration.window.revenues.with.x.percent.vat", vatPercentage,
+                    netAmountAndReceivedVatProperties.first, netAmountAndReceivedVatProperties.second)
+            }
+
+            spentVat.forEach { (vatPercentage, spentVatProperty) ->
+                vatAmountField("elster.tax.declaration.window.spent.vat.with.x.percent", spentVatProperty, vatPercentage)
+            }
+        }
+
+        updateWindowSize()
     }
 
     private fun initYearAndPeriod() {
@@ -555,19 +582,26 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         val revenuesInPeriod = overviewPresenter.getDocumentsInPeriod(overviewPresenter.getRevenues(), periodStart, periodEnd)
         val expendituresInPeriod = overviewPresenter.getDocumentsInPeriod(overviewPresenter.getExpenditures(), periodStart, periodEnd)
 
-        val revenuesWith19PercentVatInPeriod = revenuesInPeriod.flatMap { it.items }.filter { it.valueAddedTaxRate == 19f }
-        this.revenuesWith19PercentVatNetAmount.value = revenuesWith19PercentVatInPeriod.sumByDouble { it.netAmount }.toInt()
-        this.receivedVatWith19Percent.value = revenuesWith19PercentVatInPeriod.sumByDouble { it.valueAddedTax }
+        this.receivedVat = revenuesInPeriod.flatMap { it.items }.groupBy { it.valueAddedTaxRate }
+            .mapValues { Pair(
+                SimpleIntegerProperty(it.value.sumByDouble { it.netAmount }.toInt()),
+                SimpleDoubleProperty(it.value.sumByDouble { it.valueAddedTax })
+            ) }.toMutableMap()
 
-        val revenuesWith7PercentVatInPeriod = revenuesInPeriod.flatMap { it.items }.filter { it.valueAddedTaxRate == 7f }
-        this.revenuesWith7PercentVatNetAmount.value = revenuesWith7PercentVatInPeriod.sumByDouble { it.netAmount }.toInt()
-        this.receivedVatWith7Percent.value = revenuesWith7PercentVatInPeriod.sumByDouble { it.valueAddedTax }
+        this.spentVat = expendituresInPeriod.flatMap { it.items }.groupBy { it.valueAddedTaxRate }
+            .mapValues { it.value.sumByDouble { it.valueAddedTax } }
+            .mapValues { SimpleDoubleProperty(it.value) }.toMutableMap()
 
-        this.spentVatWith19Percent.value = expendituresInPeriod.flatMap { it.items }.filter { it.valueAddedTaxRate == 19f }.sumByDouble { it.valueAddedTax }
-        this.spentWith7Percent.value = expendituresInPeriod.flatMap { it.items }.filter { it.valueAddedTaxRate == 7f }.sumByDouble { it.valueAddedTax }
+        overviewPresenter.getVatRatesForUser().filter { it != 0f }.sortedDescending().forEach { vatRate ->
+            receivedVat.putIfAbsent(vatRate, Pair(SimpleIntegerProperty(0), SimpleDoubleProperty(0.0)))
 
-        this.vatBalance.value = receivedVatWith19Percent.value + receivedVatWith7Percent.value -
-                (spentVatWith19Percent.value + spentWith7Percent.value)
+            spentVat.putIfAbsent(vatRate, SimpleDoubleProperty(0.0))
+        }
+
+        this.vatBalance.value = receivedVat.values.map { it.second.value }.sum() -
+                (spentVat.values.sumByDouble { it.value })
+
+        showReceivedAndSpentVat()
     }
 
     private fun getInitialFederalState(): FederalState? {
@@ -743,10 +777,15 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
         val pdfOutputFile = if (uploadToElster) File(UploadedFilesFolder, outputFilename + ".pdf") else null
         val xmlOutputFile = if (uploadToElster) File(UploadedFilesFolder, outputFilename + ".xml") else null
 
+        val receivedNetAmountWith19Percent = receivedVat.filter { it.key == 19f }.map { it.value.first.value }.firstOrNull() ?: 0
+        val receivedNetAmountWith7Percent = receivedVat.filter { it.key == 7f }.map { it.value.first.value }.firstOrNull() ?: 0
+        val receivedNetAmountWithOtherPercentages = receivedVat.filter { it.key != 19f && it.key != 7f }.values.map { Pair(it.first.value, it.second.value) } // TODO: also add these to Umsatzsteuervoranmeldung
+        val vatSpent = spentVat.map { it.value.value }.sum()
+
         return UmsatzsteuerVoranmeldung(jahr.value, zeitraum.value, taxOffice, taxNumber,
             mapPersonToSteuerpflichtiger(taxpayer.value), File(certificateFilePath.value), certificatePassword.value, // TODO: don't pass certificateFilePath and certificatePassword if only creating XML file
-            revenuesWith19PercentVatNetAmount.value, revenuesWith7PercentVatNetAmount.value,
-            spentVatWith19Percent.value + spentWith7Percent.value, vatBalance.value, herstellerID,
+            receivedNetAmountWith19Percent, receivedNetAmountWith7Percent,
+            vatSpent, vatBalance.value, herstellerID,
             pdfOutputFile, xmlOutputFile)
     }
 
