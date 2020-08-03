@@ -779,12 +779,15 @@ class ElsterTaxDeclarationWindow(private val overviewPresenter: OverviewPresente
 
         val receivedNetAmountWith19Percent = receivedVat.filter { it.key == 19f }.map { it.value.first.value }.firstOrNull() ?: 0
         val receivedNetAmountWith7Percent = receivedVat.filter { it.key == 7f }.map { it.value.first.value }.firstOrNull() ?: 0
-        val receivedNetAmountWithOtherPercentages = receivedVat.filter { it.key != 19f && it.key != 7f }.values.map { Pair(it.first.value, it.second.value) } // TODO: also add these to Umsatzsteuervoranmeldung
+        val receivedNetAmountAndVatWithOtherPercentages = receivedVat.filter { it.key != 19f && it.key != 7f }.values.map { Pair(it.first.value, it.second.value) }
+        val receivedNetAmountWithOtherPercentages = receivedNetAmountAndVatWithOtherPercentages.map { it.first }.sum()
+        val receivedVatWithOtherPercentages = receivedNetAmountAndVatWithOtherPercentages.map { it.second }.sum()
         val vatSpent = spentVat.map { it.value.value }.sum()
 
         return UmsatzsteuerVoranmeldung(jahr.value, zeitraum.value, taxOffice, taxNumber,
             mapPersonToSteuerpflichtiger(taxpayer.value), File(certificateFilePath.value), certificatePassword.value, // TODO: don't pass certificateFilePath and certificatePassword if only creating XML file
             receivedNetAmountWith19Percent, receivedNetAmountWith7Percent,
+            receivedNetAmountWithOtherPercentages, receivedVatWithOtherPercentages,
             vatSpent, vatBalance.value, herstellerID,
             pdfOutputFile, xmlOutputFile)
     }
