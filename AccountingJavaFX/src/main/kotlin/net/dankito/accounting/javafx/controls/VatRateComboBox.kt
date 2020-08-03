@@ -13,6 +13,8 @@ open class VatRateComboBox(selectedVatRate: SimpleFloatProperty?, vatRatesForUse
     : ComboBox<Number>(vatRatesForUser.observable()) {
 
     init {
+        isEditable = true
+
         selectedVatRate?.let { bind(it) }
 
         converter = ZeroTo100PercentageStringConverter()
