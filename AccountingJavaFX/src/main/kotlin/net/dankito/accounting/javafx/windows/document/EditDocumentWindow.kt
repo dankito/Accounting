@@ -174,6 +174,7 @@ class EditDocumentWindow(private val document: Document, private val presenter: 
                     label("value.added.tax.rate")
 
                     val vatRates = HashSet(presenter.getVatRatesForUser())
+                    vatRates.add(vatRate.value)
                     extractedData?.data?.percentages?.map { it.amount.toFloat() }?.let { vatRates.addAll(it) }
                     vatRateComboBox(vatRate, vatRates.toList()) {
                         anchorpaneConstraints {
